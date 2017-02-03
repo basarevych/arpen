@@ -1,0 +1,9 @@
+{
+  "name": "arpen",
+  "version": "0.0.1",
+  "lincense": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/basarevych/arpen.git"
+  }
+}
