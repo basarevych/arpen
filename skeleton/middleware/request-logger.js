@@ -11,10 +11,12 @@ const RotatingFileStream = require('rotating-file-stream');
 class RequestLogger {
     /**
      * Create the service
+     * @param {App} app                 Application
      * @param {object} config           Configuration
      * @param {object} express          Express app
      */
-    constructor(config, express) {
+    constructor(app, config, express) {
+        this._app = app;
         this._config = config;
         this._express = express;
     }
@@ -32,7 +34,7 @@ class RequestLogger {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'config', 'express' ];
+        return [ 'app', 'config', 'express' ];
     }
 
     /**
@@ -42,7 +44,7 @@ class RequestLogger {
     register() {
         this._express.use(morgan('dev'));
 
-        let logStream = RotatingFileStream('access.log', this._config.get('web_server.access_log'));
+        let logStream = RotatingFileStream(this._app.name + '-access.log', this._config.get(`servers.${this._app.name}.access_log`));
         this._express.use(morgan('combined', { stream: logStream }));
 
         return Promise.resolve();
