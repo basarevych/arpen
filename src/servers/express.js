@@ -45,6 +45,14 @@ class Express {
     }
 
     /**
+     * This service is a singleton
+     * @type {string}
+     */
+    static get lifecycle() {
+        return 'singleton';
+    }
+
+    /**
      * Initialize the server
      * @param {string} name                     Config section name
      * @return {Promise}
@@ -107,12 +115,22 @@ class Express {
                 if (!this._config.get(`servers.${name}.ssl.enable`))
                     return http.createServer(exp);
 
+                let key = this._config.get(`servers.${name}.ssl.key`);
+                if (key && key[0] != '/')
+                    key = path.join(this._config.base_path, key);
+                let cert = this._config.get(`servers.${name}.ssl.cert`);
+                if (cert && cert[0] != '/')
+                    cert = path.join(this._config.base_path, cert);
+                let ca = this._config.get(`server.${name}.ssl.ca`);
+                if (ca && ca[0] != '/')
+                    ca = path.join(this._config.base_path, ca);
+
                 let promises = [
-                    this._filer.lockReadBuffer(this._config.get(`servers.${name}.ssl.key`)),
-                    this._filer.lockReadBuffer(this._config.get(`servers.${name}.ssl.cert`)),
+                    this._filer.lockReadBuffer(key),
+                    this._filer.lockReadBuffer(cert),
                 ];
-                if (this._config.get(`server.${name}.ssl.ca`))
-                    promises.push(this._filer.lockReadBuffer(this._config.get(`servers.${name}.ssl.ca`)));
+                if (ca)
+                    promises.push(this._filer.lockReadBuffer(ca));
 
                 return Promise.all(promises)
                     .then(([key, cert, ca]) => {
