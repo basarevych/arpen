@@ -145,6 +145,8 @@ class Express {
                     });
             })
             .then(server => {
+                server.on('error', this.onError.bind(this));
+                server.on('listening', this.onListening.bind(this));
                 this._app.registerInstance(server, 'http');
             });
     }
@@ -161,8 +163,6 @@ class Express {
 
             try {
                 http.listen(port, typeof port == 'string' ? undefined : this._config.get(`servers.${this.name}.host`));
-                http.on('error', this.onError.bind(this));
-                http.on('listening', this.onListening.bind(this));
                 resolve();
             } catch (error) {
                 reject(new WError(error, 'Express.start()'));
@@ -176,14 +176,14 @@ class Express {
      */
     onError(error) {
         if (error.syscall !== 'listen')
-            return this._logger.error(new WError(error, 'WebServer.onError()'));
+            return this._logger.error(new WError(error, 'Express.onError()'));
 
         switch (error.code) {
             case 'EACCES':
-                this._logger.error('Port requires elevated privileges');
+                this._logger.error('Web server port requires elevated privileges');
                 break;
             case 'EADDRINUSE':
-                this._logger.error('Port is already in use');
+                this._logger.error('Web server port is already in use');
                 break;
             default:
                 this._logger.error(error);

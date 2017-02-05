@@ -2,6 +2,7 @@
   "name": "arpen",
   "version": "0.0.2",
   "license": "MIT",
+  "author": "Ross Basarevych <basarevych@gmail.com>",
   "description": "ARPEN",
   "repository": {
     "type": "git",
