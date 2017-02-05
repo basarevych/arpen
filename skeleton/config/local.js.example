@@ -16,7 +16,7 @@ module.exports = {
         'index',
     ],
 
-    // Server
+    // Servers
     servers: {
         web: {
             class: 'servers.express',
