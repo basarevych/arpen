@@ -21,7 +21,6 @@ class Express {
      * @param {Logger} logger               Logger service
      */
     constructor(app, config, filer, logger) {
-        this.name = null;
         this._app = app;
         this._config = config;
         this._filer = filer;
@@ -58,7 +57,7 @@ class Express {
      * @return {Promise}
      */
     bootstrap(name) {
-        this.name = name;
+        this._name = name;
         let exp = express();
 
         return new Promise((resolve, reject) => {
@@ -75,7 +74,7 @@ class Express {
 
                 let views = [];
                 for (let _module of this._config.modules) {
-                    for (let view of _module.views) {
+                    for (let view of _module.views || []) {
                         let filename = (view[0] == '/' ? view : path.join(this._config.base_path, 'modules', _module.name, view));
                         views.push(filename);
                     }
@@ -97,7 +96,7 @@ class Express {
                                 loadedMiddleware.set(cur, middleware);
 
                                 debug(`Registering middleware ${cur}`);
-                                return middleware.register();
+                                return middleware.register(name);
                             });
                         },
                         Promise.resolve()
@@ -153,16 +152,20 @@ class Express {
 
     /**
      * Start the server
+     * @param {string} name                     Config section name
      * @return {Promise}
      */
-    start() {
+    start(name) {
+        if (name !== this._name)
+            return Promise.reject(new Error(`Server ${name} was not properly bootstrapped`));
+
         return new Promise((resolve, reject) => {
             debug('Starting the server');
-            let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
+            let port = this._normalizePort(this._config.get(`servers.${this._name}.port`));
             let http = this._app.get('http');
 
             try {
-                http.listen(port, typeof port == 'string' ? undefined : this._config.get(`servers.${this.name}.host`));
+                http.listen(port, typeof port == 'string' ? undefined : this._config.get(`servers.${this._name}.host`));
                 resolve();
             } catch (error) {
                 reject(new WError(error, 'Express.start()'));
@@ -195,13 +198,13 @@ class Express {
      * Listening event handler
      */
     onListening() {
-        let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
+        let port = this._normalizePort(this._config.get(`servers.${this._name}.port`));
         this._logger.info(
-            (this._config.get(`servers.${this.name}.ssl.enable`) ? 'HTTPS' : 'HTTP') +
+            (this._config.get(`servers.${this._name}.ssl.enable`) ? 'HTTPS' : 'HTTP') +
             ' server listening on ' +
             (typeof port == 'string' ?
                 port :
-            this._config.get(`servers.${this.name}.host`) + ':' + port)
+            this._config.get(`servers.${this._name}.host`) + ':' + port)
         );
     }
 

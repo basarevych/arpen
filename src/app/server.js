@@ -17,20 +17,20 @@ class Server extends App {
      * @return {Promise}
      */
     init() {
-        this.name = this.argv['_'][0];
+        this._name = this.argv['_'][0];
         return super.init()
             .then(() => {
                 let config = this.get('config');
-                let params = config.get(`servers.${this.name}`);
+                let params = config.get(`servers.${this._name}`);
                 if (!params)
-                    throw new Error(`Server ${this.name} not found in config`);
+                    throw new Error(`Server ${this._name} not found in config`);
 
                 return this._initSubscribers(params.subscribers ? params.subscribers : [])
                     .then(() => {
                         let server = this.get(params.class);
                         if (!server)
-                            throw new Error(`Service ${params.class} not found when creating server ${this.name}`);
-                        let result = server.bootstrap(this.name);
+                            throw new Error(`Service ${params.class} not found when creating server ${this._name}`);
+                        let result = server.bootstrap(this._name);
                         if (result === null || typeof result != 'object' || typeof result.then != 'function')
                             throw new Error(`Server '${params.class}' bootstrap() did not return a Promise`);
                         return result;
@@ -46,15 +46,15 @@ class Server extends App {
         let config = this.get('config');
         return super.start()
             .then(() => {
-                let params = config.get(`servers.${this.name}`);
+                let params = config.get(`servers.${this._name}`);
                 if (!params)
-                    throw new Error(`Server ${this.name} not found in config`);
+                    throw new Error(`Server ${this._name} not found in config`);
 
                 let server = this.get(params.class);
                 if (!server)
-                    throw new Error(`Service ${params.class} not found when starting server ${this.name}`);
+                    throw new Error(`Service ${params.class} not found when starting server ${this._name}`);
 
-                let result = server.start();
+                let result = server.start(this._name);
                 if (result === null || typeof result != 'object' || typeof result.then != 'function')
                     throw new Error(`Server '${params.class}' start() did not return a Promise`);
                 return result;
