@@ -45,7 +45,9 @@ class PostgresClient {
      * Client termination
      */
     done() {
-        return this._done;
+        let res = this._done();
+        this.client = null;
+        return res;
     }
 
     /**
@@ -90,28 +92,35 @@ class PostgresClient {
         }
         debug(debugSql);
 
-        return new Promise((resolve, reject) => {
-                this.client.query(
-                    parsedSql, parsedParams,
-                    (error, result) => {
-                        if (error) {
-                            let sqlState = (typeof error.sqlState == 'undefined' ? error.code : error.sqlState);
-                            return reject(new WError(
-                                {
-                                    cause: error,
-                                    info: {
-                                        sql_state: sqlState,
-                                        query: parsedSql,
-                                        params: parsedParams,
-                                    },
-                                },
-                                'Query failed: ' + sqlState
-                            ));
-                        }
+        if (!this.client)
+            return Promise.reject(new Error('Query on terminated client'));
 
-                        resolve(result);
-                    }
-                );
+        return new Promise((resolve, reject) => {
+                try {
+                    this.client.query(
+                        parsedSql, parsedParams,
+                        (error, result) => {
+                            if (error) {
+                                let sqlState = (typeof error.sqlState == 'undefined' ? error.code : error.sqlState);
+                                return reject(new WError(
+                                    {
+                                        cause: error,
+                                        info: {
+                                            sql_state: sqlState,
+                                            query: parsedSql,
+                                            params: parsedParams,
+                                        },
+                                    },
+                                    'Query failed: ' + sqlState
+                                ));
+                            }
+
+                            resolve(result);
+                        }
+                    );
+                } catch (error) {
+                    reject(new WError(error, 'PostgresClient.query()'));
+                }
             });
     }
 
@@ -131,6 +140,14 @@ class PostgresClient {
             cb = arguments[1];
         } else if (arguments.length == 1) {
             cb = arguments[0];
+        }
+
+        if (!this.client) {
+            return Promise.reject(new Error(
+                'Transaction ' +
+                (params.name ? params.name + ' ' : '') +
+                'on terminated client'
+            ));
         }
 
         class RollbackError extends Error {

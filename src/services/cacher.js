@@ -95,17 +95,7 @@ class Cacher {
                         .then(() => {
                             if (ttl)
                                 return client.query('EXPIRE', [ this._getKey(name), ttl ]);
-                        })
-                        .then(
-                            value => {
-                                client.done();
-                                return value;
-                            },
-                            error => {
-                                client.done();
-                                throw error;
-                            }
-                        );
+                        });
                 }
             )
             .catch(error => {
@@ -137,17 +127,7 @@ class Cacher {
 
                                 debug(`Getting ${name}`);
                                 return JSON.parse(result);
-                            })
-                            .then(
-                                value => {
-                                    client.done();
-                                    return value;
-                                },
-                                error => {
-                                    client.done();
-                                    throw error;
-                                }
-                            );
+                            });
                     }
                 )
                 .catch(error => {
@@ -177,17 +157,7 @@ class Cacher {
 
                                 debug(`Unsetting ${name}`);
                                 return client.query('DEL', [ this._getKey(name) ]);
-                            })
-                            .then(
-                                value => {
-                                    client.done();
-                                    return value;
-                                },
-                                error => {
-                                    client.done();
-                                    throw error;
-                                }
-                            );
+                            });
                     }
                 )
                 .catch(error => {

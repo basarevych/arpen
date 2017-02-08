@@ -80,7 +80,9 @@ class RedisClient {
      * Client termination
      */
     done() {
-        return this.client.quit();
+        let res = this.client.quit();
+        this.client = null;
+        return res;
     }
 
     /**
@@ -92,19 +94,26 @@ class RedisClient {
     query(command, params = []) {
         debug(command.toUpperCase() + ' ' + params);
 
+        if (!this.client)
+            return Promise.reject(new Error('Query on terminated client'));
+
         return new Promise((resolve, reject) => {
-                let method = this._client[command.toLowerCase()];
-                if (typeof method != 'function')
-                    return reject('Unknown command: ' + command);
+                try {
+                    let method = this.client[command.toLowerCase()];
+                    if (typeof method != 'function')
+                        return reject('Unknown command: ' + command);
 
-                let args = params.slice();
-                args.push((error, reply) => {
-                    if (error)
-                        return reject(new WError(error, 'Command failed: ' + command));
+                    let args = params.slice();
+                    args.push((error, reply) => {
+                        if (error)
+                            return reject(new WError(error, 'Command failed: ' + command));
 
-                    resolve(reply);
-                });
-                method.apply(this._client, args);
+                        resolve(reply);
+                    });
+                    method.apply(this.client, args);
+                } catch (error) {
+                    reject(new WError(error, 'RedisClient.query()'));
+                }
             });
     }
 
@@ -125,6 +134,14 @@ class RedisClient {
             cb = arguments[1];
         } else if (arguments.length == 1) {
             cb = arguments[0];
+        }
+
+        if (!this.client) {
+            return Promise.reject(new Error(
+                'Transaction ' +
+                (params.name ? params.name + ' ' : '') +
+                'on terminated client'
+            ));
         }
 
         if (++this._transactionLevel != 1) {
