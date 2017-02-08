@@ -92,9 +92,17 @@ class Util {
     }
 
     /**
+     * Generate a password
+     * @return {string}                         Returns the password
+     */
+    generatePassword() {
+        return this.getRandomString(8, { lower: true, upper: true, digits: true });
+    }
+
+    /**
      * Create hash of a password
-     * @param {string} password     The password
-     * @return {string}             Returns the hash
+     * @param {string} password                 The password
+     * @return {string}                         Returns the hash
      */
     encryptPassword(password) {
         let salt = bcrypt.genSaltSync(10);
@@ -103,8 +111,8 @@ class Util {
 
     /**
      * Check if password matches the hash
-     * @param {string} password     Password to check
-     * @param {string} hash         Hash of the password
+     * @param {string} password                 Password to check
+     * @param {string} hash                     Hash of the password
      * @return {boolean}
      */
     checkPassword(password, hash) {
