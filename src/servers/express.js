@@ -159,18 +159,31 @@ class Express {
         if (name !== this._name)
             return Promise.reject(new Error(`Server ${name} was not properly bootstrapped`));
 
-        return new Promise((resolve, reject) => {
-            debug('Starting the server');
-            let port = this._normalizePort(this._config.get(`servers.${this._name}.port`));
-            let http = this._app.get('http');
+        return Array.from(this._app.get('modules')).reduce(
+                (prev, [ curName, curModule ]) => {
+                    return prev.then(() => {
+                        if (!curModule.register)
+                            return;
 
-            try {
-                http.listen(port, typeof port == 'string' ? undefined : this._config.get(`servers.${this._name}.host`));
-                resolve();
-            } catch (error) {
-                reject(new WError(error, 'Express.start()'));
-            }
-        });
+                        let result = curModule.register(name);
+                        if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                            throw new Error(`Module '${curName}' register() did not return a Promise`);
+                        return result;
+                    });
+                },
+                Promise.resolve()
+            )
+            .then(() => {
+                debug('Starting the server');
+                let port = this._normalizePort(this._config.get(`servers.${this._name}.port`));
+                let http = this._app.get('http');
+
+                try {
+                    http.listen(port, typeof port == 'string' ? undefined : this._config.get(`servers.${this._name}.host`));
+                } catch (error) {
+                    throw new WError(error, 'Express.start()');
+                }
+            });
     }
 
     /**

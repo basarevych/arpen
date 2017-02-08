@@ -266,6 +266,9 @@ class App {
                             filename => {
                                 return this.constructor._require(filename)
                                     .then(obj => {
+                                        if (!obj.provides)
+                                            return;
+
                                         try {
                                             this.registerClass(obj);
                                         } catch (error) {
