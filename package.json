@@ -12,6 +12,7 @@
     "arpen": "arpen.js"
   },
   "dependencies": {
+    "bcrypt": "~1.0.2",
     "debug": "~2.6.0",
     "emailjs": "~1.0.8",
     "express": "~4.14.1",

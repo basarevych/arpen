@@ -2,6 +2,7 @@
  * Miscellaneous stuff
  * @module arpen/services/util
  */
+const bcrypt = require('bcrypt');
 const merge = require('merge');
 const validator = require('validator');
 
@@ -88,6 +89,26 @@ class Util {
             string += chars.charAt(Math.floor(Math.random() * chars.length));
 
         return string;
+    }
+
+    /**
+     * Create hash of a password
+     * @param {string} password     The password
+     * @return {string}             Returns the hash
+     */
+    encryptPassword(password) {
+        let salt = bcrypt.genSaltSync(10);
+        return bcrypt.hashSync(password, salt);
+    }
+
+    /**
+     * Check if password matches the hash
+     * @param {string} password     Password to check
+     * @param {string} hash         Hash of the password
+     * @return {boolean}
+     */
+    checkPassword(password, hash) {
+        return bcrypt.compareSync(password, hash);
     }
 
     /**
