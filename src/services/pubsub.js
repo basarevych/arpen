@@ -361,7 +361,6 @@ class PubSub {
                     case 'redis':
                         this._redis.connect(name)
                             .then(sub => {
-                                console.log('sub');
                                 sub.client.on('reconnecting', () => { this._logger.info(`[${subscriberName}] Connection lost. Reconnecting...`); });
                                 sub.client.on('subscribe', () => { this._logger.info(`[${subscriberName}] Subscribed successfully`); });
                                 resolve(new RedisPubSub(() => { return this._redis.connect(name); }, sub));

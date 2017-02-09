@@ -14,58 +14,97 @@ const WError = require('verror').WError;
 class Server extends App {
     /**
      * Initialize the app
+     * @param {...string} names                         Server names
      * @return {Promise}
      */
-    init() {
-        this._name = this.argv['_'][0];
+    init(...names) {
         return super.init()
             .then(() => {
                 let config = this.get('config');
-                let params = config.get(`servers.${this._name}`);
-                if (!params)
-                    throw new Error(`Server ${this._name} not found in config`);
+                let servers = new Map();
+                this.registerInstance(servers, 'servers');
 
-                return this._initSubscribers(params.subscribers ? params.subscribers : [])
-                    .then(() => {
-                        let server = this.get(params.class);
-                        if (!server)
-                            throw new Error(`Service ${params.class} not found when creating server ${this._name}`);
-                        let result = server.bootstrap(this._name);
-                        if (result === null || typeof result != 'object' || typeof result.then != 'function')
-                            throw new Error(`Server '${params.class}' bootstrap() did not return a Promise`);
-                        return result;
-                    });
+                let promises = [];
+                for (let name of names) {
+                    let params = config.get(`servers.${name}`);
+                    if (!params)
+                        throw new Error(`Server ${name} not found in config`);
+
+                    let server = this.get(params.class);
+                    if (!server)
+                        throw new Error(`Service ${params.class} not found when initializing server ${name}`);
+                    servers.set(name, server);
+
+                    let result = server.init(name);
+                    if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                        throw new Error(`Server '${name}' init() did not return a Promise`);
+                    promises.push(result);
+                }
+
+                return Promise.all(promises);
             })
     }
 
     /**
      * Start the app
+     * @param {...string} names                         Server names
      * @return {Promise}
      */
-    start() {
-        let config = this.get('config');
+    start(...names) {
         return super.start()
             .then(() => {
-                let params = config.get(`servers.${this._name}`);
-                if (!params)
-                    throw new Error(`Server ${this._name} not found in config`);
-
-                let server = this.get(params.class);
-                if (!server)
-                    throw new Error(`Service ${params.class} not found when starting server ${this._name}`);
-
-                let result = server.start(this._name);
-                if (result === null || typeof result != 'object' || typeof result.then != 'function')
-                    throw new Error(`Server '${params.class}' start() did not return a Promise`);
-                return result;
+                let config = this.get('config');
+                return this._initSubscribers(config.get('subscribers') || []);
             })
             .then(() => {
+                let config = this.get('config');
+                let servers = this.get('servers');
+
+                let promises = [];
+                for (let name of names) {
+                    let server = servers.get(name);
+                    let result = server.start(name);
+                    if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                        throw new Error(`Server '${name}' start() did not return a Promise`);
+                    promises.push(result);
+                }
+
+                return Promise.all(promises);
+            })
+            .then(() => {
+                let config = this.get('config');
                 if (config.get('user')) {
                     process.setuid(config.get('user.uid'));
                     process.setgid(config.get('user.gid'));
                 }
                 this._running = true;
             });
+    }
+
+    /**
+     * Start subscribers
+     * @param {string[]} names              Subscribers list
+     * @return {Promise}
+     */
+    _initSubscribers(names) {
+        let subscribers = new Map();
+        this.registerInstance(subscribers, 'subscribers');
+
+        return names.reduce(
+            (prev, cur) => {
+                let subscriber = this.get(cur);
+                subscribers.set(cur, subscriber);
+
+                return prev.then(() => {
+                    debug(`Registering subscriber '${cur}'`);
+                    let result = subscriber.register();
+                    if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                        throw new Error(`Subscriber '${cur}' register() did not return a Promise`);
+                    return result;
+                });
+            },
+            Promise.resolve()
+        );
     }
 }
 

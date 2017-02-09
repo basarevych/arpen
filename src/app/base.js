@@ -104,11 +104,12 @@ class App {
 
     /**
      * Run the app. This method will simply call .init() and then .start().
+     * @param {...*} args                               Descendant-specific arguments
      */
-    run() {
-        this.init()
+    run(...args) {
+        this.init(...args)
             .then(() => {
-                return this.start();
+                return this.start(...args);
             })
             .catch(error => {
                 let logger;
@@ -336,32 +337,6 @@ class App {
                     let result = _module.bootstrap();
                     if (result === null || typeof result != 'object' || typeof result.then != 'function')
                         throw new Error(`Module '${cur}' bootstrap() did not return a Promise`);
-                    return result;
-                });
-            },
-            Promise.resolve()
-        );
-    }
-
-    /**
-     * Start subscribers
-     * @param {string[]} names              Subscribers list
-     * @return {Promise}
-     */
-    _initSubscribers(names) {
-        let subscribers = new Map();
-        this.registerInstance(subscribers, 'subscribers');
-
-        return names.reduce(
-            (prev, cur) => {
-                let subscriber = this.get(cur);
-                subscribers.set(cur, subscriber);
-
-                return prev.then(() => {
-                    debug(`Registering subscriber '${cur}'`);
-                    let result = subscriber.register();
-                    if (result === null || typeof result != 'object' || typeof result.then != 'function')
-                        throw new Error(`Subscriber '${cur}' register() did not return a Promise`);
                     return result;
                 });
             },

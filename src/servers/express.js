@@ -44,14 +44,6 @@ class Express {
     }
 
     /**
-     * This service is a singleton
-     * @type {string}
-     */
-    static get lifecycle() {
-        return 'singleton';
-    }
-
-    /**
      * Initialize the server
      * @param {string} name                     Config section name
      * @return {Promise}
