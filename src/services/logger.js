@@ -4,6 +4,7 @@
  */
 const util = require('util');
 const WError = require('verror').WError;
+const RotatingFileStream = require('rotating-file-stream');
 
 /**
  * Logger service
@@ -19,6 +20,7 @@ class Logger {
         this._config = config;
         this._error = error;
         this._emailer = emailer;
+        this._stream = null;
     }
 
     /**
@@ -55,6 +57,15 @@ class Logger {
         dateString += ' ' + padZero(date.getHours()) + ':' + padZero(date.getMinutes()) + ':' + padZero(date.getSeconds());
 
         return "[" + dateString + "] " + string;
+    }
+
+    /**
+     * Set log stream
+     * @param {string} name         File name
+     * @param {object} options      Stream options
+     */
+    setLogStream(name, options) {
+        this._stream = RotatingFileStream(name, options);
     }
 
     /**
@@ -141,6 +152,9 @@ class Logger {
 
         let logString = this.constructor.formatString(formatted ? util.format(...flat) : lines.join("\n"));
         console[logFunc](logString);
+
+        if (this._stream)
+            this._stream.write(logString + '\n');
 
         if (!emailLog || !this._emailer)
             return;
