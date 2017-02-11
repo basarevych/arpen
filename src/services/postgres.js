@@ -135,8 +135,10 @@ class PostgresClient {
     transaction() {
         let params = { isolation: 'serializable' }, cb;
         if (arguments.length >= 2) {
-            params.name = arguments[0].name;
-            params.isolation = arguments[0].isolation;
+            if (arguments[0].name)
+                params.name = arguments[0].name;
+            if (arguments[0].isolation)
+                params.isolation = arguments[0].isolation;
             cb = arguments[1];
         } else if (arguments.length == 1) {
             cb = arguments[0];

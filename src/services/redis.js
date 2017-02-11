@@ -129,8 +129,10 @@ class RedisClient {
     transaction() {
         let params = { watch: [] }, cb;
         if (arguments.length >= 2) {
-            params.name = arguments[0].name;
-            params.watch = arguments[0].watch;
+            if (arguments[0].name)
+                params.name = arguments[0].name;
+            if (arguments[0].watch)
+                params.watch = arguments[0].watch;
             cb = arguments[1];
         } else if (arguments.length == 1) {
             cb = arguments[0];
