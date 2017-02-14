@@ -54,7 +54,7 @@ class Subprocess {
         cmd.on('exit', (code, signal) => {
             this._result.code = code;
             this._result.signal = signal;
-            this._resolve(this.result);
+            this._resolve(this._result);
             this._cmd = null;
         });
         cmd.on('error', error => {
