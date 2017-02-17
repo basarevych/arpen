@@ -26,8 +26,15 @@ class Console extends App {
                 }
 
                 return this.constructor._require(path.join(config.base_path, 'commands', this.argv['_'][0]))
+                    .catch(error => {
+                        console.error('No such command');
+                        process.exit(1);
+                    });
             })
             .then(obj => {
+                if (!obj || !obj.provides)
+                    throw new Error('Command does not returned a class');
+
                 this._running = true;
 
                 this.registerClass(obj);
