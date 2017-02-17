@@ -177,7 +177,7 @@ class App {
         debug('Loading application configuration');
         return Promise.all([
                 this.constructor._require(path.join(this.basePath, 'config', 'global.js')),
-                this.constructor._require(path.join(this.basePath, 'config', 'local.js')),
+                this.constructor._require(path.join(this.basePath, 'config', 'local.js'), {}),
             ])
             .then(([globalConf, localConf]) => {
                 if (typeof globalConf != 'object')
