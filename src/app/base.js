@@ -147,6 +147,9 @@ class App {
                 return this._initSources();
             })
             .then(() => {
+                return this._initLogger();
+            })
+            .then(() => {
                 return this._initModules();
             })
             .then(() => {
@@ -317,6 +320,33 @@ class App {
                     Promise.resolve()
                 );
             });
+    }
+
+    /**
+     * Create log streams
+     * @return {Promise}
+     */
+    _initLogger() {
+        return new Promise((resolve, reject) => {
+            try {
+                let config = this.get('config');
+                if (!config.logs)
+                    return resolve();
+
+                let logger = this.get('logger');
+                for (let log of Object.keys(config.logs)) {
+                    let info = Object.assign({}, config.logs[log]);
+                    let name = info.name;
+                    delete info.name;
+
+                    logger.setLogStream(name, info);
+                }
+                resolve();
+            } catch (error) {
+                console.log(error);
+                reject(new WError(error, 'App._initLogger()'));
+            }
+        });
     }
 
     /**

@@ -12,15 +12,23 @@ const RotatingFileStream = require('rotating-file-stream');
 class Logger {
     /**
      * Create the service
+     * @param {App} app             The application
      * @param {object} config       Config service
      * @param {ErrorHelper} error   Error helper service
      * @param {Emailer} [emailer]   Emailer service if available
      */
-    constructor(config, error, emailer) {
+    constructor(app, config, error, emailer) {
+        this._app = app;
         this._config = config;
         this._error = error;
         this._emailer = emailer;
+
         this._stream = null;
+        this._streams = this._app.get('logger.streams?');
+        if (!this._streams) {
+            this._streams = new Map();
+            this._app.registerInstance(this._streams, 'logger.streams');
+        }
     }
 
     /**
@@ -36,7 +44,7 @@ class Logger {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'config', 'error', 'emailer?' ];
+        return [ 'app', 'config', 'error', 'emailer?' ];
     }
 
     /**
@@ -62,10 +70,24 @@ class Logger {
     /**
      * Set log stream
      * @param {string} name         File name
-     * @param {object} options      Stream options
+     * @param {object} [options]    Stream options
      */
     setLogStream(name, options) {
-        this._stream = RotatingFileStream(name, options);
+        let stream = this._streams.get(name);
+        if (stream)
+            stream = stream.stream;
+
+        if (options) {
+            let isDefault = options.default;
+            delete options.default;
+            if (stream)
+                stream.close();
+            stream = RotatingFileStream(name, options);
+            this._streams.set(name, { default: isDefault, stream: stream });
+        }
+
+        if (stream)
+            this._stream = stream;
     }
 
     /**
@@ -153,6 +175,14 @@ class Logger {
         let logString = this.constructor.formatString(formatted ? util.format(...flat) : lines.join("\n"));
         console[logFunc](logString);
 
+        if (!this._stream) {
+            for (let [ name, params ] of this._streams) {
+                if (params.default) {
+                    this._stream = params.stream;
+                    break;
+                }
+            }
+        }
         if (this._stream)
             this._stream.write(logString + '\n');
 
