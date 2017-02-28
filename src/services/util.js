@@ -122,10 +122,11 @@ class Util {
     /**
      * Convert dashed name to camel case<br>
      * example-name → exampleName
-     * @param {string} value    Dashed name
-     * @return {string}         Returns camel case variant
+     * @param {string} value                    Dashed name
+     * @param {boolean} [upperFirst=false]      First letter is upper case
+     * @return {string}                         Returns camel case variant
      */
-    dashedToCamel(value) {
+    dashedToCamel(value, upperFirst = false) {
         let result = '', foundDash = false;
         for (let char of value) {
             if (char == '-') {
@@ -139,7 +140,10 @@ class Util {
                 }
             }
         }
-        return result;
+        if (!upperFirst || !result.length)
+            return result;
+
+        return result[0].toUpperCase() + result.slice(1);
     }
 }
 
