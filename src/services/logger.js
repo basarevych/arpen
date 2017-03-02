@@ -82,8 +82,12 @@ class Logger {
             delete options.default;
             if (stream)
                 stream.close();
-            stream = RotatingFileStream(name, options);
-            this._streams.set(name, { default: isDefault, stream: stream });
+            try {
+                stream = RotatingFileStream(name, options);
+                this._streams.set(name, {default: isDefault, stream: stream});
+            } catch (error) {
+                this.error(`Could not open log (${name}): ${error.message}`);
+            }
         }
 
         if (stream)
