@@ -24,10 +24,13 @@ class Logger {
         this._emailer = emailer;
 
         this._stream = null;
-        this._streams = this._app.get('logger.streams?');
-        if (!this._streams) {
-            this._streams = new Map();
-            this._app.registerInstance(this._streams, 'logger.streams');
+        this._container = this._app.get('logger.streamContainer?');
+        if (!this._container) {
+            this._container = {
+                default: null,
+                streams: new Map(),
+            };
+            this._app.registerInstance(this._container, 'logger.streamContainer');
         }
     }
 
@@ -73,25 +76,49 @@ class Logger {
      * @param {object} [options]    Stream options
      */
     setLogStream(name, options) {
-        let stream = this._streams.get(name);
+        let stream = this._container.streams.get(name);
         if (stream)
-            stream = stream.stream;
+            stream.close();
 
-        if (options) {
-            let isDefault = options.default;
+        if (typeof stream == 'undefined') {
+            let isDefault = options.default || false;
             delete options.default;
-            if (stream)
-                stream.close();
-            try {
-                stream = RotatingFileStream(name, options);
-                this._streams.set(name, {default: isDefault, stream: stream});
-            } catch (error) {
-                this.error(`Could not open log (${name}): ${error.message}`);
-            }
+
+            stream = RotatingFileStream(name, options);
+            this._container.streams.set(name, stream);
+            if (isDefault)
+                this._container.default = name;
+
+            let close = () => {
+                if (this._stream == stream)
+                    this._stream = null;
+                this._container.streams.set(name, null);
+                if (this._container.default == name)
+                    this._container.default = null;
+            };
+            stream.on('error', error => {
+                close();
+                console.error(this.constructor.formatString(`Could not open log (${name}): ${error.message}`));
+            });
+            stream.on('close', close);
         }
 
-        if (stream)
-            this._stream = stream;
+        this._stream = stream;
+    }
+
+    /**
+     * Get log stream
+     * @param {string|null} [name=null]         If omitted default stream is returned if any
+     * @return {WriteStream}
+     */
+    getLogStream(name) {
+        if (!name)
+            name = this._container.default;
+
+        if (name)
+            return this._container.streams.get(name);
+
+        return null;
     }
 
     /**
@@ -179,14 +206,9 @@ class Logger {
         let logString = this.constructor.formatString(formatted ? util.format(...flat) : lines.join("\n"));
         console[logFunc](logString);
 
-        if (!this._stream) {
-            for (let [ name, params ] of this._streams) {
-                if (params.default) {
-                    this._stream = params.stream;
-                    break;
-                }
-            }
-        }
+        if (!this._stream)
+            this._stream = this.getLogStream();
+
         if (this._stream)
             this._stream.write(logString + '\n');
 
