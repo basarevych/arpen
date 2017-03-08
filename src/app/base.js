@@ -338,8 +338,9 @@ class App {
                     let info = Object.assign({}, config.logs[log]);
                     let name = info.name;
                     delete info.name;
-
-                    logger.setLogStream(name, info);
+                    let isDefault = info.default || false;
+                    delete info.default;
+                    logger.setLogStream(name, isDefault, info);
                 }
                 resolve();
             } catch (error) {

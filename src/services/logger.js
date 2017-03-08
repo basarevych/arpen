@@ -23,12 +23,12 @@ class Logger {
         this._error = error;
         this._emailer = emailer;
 
-        this._stream = null;
+        this._log = null;
         this._container = this._app.get('logger.streamContainer?');
         if (!this._container) {
             this._container = {
                 default: null,
-                streams: new Map(),
+                logs: new Map(),
             };
             this._app.registerInstance(this._container, 'logger.streamContainer');
         }
@@ -48,6 +48,13 @@ class Logger {
      */
     static get requires() {
         return [ 'app', 'config', 'error', 'emailer?' ];
+    }
+
+    /**
+     * Max lines of log waiting to written to the file
+     */
+    static get maxFileBufferLines() {
+        return 10000;
     }
 
     /**
@@ -72,53 +79,35 @@ class Logger {
 
     /**
      * Set log stream
-     * @param {string} name         File name
-     * @param {object} [options]    Stream options
+     * @param {string} name                 File name
+     * @param {boolean} [isDefault=false}   Stream is default
+     * @param {object} [options]            Stream options
      */
-    setLogStream(name, options) {
-        let stream = this._container.streams.get(name);
-        if (stream)
-            stream.close();
+    setLogStream(name, isDefault, options) {
+        let log = this._container.logs.get(name);
+        if (log) {
+            log.stream.close();
+            log.stream = null;
+            if (options)
+                log.options = options;
+        } else {
+            if (!options)
+                return;
 
-        if (typeof stream == 'undefined') {
-            let isDefault = options.default || false;
-            delete options.default;
-
-            stream = RotatingFileStream(name, options);
-            this._container.streams.set(name, stream);
-            if (isDefault)
-                this._container.default = name;
-
-            let close = () => {
-                if (this._stream == stream)
-                    this._stream = null;
-                this._container.streams.set(name, null);
-                if (this._container.default == name)
-                    this._container.default = null;
+            let log = {
+                name: name,
+                stream: null,
+                options: options,
+                open: false,
+                failed: false,
+                buffer: [],
             };
-            stream.on('error', error => {
-                close();
-                console.error(this.constructor.formatString(`Could not open log (${name}): ${error.message}`));
-            });
-            stream.on('close', close);
+            this._container.logs.set(name, log);
         }
 
-        this._stream = stream;
-    }
-
-    /**
-     * Get log stream
-     * @param {string|null} [name=null]         If omitted default stream is returned if any
-     * @return {WriteStream}
-     */
-    getLogStream(name) {
-        if (!name)
-            name = this._container.default;
-
-        if (name)
-            return this._container.streams.get(name);
-
-        return null;
+        if (isDefault)
+            this._container.default = name;
+        this._log = name;
     }
 
     /**
@@ -206,11 +195,18 @@ class Logger {
         let logString = this.constructor.formatString(formatted ? util.format(...flat) : lines.join("\n"));
         console[logFunc](logString);
 
-        if (!this._stream)
-            this._stream = this.getLogStream();
-
-        if (this._stream)
-            this._stream.write(logString + '\n');
+        let logName = this._log || this._container.default;
+        if (logName) {
+            let log = this._container.logs.get(logName);
+            if (log.open) {
+                log.stream.write(logString + '\n');
+            } else {
+                log.buffer.push(logString);
+                while (log.buffer.length > this.constructor.maxFileBufferLines)
+                    log.buffer.shift();
+                this._startLog(log);
+            }
+        }
 
         if (!emailLog || !this._emailer)
             return;
@@ -224,6 +220,47 @@ class Logger {
             .catch(error => {
                 console.error(this.constructor.formatString(`Could not email log message: ${error}`));
             });
+    }
+
+    /**
+     * Start log stream
+     * @param {object} log
+     */
+    _startLog(log) {
+        if (log.stream)
+            return;
+
+        let stream = RotatingFileStream(log.name, log.options);
+        log.stream = stream;
+        log.stream.on('error', error => {
+            if (log.stream != stream)
+                return;
+
+            log.stream = null;
+            log.open = false;
+            if (!log.failed) {
+                log.failed = true;
+                console.error(this.constructor.formatString(`Could not open log (${log.name}): ${error.message}`));
+            }
+        });
+        log.stream.on('open', () => {
+            if (log.stream != stream)
+                return;
+
+            if (log.buffer.length) {
+                log.stream.write(log.buffer.join('\n') + '\n');
+                log.buffer = [];
+            }
+            log.open = true;
+            log.failed = false;
+        });
+        log.stream.on('close', () => {
+            if (log.stream != stream)
+                return;
+
+            log.stream = null;
+            log.open = false;
+        });
     }
 }
 
