@@ -80,10 +80,11 @@ class Logger {
     /**
      * Set log stream
      * @param {string} name                 File name
+     * @param {string} level                Log level: debug, warn, info, error
      * @param {boolean} [isDefault=false}   Stream is default
      * @param {object} [options]            Stream options
      */
-    setLogStream(name, isDefault, options) {
+    setLogStream(name, level, isDefault, options) {
         let log = this._container.logs.get(name);
         if (log) {
             log.stream.close();
@@ -96,6 +97,7 @@ class Logger {
 
             let log = {
                 name: name,
+                level: level,
                 stream: null,
                 options: options,
                 open: false,
@@ -115,7 +117,10 @@ class Logger {
      * @param {...*} messages       Messages
      */
     error(...messages) {
-        this.log('error', messages);
+        let cb;
+        if (messages.length && typeof messages[messages.length - 1] == 'function')
+            cb = messages.pop();
+        this.log('error', messages, null, cb);
     }
 
     /**
@@ -123,7 +128,10 @@ class Logger {
      * @param {...*} messages       Messages
      */
     info(...messages) {
-        this.log('info', messages);
+        let cb;
+        if (messages.length && typeof messages[messages.length - 1] == 'function')
+            cb = messages.pop();
+        this.log('info', messages, null, cb);
     }
 
     /**
@@ -131,19 +139,49 @@ class Logger {
      * @param {...*} messages       Messages
      */
     warn(...messages) {
-        this.log('warn', messages);
+        let cb;
+        if (messages.length && typeof messages[messages.length - 1] == 'function')
+            cb = messages.pop();
+        this.log('warn', messages, null, cb);
+    }
+
+    /**
+     * Log debug
+     * @param {string} issuer       Issuer
+     * @param {...*} messages       Messages
+     */
+    debug(issuer, ...messages) {
+        let cb;
+        if (messages.length && typeof messages[messages.length - 1] == 'function')
+            cb = messages.pop();
+        this.log('debug', messages, issuer, cb);
     }
 
     /**
      * Actually log the error
      * @param {string} type         Type of the error message
      * @param {Array} messages      Array of messages
+     * @param {string} [issuer]     Issuer if used
+     * @param {function} [cb]       File write callback: first parameter whether file was actually written
      */
-    log(type, messages) {
+    log(type, messages, issuer, cb) {
+        let logInfo, logName = this._log || this._container.default;
+        if (logName)
+            logInfo = this._container.logs.get(logName);
+
+        if (logInfo) {
+            let levels = [ 'debug', 'warn', 'info', 'error' ];
+            if ((levels.indexOf(type) || 0) < (levels.indexOf(logInfo.level) || 0)) {
+                if (cb)
+                    cb(false);
+                return;
+            }
+        }
+
         let flat = [];
         for (let msg of messages) {
             if (msg instanceof WError || (msg.constructor && msg.constructor.name == 'WError')) {
-                flat.push('Exception data:\n' + JSON.stringify(this._error.info(msg), undefined, 4));
+                flat.push('Exception data: ' + JSON.stringify(this._error.info(msg), undefined, 4));
                 flat = flat.concat(this._error.flatten(msg));
             } else {
                 flat.push(msg);
@@ -169,13 +207,19 @@ class Logger {
 
                 if (msg.stack)
                     lines.push(prefix + msg.stack);
-                else
+                else if (msg.message)
                     lines.push(prefix + msg.message);
+                else
+                    lines.push(prefix + msg);
             }
         }
 
         let logFunc, emailLog;
         switch (type) {
+            case 'debug':
+                logFunc = 'log';
+                emailLog = false;
+                break;
             case 'info':
                 logFunc = 'log';
                 emailLog = this._config.get('email.logger.info_enable');
@@ -192,20 +236,29 @@ class Logger {
                 throw new Error(`Invalid type: ${type}`);
         }
 
-        let logString = this.constructor.formatString(formatted ? util.format(...flat) : lines.join("\n"));
+        let logString = this.constructor.formatString(
+            (issuer ? `<${issuer}> ` : '') +
+            (formatted ? util.format(...flat) : lines.join("\n"))
+        );
         console[logFunc](logString);
 
-        let logName = this._log || this._container.default;
-        if (logName) {
-            let log = this._container.logs.get(logName);
-            if (log.open) {
-                log.stream.write(logString + '\n');
+        if (logInfo) {
+            if (logInfo.open) {
+                logInfo.stream.write(logString + '\n', () => {
+                    if (cb)
+                        cb(true);
+                });
             } else {
-                log.buffer.push(logString);
-                while (log.buffer.length > this.constructor.maxFileBufferLines)
-                    log.buffer.shift();
-                this._startLog(log);
+                logInfo.buffer.push({ log: logString, cb: cb });
+                while (logInfo.buffer.length > this.constructor.maxFileBufferLines) {
+                    let buf = logInfo.buffer.shift();
+                    if (buf.cb)
+                        buf.cb(false);
+                }
+                this._startLog(logInfo);
             }
+        } else {
+            cb(false);
         }
 
         if (!emailLog || !this._emailer)
@@ -214,7 +267,7 @@ class Logger {
         this._emailer.send({
                 to: this._config.get('email.logger.to'),
                 from: this._config.get('email.from'),
-                subject: '[' + this._config.project + '] Message logged (' + type + ')',
+                subject: `[${this._config.project}/${this._config.instance}] Message logged (${type})`,
                 text: logString,
             })
             .catch(error => {
@@ -248,7 +301,16 @@ class Logger {
                 return;
 
             if (log.buffer.length) {
-                log.stream.write(log.buffer.join('\n') + '\n');
+                let str = '', callbacks = [];
+                for (let buf of log.buffer) {
+                    str += buf.log + '\n';
+                    if (buf.cb)
+                        callbacks.push(buf.cb);
+                }
+                log.stream.write(str, () => {
+                    for (let cb of callbacks)
+                        cb(true);
+                });
                 log.buffer = [];
             }
             log.open = true;
