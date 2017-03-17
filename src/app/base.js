@@ -342,6 +342,7 @@ class App {
                     delete info.level;
                     let isDefault = info.default || false;
                     delete info.default;
+                    delete info.echo;
                     logger.setLogStream(name, level, isDefault, info);
                 }
                 resolve();

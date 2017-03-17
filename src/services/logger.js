@@ -165,17 +165,33 @@ class Logger {
      * @param {function} [cb]       File write callback: first parameter whether file was actually written
      */
     log(type, messages, issuer, cb) {
+        let levels = [ 'debug', 'warn', 'info', 'error' ];
+        if (levels.indexOf(type) == -1) {
+            if (cb)
+                cb(false);
+            return;
+        }
+
         let logInfo, logName = this._log || this._container.default;
         if (logName)
             logInfo = this._container.logs.get(logName);
 
+        let logToFile = false, logToStdOut = false, logToMail = false;
         if (logInfo) {
-            let levels = [ 'debug', 'warn', 'info', 'error' ];
-            if ((levels.indexOf(type) || 0) < (levels.indexOf(logInfo.level) || 0)) {
-                if (cb)
-                    cb(false);
-                return;
+            if (levels.indexOf(logInfo.level) != -1 && levels.indexOf(type) >= levels.indexOf(logInfo.level)) {
+                logToFile = true;
+                logToStdOut = !!logInfo.echo;
             }
+        }
+        if (this._config.get('email.log.enable')) {
+            let mailLevel = this._config.get('email.log.level');
+            logToMail = (levels.indexOf(mailLevel) != -1 && levels.indexOf(type) >= levels.indexOf(mailLevel));
+        }
+
+        if (!logToFile && !logToStdOut && !logToMail) {
+            if (cb)
+                cb(false);
+            return;
         }
 
         let flat = [];
@@ -214,35 +230,15 @@ class Logger {
             }
         }
 
-        let logFunc, emailLog;
-        switch (type) {
-            case 'debug':
-                logFunc = 'log';
-                emailLog = false;
-                break;
-            case 'info':
-                logFunc = 'log';
-                emailLog = this._config.get('email.logger.info_enable');
-                break;
-            case 'warn':
-                logFunc = 'log';
-                emailLog = this._config.get('email.logger.warn_enable');
-                break;
-            case 'error':
-                logFunc = 'error';
-                emailLog = this._config.get('email.logger.error_enable');
-                break;
-            default:
-                throw new Error(`Invalid type: ${type}`);
-        }
-
         let logString = this.constructor.formatString(
             (issuer ? `<${issuer}> ` : '') +
             (formatted ? util.format(...flat) : lines.join("\n"))
         );
-        console[logFunc](logString);
 
-        if (logInfo) {
+        if (logToStdOut)
+            console[type == 'error' ? 'error' : 'log'](logString);
+
+        if (logToFile) {
             if (logInfo.open) {
                 logInfo.stream.write(logString + '\n', () => {
                     if (cb)
@@ -261,18 +257,17 @@ class Logger {
             cb(false);
         }
 
-        if (!emailLog || !this._emailer)
-            return;
-
-        this._emailer.send({
-                to: this._config.get('email.logger.to'),
-                from: this._config.get('email.from'),
-                subject: `[${this._config.project}/${this._config.instance}] Message logged (${type})`,
-                text: logString,
-            })
-            .catch(error => {
-                console.error(this.constructor.formatString(`Could not email log message: ${error}`));
-            });
+        if (logToMail) {
+            this._emailer.send({
+                    to: this._config.get('email.logger.to'),
+                    from: this._config.get('email.from'),
+                    subject: `[${this._config.project}/${this._config.instance}] Message logged (${type})`,
+                    text: logString,
+                })
+                .catch(error => {
+                    console.error(this.constructor.formatString(`Could not email log message: ${error}`));
+                });
+        }
     }
 
     /**
