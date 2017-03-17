@@ -192,10 +192,18 @@ class Filer {
 
                     this.write(fd, buffer)
                         .then(() => {
-                            if (mode !== null)
-                                fs.chmodSync(filename, mode);
-                            if (uid !== null && gid !== null)
-                                fs.chownSync(filename, uid, gid);
+                            try {
+                                if (mode !== null)
+                                    fs.chmodSync(filename, mode);
+                            } catch (error) {
+                                // do nothing
+                            }
+                            try {
+                                if (uid !== null && gid !== null)
+                                    fs.chownSync(filename, uid, gid);
+                            } catch (error) {
+                                // do nothing
+                            }
                             fs.flock(fd, 'un', err => {
                                 if (fd) {
                                     fs.closeSync(fd);
@@ -270,10 +278,18 @@ class Filer {
                             return this.write(fd, newBuffer);
                         })
                         .then(() => {
-                            if (mode !== null)
-                                fs.chmodSync(filename, mode);
-                            if (uid !== null && gid !== null)
-                                fs.chownSync(filename, uid, gid);
+                            try {
+                                if (mode !== null)
+                                    fs.chmodSync(filename, mode);
+                            } catch (error) {
+                                // do nothing
+                            }
+                            try {
+                                if (uid !== null && gid !== null)
+                                    fs.chownSync(filename, uid, gid);
+                            } catch (error) {
+                                // do nothing
+                            }
                             fs.flock(fd, 'un', err => {
                                 if (fd) {
                                     fs.closeSync(fd);
@@ -361,9 +377,19 @@ class Filer {
                                     if (!stats.isDirectory())
                                         throw new Error(`Path exists and not a directory: ${cur}`);
                                 } else {
-                                    fs.mkdirSync(cur, mode === null ? undefined : mode);
-                                    if (uid !== null && gid !== null)
-                                        fs.chownSync(cur, uid, gid);
+                                    fs.mkdirSync(cur);
+                                    try {
+                                        if (mode !== null)
+                                            fs.chmodSync(cur, mode);
+                                    } catch (error) {
+                                        // do nothing
+                                    }
+                                    try {
+                                        if (uid !== null && gid !== null)
+                                            fs.chownSync(cur, uid, gid);
+                                    } catch (error) {
+                                        // do nothing
+                                    }
                                 }
                             });
                         },
@@ -402,11 +428,21 @@ class Filer {
                 }
 
                 try {
-                    let fd = fs.openSync(filename, 'a', mode === null ? undefined : mode);
+                    let fd = fs.openSync(filename, 'a');
                     fs.closeSync(fd);
 
-                    if (uid !== null && gid !== null)
-                        fs.chownSync(filename, uid, gid);
+                    try {
+                        if (mode !== null)
+                            fs.chmodSync(filename, mode);
+                    } catch (error) {
+                        // do nothing
+                    }
+                    try {
+                        if (uid !== null && gid !== null)
+                            fs.chownSync(filename, uid, gid);
+                    } catch (error) {
+                        // do nothing
+                    }
 
                     resolve(true);
                 } catch (err) {

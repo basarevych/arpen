@@ -60,16 +60,18 @@ class Server extends App {
                 let config = this.get('config');
                 let servers = this.get('servers');
 
-                let promises = [];
-                for (let name of names) {
-                    let server = servers.get(name);
-                    let result = server.start(name);
-                    if (result === null || typeof result != 'object' || typeof result.then != 'function')
-                        throw new Error(`Server '${name}' start() did not return a Promise`);
-                    promises.push(result);
-                }
-
-                return Promise.all(promises);
+                return names.reduce(
+                    (prev, name) => {
+                        return prev.then(() => {
+                            let server = servers.get(name);
+                            let result = server.start(name);
+                            if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                                throw new Error(`Server '${name}' start() did not return a Promise`);
+                            return result;
+                        });
+                    },
+                    Promise.resolve()
+                );
             })
             .then(() => {
                 let config = this.get('config');

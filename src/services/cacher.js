@@ -153,7 +153,7 @@ class Cacher {
                         return client.query('EXISTS', [ this._getKey(name) ])
                             .then(result => {
                                 if (!result)
-                                    return;
+                                    return null;
 
                                 debug(`Unsetting ${name}`);
                                 return client.query('DEL', [ this._getKey(name) ]);
