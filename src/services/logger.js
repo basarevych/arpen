@@ -176,19 +176,15 @@ class Logger {
         if (logName)
             logInfo = this._container.logs.get(logName);
 
-        let logToFile = false, logToStdOut = false, logToMail = false;
-        if (logInfo) {
-            if (levels.indexOf(logInfo.level) != -1 && levels.indexOf(type) >= levels.indexOf(logInfo.level)) {
-                logToFile = true;
-                logToStdOut = !!logInfo.echo;
-            }
-        }
+        let logToStdOut = !!process.env.DEBUG, logToFile = false, logToMail = false;
+        if (logInfo)
+            logToFile =  (levels.indexOf(logInfo.level) != -1 && levels.indexOf(type) >= levels.indexOf(logInfo.level));
         if (this._config.get('email.log.enable')) {
             let mailLevel = this._config.get('email.log.level');
             logToMail = (levels.indexOf(mailLevel) != -1 && levels.indexOf(type) >= levels.indexOf(mailLevel));
         }
 
-        if (!logToFile && !logToStdOut && !logToMail) {
+        if (!logToStdOut && !logToFile && !logToMail) {
             if (cb)
                 cb(false);
             return;
