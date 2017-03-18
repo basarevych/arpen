@@ -266,14 +266,19 @@ class Filer {
                     if (err)
                         return reject(err);
 
+                    let oldBuffer;
                     this.read(fd)
                         .then(buffer => {
+                            oldBuffer = buffer;
                             let result = cb(buffer);
                             if (typeof result != 'object' || result === null || typeof result.then != 'function')
                                 throw new Error(`The callback did not return a Promise`);
                             return result;
                         })
                         .then(newBuffer => {
+                            if (oldBuffer.equals(newBuffer))
+                                return;
+
                             fs.ftruncateSync(fd, 0);
                             return this.write(fd, newBuffer);
                         })
