@@ -47,11 +47,11 @@ class Server extends App {
 
     /**
      * Start the app
-     * @param {...string} names                         Server names
+     * @param {...*} args                               Server names
      * @return {Promise}
      */
-    start(...names) {
-        return super.start()
+    start(...args) {
+        return super.start(...args)
             .then(() => {
                 let config = this.get('config');
                 return this._initSubscribers(config.get('subscribers') || []);
@@ -60,7 +60,7 @@ class Server extends App {
                 let config = this.get('config');
                 let servers = this.get('servers');
 
-                return names.reduce(
+                return args.reduce(
                     (prev, name) => {
                         return prev.then(() => {
                             let server = servers.get(name);

@@ -14,10 +14,11 @@ const WError = require('verror').WError;
 class Console extends App {
     /**
      * Start the app
+     * @param {...*} args                               Parent arguments
      * @return {Promise}
      */
-    start() {
-        return super.start()
+    start(...args) {
+        return super.start(...args)
             .then(() => {
                 let config = this.get('config');
                 if (!this.argv['_'].length) {
