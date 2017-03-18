@@ -10,15 +10,6 @@ const WError = require('verror').WError;
 const Filer = require('../services/filer.js');
 
 /**
- * Logger to use when 'logger' service is not available
- */
-class AppLogger {
-    error(...args) {
-        console.error(...args);
-    }
-}
-
-/**
  * Base application class
  */
 class App {
@@ -140,6 +131,7 @@ class App {
     /**
      * Run the app. This method will simply call .init() and then .start().
      * @param {...*} args                               Descendant-specific arguments
+     * @return {Promise}
      */
     run(...args) {
         this.init(...args)
@@ -147,23 +139,19 @@ class App {
                 return this.start(...args);
             })
             .catch(error => {
-                let logger;
-                try {
-                    logger = this.get('logger');
-                    logger.error(new WError(error, 'App.run() failed'));
-                } catch (ignore) {
-                    logger = new AppLogger();
-                    logger.error('App.run() failed:', error.message);
-                }
-                process.exit(1);
+                return this.error('App.run() failed:', error.message + '\n' + error.stack)
+                    .then(() => {
+                        process.exit(1);
+                    });
             });
     }
 
     /**
      * Initialize the app
+     * @param {...*} args                               Descendant-specific arguments
      * @return {Promise}
      */
-    init() {
+    init(...args) {
         if (this._initialized)
             return Promise.resolve();
 
@@ -210,9 +198,10 @@ class App {
 
     /**
      * Start the app
+     * @param {...*} args                               Descendant-specific arguments
      * @return {Promise}
      */
-    start() {
+    start(...args) {
         return new Promise((resolve, reject) => {
             if (this._running !== null)
                 return reject(new Error('Application is already started'));
@@ -398,7 +387,6 @@ class App {
                     }
                     resolve();
                 } catch (error) {
-                    console.log(error);
                     reject(new WError(error, 'App._initLogger()'));
                 }
             })

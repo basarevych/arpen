@@ -21,16 +21,20 @@ class Console extends App {
             .then(() => {
                 let config = this.get('config');
                 if (!this.argv['_'].length) {
-                    console.error('Command name required');
-                    process.exit(1);
+                    return this.error('Command name required\n')
+                        .then(() => {
+                            process.exit(1);
+                        });
                 }
 
                 let command, util = this.get('util');
                 try {
                     command = this.get(`commands.${util.dashedToCamel(this.argv['_'][0])}`);
                 } catch (error) {
-                    console.error('Unknown command');
-                    process.exit(1);
+                    return this.error('Unknown command\n')
+                        .then(() => {
+                            process.exit(1);
+                        });
                 }
 
                 this._running = true;
