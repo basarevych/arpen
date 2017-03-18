@@ -38,6 +38,14 @@ class App {
     }
 
     /**
+     * Graceful shutdown timeout
+     * @type {number}
+     */
+    static get gracefulTimeout() {
+        return 10 * 1000; // ms
+    }
+
+    /**
      * Register an instance of a service
      * @param {*} instance                  Instance
      * @param {string} name                 Name
@@ -160,6 +168,22 @@ class App {
             return Promise.resolve();
 
         debug('Initializing the app');
+        let onExit = signal => {
+            try {
+                let logger = this.get('logger');
+                if (!logger)
+                    throw new Error('No logger');
+
+                logger.info(`Terminating due to ${signal} signal`, () => { process.exit(0); });
+                setTimeout(() => { process.exit(0); }, this.constructor.gracefulTimeout);
+            } catch (error) {
+                process.exit(0);
+            }
+        };
+        process.on('SIGINT', () => { onExit('SIGINT'); });
+        process.on('SIGTERM', () => { onExit('SIGTERM'); });
+        process.on('SIGHUP', () => { /* ignore */ });
+
         return new Promise((resolve, reject) => {
                 if (this._initialized === false)
                     return reject(new Error('Application is in process of initialization'));
@@ -354,29 +378,43 @@ class App {
      * @return {Promise}
      */
     _initLogger() {
+        let config, logger;
         return new Promise((resolve, reject) => {
-            try {
-                let config = this.get('config');
-                if (!config.logs)
-                    return resolve();
+                try {
+                    config = this.get('config');
+                    if (!config.logs)
+                        return resolve();
 
-                let logger = this.get('logger');
-                for (let log of Object.keys(config.logs)) {
-                    let info = Object.assign({}, config.logs[log]);
-                    let name = info.name;
-                    delete info.name;
-                    let level = info.level || 'info';
-                    delete info.level;
-                    let isDefault = info.default || false;
-                    delete info.default;
-                    logger.setLogStream(name, level, isDefault, info);
+                    logger = this.get('logger');
+                    for (let log of Object.keys(config.logs)) {
+                        let info = Object.assign({}, config.logs[log]);
+                        let name = info.name;
+                        delete info.name;
+                        let level = info.level || 'info';
+                        delete info.level;
+                        let isDefault = info.default || false;
+                        delete info.default;
+                        logger.setLogStream(name, level, isDefault, info);
+                    }
+                    resolve();
+                } catch (error) {
+                    console.log(error);
+                    reject(new WError(error, 'App._initLogger()'));
                 }
-                resolve();
-            } catch (error) {
-                console.log(error);
-                reject(new WError(error, 'App._initLogger()'));
-            }
-        });
+            })
+            .then(() => {
+                let filer = this.get('filer');
+                return filer.lockRead(path.join(config.base_path, 'package.json'));
+            })
+            .then(packageInfo => {
+                let json;
+                try {
+                    json = JSON.parse(packageInfo);
+                } catch (error) {
+                    json = { name: 'program' };
+                }
+                logger.info(`Starting ${json.name}` + (json.version ? ' v' + json.version : ''));
+            });
     }
 
     /**
