@@ -103,6 +103,33 @@ class App {
     }
 
     /**
+     * Debug output
+     * @param {...*} messages                           Messages
+     */
+    debug(...messages) {
+        if (!(!!process.env.DEBUG))
+            return Promise.resolve();
+
+        return this._output(process.stderr, messages);
+    }
+
+    /**
+     * Info output
+     * @param {...*} messages                           Messages
+     */
+    info(...messages) {
+        return this._output(process.stdout, messages);
+    }
+
+    /**
+     * Error output
+     * @param {...*} messages                           Messages
+     */
+    error(...messages) {
+        return this._output(process.stderr, messages);
+    }
+
+    /**
      * Run the app. This method will simply call .init() and then .start().
      * @param {...*} args                               Descendant-specific arguments
      */
@@ -467,6 +494,29 @@ class App {
             args.push(this._resolveService(arg, [], request));
         args = args.concat(extra);
         return new classFunc(...args);
+    }
+
+    /**
+     * Print output
+     * @param {*} stream                    Stream for output
+     * @param {Array} messages              Messages
+     */
+    _output(stream, messages) {
+        return new Promise((resolve, reject) => {
+            let output = messages.join(' ');
+            if (!output.length)
+                return resolve();
+
+            let onError = error => {
+                reject(error);
+            };
+
+            stream.once('error', onError);
+            stream.write(output, () => {
+                stream.removeListener('error', onError);
+                resolve();
+            })
+        });
     }
 
     /**
