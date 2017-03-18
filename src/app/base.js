@@ -181,9 +181,6 @@ class App {
                 return this._initSources();
             })
             .then(() => {
-                return this._initLogger();
-            })
-            .then(() => {
                 return this._initModules();
             })
             .then(() => {
@@ -211,9 +208,6 @@ class App {
      * @param {string} signal                           Signal as SIGNAME
      */
     onSignal(signal) {
-        if ([ 'SIGINT', 'SIGTERM' ].indexOf(signal) == -1)
-            return;
-
         if (!this._logger)
             process.exit(0);
 
