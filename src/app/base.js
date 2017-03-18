@@ -22,9 +22,12 @@ class App {
         debug('Constructing the app');
         this.basePath = basePath;
         this.argv = argv;
+
         this._initialized = null;
         this._running = null;
         this._container = new Map();
+        this._logger = null;
+
         this.registerInstance(this, 'app');
     }
 
@@ -156,21 +159,13 @@ class App {
             return Promise.resolve();
 
         debug('Initializing the app');
-        let onExit = signal => {
-            try {
-                let logger = this.get('logger');
-                if (!logger)
-                    throw new Error('No logger');
-
-                logger.info(`Terminating due to ${signal} signal`, () => { process.exit(0); });
-                setTimeout(() => { process.exit(0); }, this.constructor.gracefulTimeout);
-            } catch (error) {
-                process.exit(0);
-            }
+        let onSignal = signal => {
+            if (typeof this.onSignal == 'function')
+                this.onSignal(signal);
         };
-        process.on('SIGINT', () => { onExit('SIGINT'); });
-        process.on('SIGTERM', () => { onExit('SIGTERM'); });
-        process.on('SIGHUP', () => { /* ignore */ });
+        process.on('SIGINT', () => { onSignal('SIGINT'); });
+        process.on('SIGTERM', () => { onSignal('SIGTERM'); });
+        process.on('SIGHUP', () => { onSignal('SIGHUP'); });
 
         return new Promise((resolve, reject) => {
                 if (this._initialized === false)
@@ -209,6 +204,21 @@ class App {
             this._running = false;
             resolve();
         });
+    }
+
+    /**
+     * Handle process signal
+     * @param {string} signal                           Signal as SIGNAME
+     */
+    onSignal(signal) {
+        if ([ 'SIGINT', 'SIGTERM' ].indexOf(signal) == -1)
+            return;
+
+        if (!this._logger)
+            process.exit(0);
+
+        this._logger.info(`Terminating due to ${signal} signal`, () => { process.exit(0); });
+        setTimeout(() => { process.exit(0); }, this.constructor.gracefulTimeout);
     }
 
     /**
@@ -367,14 +377,14 @@ class App {
      * @return {Promise}
      */
     _initLogger() {
-        let config, logger;
+        let config;
         return new Promise((resolve, reject) => {
                 try {
                     config = this.get('config');
                     if (!config.logs)
                         return resolve();
 
-                    logger = this.get('logger');
+                    this._logger = this.get('logger');
                     for (let log of Object.keys(config.logs)) {
                         let info = Object.assign({}, config.logs[log]);
                         let name = info.name;
@@ -383,7 +393,7 @@ class App {
                         delete info.level;
                         let isDefault = info.default || false;
                         delete info.default;
-                        logger.setLogStream(name, level, isDefault, info);
+                        this._logger.setLogStream(name, level, isDefault, info);
                     }
                     resolve();
                 } catch (error) {
@@ -401,7 +411,7 @@ class App {
                 } catch (error) {
                     json = { name: 'program' };
                 }
-                logger.info(`Starting ${json.name}` + (json.version ? ' v' + json.version : ''));
+                this._logger.info(`Starting ${json.name}` + (json.version ? ' v' + json.version : ''));
             });
     }
 
