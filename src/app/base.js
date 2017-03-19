@@ -51,28 +51,28 @@ class App {
 
         debug(`Registering instance '${name}'`);
         let service = this._initService(name);
-        delete service.class;
         service.instance = instance;
 
-        return name;
+        return service.provides;
     }
 
     /**
      * Register class function as a service
      * @param {function} classFunc          Class function
+     * @param {string} [filename]           Path to the file
      * @return {string}                     Returns name of the service
      */
-    registerClass(classFunc) {
+    registerClass(classFunc, filename) {
         let name = classFunc.provides;
         if (!name)
             throw new Error('No name provided for a class');
 
         debug(`Registering class '${name}'`);
-        let service = this._initService(name);
+        let service = this._initService(name, filename);
         service.class = classFunc;
-        delete service.instance;
+        service.requires = classFunc.requires || [];
 
-        return name;
+        return service.provides;
     }
 
     /**
@@ -220,7 +220,7 @@ class App {
      * @return {Promise}
      */
     _initConfig() {
-        let config, modules = [];
+        let config, modules = new Map();
         debug('Loading application configuration');
         return Promise.all([
                 this.constructor._require(path.join(this.basePath, 'config', 'global.js')),
@@ -274,14 +274,13 @@ class App {
                                         throw new Error(`Local config is not an object (module: ${cur})`);
 
                                     let moduleConfig = merge.recursive(true, globalConf, localConf);
-                                    moduleConfig.name = cur;
 
                                     if (!moduleConfig.autoload)
                                         moduleConfig.autoload = [];
                                     else if (!Array.isArray(moduleConfig.autoload))
                                         throw new Error(`Config.autoload is not an array (module: ${cur})`);
 
-                                    modules.push(moduleConfig);
+                                    modules.set(cur, moduleConfig);
                                 });
                         });
                     },
@@ -290,6 +289,18 @@ class App {
             })
             .then(() => {
                 config.modules = modules;
+
+                let filer = new Filer();
+                return filer.lockRead(path.join(config.base_path, 'package.json'));
+            })
+            .then(packageInfo => {
+                let json;
+                try {
+                    json = JSON.parse(packageInfo);
+                } catch (error) {
+                    json = {};
+                }
+                config.version = json.version;
             });
     }
 
@@ -300,69 +311,125 @@ class App {
     _initSources() {
         let config = this.get('config');
         let filer = new Filer();
-        debug('Loading application sources');
-        return config.autoload.reduce(
-                (prev, cur) => {
-                    return prev.then(() => {
-                        let file = cur;
-                        if (cur[0] == '!')
-                            file = path.join(this.basePath, 'node_modules', 'arpen', cur.slice(1));
-                        else if (cur[0] != '/')
-                            file = path.join(this.basePath, cur);
-                        return filer.process(
-                            file,
-                            filename => {
-                                return this.constructor._require(filename)
-                                    .then(obj => {
-                                        if (!obj.provides)
-                                            return;
+        let cache = null;
+        let mapFile = `arpen.${config.project}.${config.instance}.map.json`;
 
-                                        try {
-                                            this.registerClass(obj);
-                                        } catch (error) {
-                                            throw new WError(error, `Registering ${filename}`);
-                                        }
-                                    });
-                            }
-                        );
-                    });
-                },
-                Promise.resolve()
-            )
+        debug('Loading application sources');
+        return Promise.resolve()
             .then(() => {
-                return config.modules.reduce(
-                    (prevModule, curModule) => {
-                        return prevModule.then(() => {
-                            debug(`Loading module ${curModule.name} sources`);
-                            return curModule.autoload.reduce(
-                                (prevLoad, curLoad) => {
-                                    return prevLoad.then(() => {
-                                        let file = curLoad;
-                                        if (curLoad[0] == '!')
-                                            file = path.join(this.basePath, 'node_modules', 'arpen', curLoad.slice(1));
-                                        else if (curLoad[0] != '/')
-                                            file = path.join(this.basePath, 'modules', curModule.name, curLoad);
-                                        return filer.process(
-                                            file,
-                                            filename => {
-                                                return this.constructor._require(filename)
-                                                    .then(obj => {
-                                                        try {
-                                                            this.registerClass(obj);
-                                                        } catch (error) {
-                                                            throw new WError(error, `Registering ${filename}`);
-                                                        }
-                                                    });
-                                            }
-                                        );
-                                    });
-                                },
-                                Promise.resolve()
-                            );
-                        });
-                    },
-                    Promise.resolve()
-                );
+                if (!!process.env.DEBUG)
+                    return null;
+
+                return filer.lockRead(path.join('/var/tmp', mapFile))
+                    .then(
+                        contents => {
+                            try {
+                                cache = JSON.parse(contents.trim());
+                                if (typeof cache != 'object' || cache === null || cache.version !== config.version)
+                                    cache = null;
+                            } catch (error) {
+                                cache = null;
+                            }
+                        },
+                        () => {
+                            cache = null;
+                        }
+                    );
+            })
+            .then(() => {
+                if (cache) {
+                    for (let service of cache.services || []) {
+                        if (typeof service.filename != 'string' || typeof service.provides != 'string' || !Array.isArray(service.requires))
+                            continue;
+
+                        debug(`Preloading ${service.provides}`);
+                        let obj = this._initService(service.provides, service.filename);
+                        obj.requires = service.requires;
+                    }
+                    return;
+                }
+
+                return config.autoload.reduce(
+                        (prev, cur) => {
+                            return prev.then(() => {
+                                let file = cur;
+                                if (cur[0] == '!')
+                                    file = path.join(this.basePath, 'node_modules', 'arpen', cur.slice(1));
+                                else if (cur[0] != '/')
+                                    file = path.join(this.basePath, cur);
+                                return filer.process(
+                                    file,
+                                    filename => {
+                                        return this.constructor._require(filename)
+                                            .then(obj => {
+                                                if (!obj.provides)
+                                                    return;
+
+                                                try {
+                                                    this.registerClass(obj, filename);
+                                                } catch (error) {
+                                                    throw new WError(error, `Registering ${filename}`);
+                                                }
+                                            });
+                                    }
+                                );
+                            });
+                        },
+                        Promise.resolve()
+                    )
+                    .then(() => {
+                        return Array.from(config.modules).reduce(
+                            (prevModule, [ curModule, curConfig ]) => {
+                                return prevModule.then(() => {
+                                    debug(`Loading module ${curModule} sources`);
+                                    return curConfig.autoload.reduce(
+                                        (prevLoad, curLoad) => {
+                                            return prevLoad.then(() => {
+                                                let file = curLoad;
+                                                if (curLoad[0] == '!')
+                                                    file = path.join(this.basePath, 'node_modules', 'arpen', curLoad.slice(1));
+                                                else if (curLoad[0] != '/')
+                                                    file = path.join(this.basePath, 'modules', curModule, curLoad);
+                                                return filer.process(
+                                                    file,
+                                                    filename => {
+                                                        return this.constructor._require(filename)
+                                                            .then(obj => {
+                                                                try {
+                                                                    this.registerClass(obj, filename);
+                                                                } catch (error) {
+                                                                    throw new WError(error, `Registering ${filename}`);
+                                                                }
+                                                            });
+                                                    }
+                                                );
+                                            });
+                                        },
+                                        Promise.resolve()
+                                    );
+                                });
+                            },
+                            Promise.resolve()
+                        );
+                    })
+                    .then(() => {
+                        let map = {
+                            version: config.version,
+                            services: [],
+                        };
+                        for (let [ name, service ] of this._container) {
+                            if (!service.filename)
+                                continue;
+
+                            map.services.push({
+                                filename: service.filename,
+                                provides: service.provides,
+                                requires: service.requires || [],
+                            });
+                        }
+
+                        return filer.lockWrite(path.join('/var/tmp', mapFile), JSON.stringify(map, undefined, 4) + '\n');
+                    })
             });
     }
 
@@ -437,9 +504,10 @@ class App {
     /**
      * Returns item of the service container, adding new one if it does not exist yet
      * @param {string} name                 Name of the service
+     * @param {string} [filename]           Path to the class
      * @return {object}                     Returns service object
      */
-    _initService(name) {
+    _initService(name, filename) {
         if (name[name.length - 1] == '?')
             throw new Error(`Invalid service name: ${name}`);
 
@@ -450,6 +518,16 @@ class App {
             service = {};
             this._container.set(name, service);
         }
+
+        delete service.instance;
+        delete service.class;
+        service.provides = name;
+        delete service.requires;
+        if (filename)
+            service.filename = filename;
+        else
+            delete service.filename;
+
         return service;
     }
 
@@ -474,7 +552,7 @@ class App {
         }
 
         let service = this._container.get(name);
-        if (!service.class)
+        if (service.instance)
             return service.instance;
 
         let instance;
@@ -482,23 +560,17 @@ class App {
             instance = request.get(name);
         } else {
             request.set(name, null); // mark as visited but not resolved yet
+            instance = this._instantiateClass(service, extra, request);
             switch (service.class.lifecycle || 'perRequest') {
                 case 'perRequest':
-                    instance = this._instantiateClass(service.class, extra, request);
                     request.set(name, instance);
                     break;
                 case 'unique':
-                    instance = this._instantiateClass(service.class, extra, request);
                     request.delete(name);
                     break;
                 case 'singleton':
-                    if (service.instance) {
-                        instance = service.instance;
-                    } else {
-                        instance = this._instantiateClass(service.class, extra, request);
-                        service.instance = instance;
-                    }
-                    request.set(name, instance);
+                    service.instance = instance;
+                    request.delete(name);
                     break;
                 default:
                     throw new Error(`Service '${name}' has invalid lifecycle: ${service.class.lifecycle}`);
@@ -513,16 +585,29 @@ class App {
 
     /**
      * Instantiate given service class
-     * @param {function} classFunc          Class function
+     * @param {object} service              Service object
      * @param {Array} extra                 Extra constructor arguments
      * @param {Map} request                 Resolved dependencies
      * @return {object}                     Returns instance of the class
      */
-    _instantiateClass(classFunc, extra, request) {
+    _instantiateClass(service, extra, request) {
         let args = [];
-        for (let arg of classFunc.requires || [])
+        for (let arg of service.requires || [])
             args.push(this._resolveService(arg, [], request));
         args = args.concat(extra);
+
+        let classFunc = service.class;
+        if (classFunc)
+            return new classFunc(...args);
+
+        if (!service.filename)
+            throw new Error(`No class function and no filename for ${service.provides}`);
+
+        let obj = require(service.filename);
+        if (obj.provides !== service.provides)
+            throw new Error(`Invalid file detected when loading ${service.provides}`);
+
+        classFunc = service.class = obj;
         return new classFunc(...args);
     }
 
