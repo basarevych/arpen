@@ -77,7 +77,7 @@ class Filer {
                         (err, bytesRead, buffer) => {
                             if (err)
                                 return reject(err);
-                            if (bytesRead != stats.size)
+                            if (bytesRead !== stats.size)
                                 return reject(new Error(`Only ${bytesRead} out of ${stats.size} has been read on fd ${fd}`));
 
                             resolve(buffer);
@@ -271,7 +271,7 @@ class Filer {
                         .then(buffer => {
                             oldBuffer = buffer;
                             let result = cb(buffer);
-                            if (typeof result != 'object' || result === null || typeof result.then != 'function')
+                            if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
                                 throw new Error(`The callback did not return a Promise`);
                             return result;
                         })
@@ -332,7 +332,7 @@ class Filer {
     lockUpdate(filename, cb, { mode = null, uid = null, gid = null } = {}) {
         let stringCb = buffer => {
             let result = cb(buffer.toString());
-            if (typeof result != 'object' || result === null || typeof result.then != 'function')
+            if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
                 return Promise.reject(new Error(`The callback did not return a Promise`));
 
             return result
@@ -354,7 +354,7 @@ class Filer {
      */
     createDirectory(filename, { mode = null, uid = null, gid = null } = {}) {
         return new Promise((resolve, reject) => {
-                if (filename.length < 2 || filename[0] != '/')
+                if (filename.length < 2 || filename[0] !== '/')
                     return reject(`Invalid path: ${filename}`);
 
                 let parts = filename.split('/');
@@ -420,7 +420,7 @@ class Filer {
      */
     createFile(filename, { mode = null, uid = null, gid = null } = {}) {
         return new Promise((resolve, reject) => {
-                if (filename.length < 2 || filename[0] != '/')
+                if (filename.length < 2 || filename[0] !== '/')
                     return reject(`Invalid path: ${filename}`);
 
                 try {
@@ -463,7 +463,7 @@ class Filer {
      */
     remove(filename) {
         return new Promise((resolve, reject) => {
-                if (filename.length < 2 || filename[0] != '/')
+                if (filename.length < 2 || filename[0] !== '/')
                     return reject(`Invalid path: ${filename}`);
 
                 try {
@@ -493,7 +493,7 @@ class Filer {
         try {
             if (!fs.statSync(filename).isDirectory()) {
                 let result = cb(filename);
-                if (typeof result != 'object' || result === null || typeof result.then != 'function')
+                if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
                     return Promise.reject(new Error(`The callback did not return a Promise for "${name}"`));
                 return result;
             }
@@ -521,7 +521,7 @@ class Filer {
 
             return prev.then(() => {
                 let result = cb(name);
-                if (typeof result != 'object' || result === null || typeof result.then != 'function')
+                if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
                     throw new Error(`The callback did not return a Promise for "${name}"`);
                 return result;
             });

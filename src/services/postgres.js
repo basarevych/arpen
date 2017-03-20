@@ -101,7 +101,7 @@ class PostgresClient {
                         parsedSql, parsedParams,
                         (error, result) => {
                             if (error) {
-                                let sqlState = (typeof error.sqlState == 'undefined' ? error.code : error.sqlState);
+                                let sqlState = (typeof error.sqlState === 'undefined' ? error.code : error.sqlState);
                                 return reject(new WError(
                                     {
                                         cause: error,
@@ -140,7 +140,7 @@ class PostgresClient {
             if (arguments[0].isolation)
                 params.isolation = arguments[0].isolation;
             cb = arguments[1];
-        } else if (arguments.length == 1) {
+        } else if (arguments.length === 1) {
             cb = arguments[0];
         }
 
@@ -167,14 +167,14 @@ class PostgresClient {
             };
         }
 
-        if (++this._transactionLevel != 1) {
+        if (++this._transactionLevel !== 1) {
             let savepoint = 'arpen_' + this._postgres._util.getRandomString(16, { lower: true, digits: true });
             let savepointCreated = false;
             return this.query("SAVEPOINT " + savepoint)
                 .then(() => {
                     savepointCreated = true;
                     let result = cb(rollback(savepoint));
-                    if (result === null || typeof result != 'object' || typeof result.then != 'function') {
+                    if (result === null || typeof result !== 'object' || typeof result.then !== 'function') {
                         throw new Error(
                             'Transaction ' +
                             (params.name ? params.name + ' ' : '') +
@@ -213,7 +213,7 @@ class PostgresClient {
                             transactionStarted = true;
 
                             let result = cb(rollback(null));
-                            if (result === null || typeof result != 'object' || typeof result.then != 'function') {
+                            if (result === null || typeof result !== 'object' || typeof result.then !== 'function') {
                                 throw new Error(
                                     'Transaction ' +
                                     (params.name ? params.name + ' ' : '') +
@@ -357,7 +357,7 @@ class Postgres {
     static unserializeModel(model, data) {
         for (let field of model._fields.keys()) {
             let value;
-            if (typeof data[field] != 'undefined') {
+            if (typeof data[field] !== 'undefined') {
                 value = data[field];
                 if (value instanceof Date) {
                     let utcMoment = moment(value); // db field is in UTC

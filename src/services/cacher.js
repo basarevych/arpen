@@ -79,7 +79,7 @@ class Cacher {
         if (Buffer.byteLength(value) > 512 * 1024 * 1024)
             return Promise.reject(new Error(`Cache overflow for ${name}`));
 
-        if (typeof ttl == 'undefined')
+        if (typeof ttl === 'undefined')
             ttl = this._util.getRandomInt(this._config.get('cache.expire_min'), this._config.get('cache.expire_max'));
 
         return this._clientPromise

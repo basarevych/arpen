@@ -65,7 +65,7 @@ class Logger {
     static formatString(string) {
         function padZero(number) {
             let output = String(number);
-            if (output.length == 1)
+            if (output.length === 1)
                 output = '0' + output;
             return output;
         }
@@ -118,7 +118,7 @@ class Logger {
      */
     error(...messages) {
         let cb;
-        if (messages.length && typeof messages[messages.length - 1] == 'function')
+        if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
         this.log('error', messages, null, cb);
     }
@@ -129,7 +129,7 @@ class Logger {
      */
     info(...messages) {
         let cb;
-        if (messages.length && typeof messages[messages.length - 1] == 'function')
+        if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
         this.log('info', messages, null, cb);
     }
@@ -140,7 +140,7 @@ class Logger {
      */
     warn(...messages) {
         let cb;
-        if (messages.length && typeof messages[messages.length - 1] == 'function')
+        if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
         this.log('warn', messages, null, cb);
     }
@@ -152,7 +152,7 @@ class Logger {
      */
     debug(issuer, ...messages) {
         let cb;
-        if (messages.length && typeof messages[messages.length - 1] == 'function')
+        if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
         this.log('debug', messages, issuer, cb);
     }
@@ -166,7 +166,7 @@ class Logger {
      */
     log(type, messages, issuer, cb) {
         let levels = [ 'debug', 'warn', 'info', 'error' ];
-        if (levels.indexOf(type) == -1) {
+        if (levels.indexOf(type) === -1) {
             if (cb)
                 cb(false);
             return;
@@ -178,10 +178,10 @@ class Logger {
 
         let logToStdOut = !!process.env.DEBUG, logToFile = false, logToMail = false;
         if (logInfo)
-            logToFile =  (levels.indexOf(logInfo.level) != -1 && levels.indexOf(type) >= levels.indexOf(logInfo.level));
+            logToFile =  (levels.indexOf(logInfo.level) !== -1 && levels.indexOf(type) >= levels.indexOf(logInfo.level));
         if (this._config.get('email.log.enable')) {
             let mailLevel = this._config.get('email.log.level');
-            logToMail = (levels.indexOf(mailLevel) != -1 && levels.indexOf(type) >= levels.indexOf(mailLevel));
+            logToMail = (levels.indexOf(mailLevel) !== -1 && levels.indexOf(type) >= levels.indexOf(mailLevel));
         }
 
         if (!logToStdOut && !logToFile && !logToMail) {
@@ -192,7 +192,7 @@ class Logger {
 
         let flat = [];
         for (let msg of messages) {
-            if (msg instanceof WError || (msg.constructor && msg.constructor.name == 'WError')) {
+            if (msg instanceof WError || (msg.constructor && msg.constructor.name === 'WError')) {
                 flat.push('Exception data: ' + JSON.stringify(this._error.info(msg), undefined, 4));
                 flat = flat.concat(this._error.flatten(msg));
             } else {
@@ -213,7 +213,7 @@ class Logger {
                     prefix = '  ';
 
                 if (!(msg instanceof Error)) {
-                    lines.push(prefix + (typeof msg == 'object' ? JSON.stringify(msg) : msg));
+                    lines.push(prefix + (typeof msg === 'object' ? JSON.stringify(msg) : msg));
                     continue;
                 }
 
@@ -232,7 +232,7 @@ class Logger {
         );
 
         if (logToStdOut)
-            console[type == 'error' ? 'error' : 'log'](logString);
+            console[type === 'error' ? 'error' : 'log'](logString);
 
         if (logToFile) {
             if (logInfo.open) {
@@ -277,7 +277,7 @@ class Logger {
         let stream = RotatingFileStream(log.name, log.options);
         log.stream = stream;
         log.stream.on('error', error => {
-            if (log.stream != stream)
+            if (log.stream !== stream)
                 return;
 
             log.stream = null;
@@ -288,7 +288,7 @@ class Logger {
             }
         });
         log.stream.on('open', () => {
-            if (log.stream != stream)
+            if (log.stream !== stream)
                 return;
 
             if (log.buffer.length) {
@@ -308,7 +308,7 @@ class Logger {
             log.failed = false;
         });
         log.stream.on('close', () => {
-            if (log.stream != stream)
+            if (log.stream !== stream)
                 return;
 
             log.stream = null;

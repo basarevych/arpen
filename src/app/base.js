@@ -160,7 +160,7 @@ class App {
 
         debug('Initializing the app');
         let onSignal = signal => {
-            if (typeof this.onSignal == 'function')
+            if (typeof this.onSignal === 'function')
                 this.onSignal(signal);
         };
         process.on('SIGINT', () => { onSignal('SIGINT'); });
@@ -227,9 +227,9 @@ class App {
                 this.constructor._require(path.join(this.basePath, 'config', 'local.js'), {}),
             ])
             .then(([globalConf, localConf]) => {
-                if (typeof globalConf != 'object')
+                if (typeof globalConf !== 'object')
                     throw new Error('Global config is not an object');
-                if (typeof localConf!= 'object')
+                if (typeof localConf!== 'object')
                     throw new Error('Local config is not an object');
 
                 config = merge.recursive(true, globalConf, localConf);
@@ -268,9 +268,9 @@ class App {
                                     )
                                 ])
                                 .then(([globalConf, localConf]) => {
-                                    if (typeof globalConf != 'object')
+                                    if (typeof globalConf !== 'object')
                                         throw new Error(`Global config is not an object (module: ${cur})`);
-                                    if (typeof localConf!= 'object')
+                                    if (typeof localConf !== 'object')
                                         throw new Error(`Local config is not an object (module: ${cur})`);
 
                                     let moduleConfig = merge.recursive(true, globalConf, localConf);
@@ -325,7 +325,7 @@ class App {
                         contents => {
                             try {
                                 cache = JSON.parse(contents.trim());
-                                if (typeof cache != 'object' || cache === null || cache.version !== config.version)
+                                if (typeof cache !== 'object' || cache === null || cache.version !== config.version)
                                     cache = null;
                             } catch (error) {
                                 cache = null;
@@ -339,7 +339,7 @@ class App {
             .then(() => {
                 if (cache) {
                     for (let service of cache.services || []) {
-                        if (typeof service.filename != 'string' || typeof service.provides != 'string' || !Array.isArray(service.requires))
+                        if (typeof service.filename !== 'string' || typeof service.provides !== 'string' || !Array.isArray(service.requires))
                             continue;
 
                         debug(`Preloading ${service.provides}`);
@@ -353,9 +353,9 @@ class App {
                         (prev, cur) => {
                             return prev.then(() => {
                                 let file = cur;
-                                if (cur[0] == '!')
+                                if (cur[0] === '!')
                                     file = path.join(this.basePath, 'node_modules', 'arpen', cur.slice(1));
-                                else if (cur[0] != '/')
+                                else if (cur[0] !== '/')
                                     file = path.join(this.basePath, cur);
                                 return filer.process(
                                     file,
@@ -386,9 +386,9 @@ class App {
                                         (prevLoad, curLoad) => {
                                             return prevLoad.then(() => {
                                                 let file = curLoad;
-                                                if (curLoad[0] == '!')
+                                                if (curLoad[0] === '!')
                                                     file = path.join(this.basePath, 'node_modules', 'arpen', curLoad.slice(1));
-                                                else if (curLoad[0] != '/')
+                                                else if (curLoad[0] !== '/')
                                                     file = path.join(this.basePath, 'modules', curModule, curLoad);
                                                 return filer.process(
                                                     file,
@@ -493,7 +493,7 @@ class App {
                 return prev.then(() => {
                     debug(`Bootstrapping module '${cur}'`);
                     let result = _module.bootstrap();
-                    if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                    if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                         throw new Error(`Module '${cur}' bootstrap() did not return a Promise`);
                     return result;
                 });
@@ -509,7 +509,7 @@ class App {
      * @return {object}                     Returns service object
      */
     _initService(name, filename) {
-        if (name[name.length - 1] == '?')
+        if (name[name.length - 1] === '?')
             throw new Error(`Invalid service name: ${name}`);
 
         let service;
@@ -541,7 +541,7 @@ class App {
      */
     _resolveService(name, extra, request) {
         let mustExist = true;
-        if (name[name.length - 1] == '?') {
+        if (name[name.length - 1] === '?') {
             name = name.slice(0, -1);
             mustExist = false;
         }
@@ -646,7 +646,7 @@ class App {
                 try {
                     resolve(require(filename));
                 } catch (err) {
-                    if (typeof defaultObject == 'undefined')
+                    if (typeof defaultObject === 'undefined')
                         reject(new WError(err, `Could not load ${filename}`));
                     else
                         resolve(defaultObject);

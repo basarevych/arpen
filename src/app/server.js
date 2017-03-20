@@ -39,7 +39,7 @@ class Server extends App {
                     servers.set(name, server);
 
                     let result = server.init(name);
-                    if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                    if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                         throw new Error(`Server '${name}' init() did not return a Promise`);
                     promises.push(result);
                 }
@@ -68,7 +68,7 @@ class Server extends App {
                         return prev.then(() => {
                             let server = servers.get(name);
                             let result = server.start(name);
-                            if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                            if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                                 throw new Error(`Server '${name}' start() did not return a Promise`);
                             return result;
                         });
@@ -103,7 +103,7 @@ class Server extends App {
                 return prev.then(() => {
                     debug(`Registering subscriber '${cur}'`);
                     let result = subscriber.register();
-                    if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                    if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                         throw new Error(`Subscriber '${cur}' register() did not return a Promise`);
                     return result;
                 });

@@ -55,9 +55,9 @@ class Util {
      * @return {number}             Returns random in range
      */
     getRandomInt(min, max) {
-        if (typeof min != 'number')
+        if (typeof min !== 'number')
             throw new Error('Minimum is not a Number');
-        if (typeof max != 'number')
+        if (typeof max !== 'number')
             throw new Error('Maximum is not a Number');
 
         return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -129,7 +129,7 @@ class Util {
     dashedToCamel(value, upperFirst = false) {
         let result = '', foundDash = false;
         for (let char of value) {
-            if (char == '-') {
+            if (char === '-') {
                 foundDash = true;
             } else {
                 if (foundDash) {

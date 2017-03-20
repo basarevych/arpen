@@ -1,5 +1,5 @@
 /**
- * Error hepler service
+ * Error helper service
  * @module arpen/services/error
  */
 const VError = require('verror');
@@ -52,7 +52,7 @@ class ErrorHelper {
         else
             return result;
 
-        if (typeof error.cause != 'function')
+        if (typeof error.cause !== 'function')
             return result;
 
         return result.concat(this.flatten(error.cause()));

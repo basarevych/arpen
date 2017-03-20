@@ -272,7 +272,7 @@ class RedisPubSub {
         }
 
         for (let thisChannel of this.channels.keys()) {
-            if (thisChannel == channel) {
+            if (thisChannel === channel) {
                 for (let handler of this.channels.get(thisChannel))
                     handler(message);
                 break;

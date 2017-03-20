@@ -33,7 +33,7 @@ class Subprocess {
             signal: null,
         };
 
-        if (typeof expect == 'object' && expect !== null) {
+        if (typeof expect === 'object' && expect !== null) {
             let sendKey = send => {
                 setTimeout(function () {
                     cmd.write(send + '\r');
@@ -58,7 +58,7 @@ class Subprocess {
             this._cmd = null;
         });
         cmd.on('error', error => {
-            if (error.errno == 'EIO' && error.syscall == 'read')    // TODO: check the status of this bug
+            if (error.errno === 'EIO' && error.syscall === 'read')    // TODO: check the status of this bug
                 return;                                             // Do nothing here as this is a Debian-specific bug
 
             this._reject(error);
@@ -209,7 +209,7 @@ class Runner {
         return new Promise((resolve, reject) => {
             execFile(command, params, {env, timeout, killSignal}, (error, stdout, stderr) => {
                 if (error) {
-                    if (typeof error.code == 'number' || error.signal) {
+                    if (typeof error.code === 'number' || error.signal) {
                         return resolve({
                             code: error.code,
                             signal: error.signal,

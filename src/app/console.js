@@ -41,7 +41,7 @@ class Console extends App {
                 this._running = true;
 
                 let result = command.run(this.argv);
-                if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                     throw new Error(`Command '${this.argv['_'][0]}' run() did not return a Promise`);
                 return result;
             });

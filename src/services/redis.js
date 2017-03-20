@@ -45,7 +45,7 @@ class RedisQueue {
      */
     add(command, params = []) {
         let method = this._multi[command.toLowerCase()];
-        if (typeof method != 'function')
+        if (typeof method !== 'function')
             throw new Error('Unknown Multi command: ' + command);
 
         method.apply(this._multi, params);
@@ -100,7 +100,7 @@ class RedisClient {
         return new Promise((resolve, reject) => {
                 try {
                     let method = this.client[command.toLowerCase()];
-                    if (typeof method != 'function')
+                    if (typeof method !== 'function')
                         return reject('Unknown command: ' + command);
 
                     let args = params.slice();
@@ -134,7 +134,7 @@ class RedisClient {
             if (arguments[0].watch)
                 params.watch = arguments[0].watch;
             cb = arguments[1];
-        } else if (arguments.length == 1) {
+        } else if (arguments.length === 1) {
             cb = arguments[0];
         }
 
@@ -146,7 +146,7 @@ class RedisClient {
             ));
         }
 
-        if (++this._transactionLevel != 1) {
+        if (++this._transactionLevel !== 1) {
             this._transactionLevel--;
             return Promise.reject(new Error(
                 'Nested Redis transactions are not supported' +
@@ -179,7 +179,7 @@ class RedisClient {
                         .then(() => {
                             watched = true;
                             let result = cb(queue);
-                            if (result === null || typeof result != 'object' || typeof result.then != 'function') {
+                            if (result === null || typeof result !== 'object' || typeof result.then !== 'function') {
                                 throw new Error(
                                     'Transaction ' +
                                     (params.name ? params.name + ' ' : '') +
