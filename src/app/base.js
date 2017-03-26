@@ -16,7 +16,7 @@ class App {
     /**
      * Create app
      * @param {string} basePath             Base path
-     * @param {object} argv                 Minimist object
+     * @param {string[]} argv               Arguments
      */
     constructor(basePath, argv) {
         debug('Constructing the app');
