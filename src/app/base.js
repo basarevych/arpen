@@ -134,7 +134,6 @@ class App {
     /**
      * Run the app. This method will simply call .init() and then .start().
      * @param {...*} args                               Descendant-specific arguments
-     * @return {Promise}
      */
     run(...args) {
         this.init(...args)
@@ -142,7 +141,7 @@ class App {
                 return this.start(...args);
             })
             .catch(error => {
-                return this.error('App.run() failed:', error.message + '\n' + error.stack)
+                return this.error('App.run() failed:', error.message + '\n' + error.stack + '\n')
                     .then(() => {
                         process.exit(1);
                     });

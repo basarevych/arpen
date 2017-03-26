@@ -21,7 +21,7 @@ class Console extends App {
         return super.start(...args)
             .then(() => {
                 let config = this.get('config');
-                if (!this.argv['_'].length) {
+                if (!this.argv.length) {
                     return this.error('Command name required\n')
                         .then(() => {
                             process.exit(1);
@@ -30,7 +30,7 @@ class Console extends App {
 
                 let command, util = this.get('util');
                 try {
-                    command = this.get(`commands.${util.dashedToCamel(this.argv['_'][0])}`);
+                    command = this.get(`commands.${util.dashedToCamel(this.argv[0])}`);
                 } catch (error) {
                     return this.error('Unknown command\n')
                         .then(() => {
@@ -42,7 +42,7 @@ class Console extends App {
 
                 let result = command.run(this.argv);
                 if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
-                    throw new Error(`Command '${this.argv['_'][0]}' run() did not return a Promise`);
+                    throw new Error(`Command '${this.argv[0]}' run() did not return a Promise`);
                 return result;
             });
     }
