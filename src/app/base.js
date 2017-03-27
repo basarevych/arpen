@@ -76,6 +76,18 @@ class App {
     }
 
     /**
+     * Check if service is registered
+     * @param {string} name                 Service name
+     * @return {boolean}
+     */
+    has(name) {
+        if (!name)
+            throw new Error('No service name provided');
+
+        return this._container.has(name);
+    }
+
+    /**
      * Get instance of a service
      * @param {string} name                 Service name
      * @param {...*} extra                  Optional extra arguments to the constructor

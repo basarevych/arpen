@@ -30,9 +30,12 @@ class Console extends App {
 
                 let command, util = this.get('util');
                 try {
-                    command = this.get(`commands.${util.dashedToCamel(this.argv[0])}`);
+                    let name = `commands.${util.dashedToCamel(this.argv[0])}`;
+                    if (!this.has(name))
+                        throw null;
+                    command = this.get(name);
                 } catch (error) {
-                    return this.error('Unknown command\n')
+                    return this.error(error ? `Error: ${error.message}\n` : 'Unknown command\n')
                         .then(() => {
                             process.exit(1);
                         });
