@@ -33,6 +33,15 @@ class Util {
     }
 
     /**
+     * Check if given string is UUID
+     * @param {string} value        The string to check
+     * @return {boolean}
+     */
+    isUuid(value) {
+        return /[a-f0-9]{8}-?[a-f0-9]{4}-?[1-5][a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}/i.test(value);
+    }
+
+    /**
      * Convert value to a trimmed string<br>
      * Accepts string or number and returns empty string for anything else
      * @param {*} value             The value
