@@ -28,6 +28,14 @@ const rimraf = require('rimraf');
  */
 
 /**
+ * Callback for processing a directory
+ * @callback ProcessDirCallback
+ * @param {string} filename     Path of the file
+ * @return {Promise}            Should return a Promise resolving to true if directory
+ *                              needs processing
+ */
+
+/**
  * File operations service
  */
 class Filer {
@@ -485,16 +493,20 @@ class Filer {
      * Execute a callback for the filename if it is a file. If it is a directory then execute it for every file in that
      * directory recursively.<br>
      * Execution is chained, if any of the callback invocations rejects then the entire process is rejected.
-     * @param {string} filename             Path to the file or directory
-     * @param {ProcessFileCallback} cb      The callback
-     * @return {Promise}                    Resolves to true on success
+     * @param {string} filename                 Path to the file or directory
+     * @param {ProcessFileCallback} [cbFile]    The file callback
+     * @param {ProcessDirCallback} [cbDir]      The directory callback
+     * @return {Promise}                        Resolves on success
      */
-    process(filename, cb) {
+    process(filename, cbFile, cbDir) {
         try {
             if (!fs.statSync(filename).isDirectory()) {
-                let result = cb(filename);
+                if (!cbFile)
+                    return Promise.resolve();
+
+                let result = cbFile(filename);
                 if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
-                    return Promise.reject(new Error(`The callback did not return a Promise for "${name}"`));
+                    return Promise.reject(new Error(`The file callback did not return a Promise for "${name}"`));
                 return result;
             }
         } catch (err) {
@@ -513,16 +525,31 @@ class Filer {
             let name = path.join(filename, cur);
             try {
                 if (fs.statSync(name).isDirectory()) {
-                    return prev.then(() => { return this.process(name, cb); });
+                    return prev.then(() => {
+                        if (!cbDir)
+                            return this.process(name, cbFile, cbDir);
+
+                        let result = cbDir(name);
+                        if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
+                            return Promise.reject(new Error(`The dir callback did not return a Promise for "${name}"`));
+                        return result
+                            .then(accept => {
+                                if (accept)
+                                    return this.process(name, cbFile, cbDir);
+                            });
+                    });
                 }
             } catch (err) {
                 return prev;
             }
 
             return prev.then(() => {
-                let result = cb(name);
+                if (!cbFile)
+                    return Promise.resolve();
+
+                let result = cbFile(name);
                 if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
-                    throw new Error(`The callback did not return a Promise for "${name}"`);
+                    throw new Error(`The file callback did not return a Promise for "${name}"`);
                 return result;
             });
         }, Promise.resolve());
