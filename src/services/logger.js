@@ -120,7 +120,7 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('error', messages, null, cb);
+        this.log('error', messages, undefined, cb);
     }
 
     /**
@@ -131,7 +131,7 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('info', messages, null, cb);
+        this.log('info', messages, undefined, cb);
     }
 
     /**
@@ -142,7 +142,7 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('warn', messages, null, cb);
+        this.log('warn', messages, undefined, cb);
     }
 
     /**
@@ -250,7 +250,8 @@ class Logger {
                 this._startLog(logInfo);
             }
         } else {
-            cb(false);
+            if (cb)
+                cb(false);
         }
 
         if (logToMail) {
@@ -299,8 +300,10 @@ class Logger {
                         callbacks.push(buf.cb);
                 }
                 log.stream.write(str, () => {
-                    for (let cb of callbacks)
-                        cb(true);
+                    for (let cb of callbacks) {
+                        if (cb)
+                            cb(true);
+                    }
                 });
                 log.buffer = [];
             }
