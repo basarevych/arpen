@@ -153,7 +153,7 @@ class App {
                 return this.start(...args);
             })
             .catch(error => {
-                return this.error('App.run() failed:', error.message + '\n' + error.stack + '\n')
+                return this.error('App.run() failed:', error.message + '\n' + error.stack)
                     .then(() => {
                         process.exit(1);
                     });
@@ -639,7 +639,7 @@ class App {
             };
 
             stream.once('error', onError);
-            stream.write(output, () => {
+            stream.write(output + '\n', () => {
                 stream.removeListener('error', onError);
                 resolve();
             })
