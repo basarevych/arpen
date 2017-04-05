@@ -73,6 +73,7 @@ class Logger {
         let date = new Date();
         let dateString = date.getFullYear() + '-' + padZero(date.getMonth()+1) + '-' + padZero(date.getDate());
         dateString += ' ' + padZero(date.getHours()) + ':' + padZero(date.getMinutes()) + ':' + padZero(date.getSeconds());
+        dateString += '.' + (date.getTime() % 1000);
 
         return "[" + dateString + "] " + string;
     }
