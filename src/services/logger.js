@@ -63,9 +63,9 @@ class Logger {
      * @return {string}             Returns the string with date
      */
     static formatString(string) {
-        function padZero(number) {
+        function padZero(number, length = 2) {
             let output = String(number);
-            if (output.length === 1)
+            while (output.length < length)
                 output = '0' + output;
             return output;
         }
@@ -73,7 +73,7 @@ class Logger {
         let date = new Date();
         let dateString = date.getFullYear() + '-' + padZero(date.getMonth()+1) + '-' + padZero(date.getDate());
         dateString += ' ' + padZero(date.getHours()) + ':' + padZero(date.getMinutes()) + ':' + padZero(date.getSeconds());
-        dateString += '.' + (date.getTime() % 1000);
+        dateString += '.' + padZero(date.getTime() % 1000, 3);
 
         return "[" + dateString + "] " + string;
     }
