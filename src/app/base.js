@@ -472,19 +472,6 @@ class App {
                 } catch (error) {
                     reject(new WError(error, 'App._initLogger()'));
                 }
-            })
-            .then(() => {
-                let filer = this.get('filer');
-                return filer.lockRead(path.join(config.base_path, 'package.json'));
-            })
-            .then(packageInfo => {
-                let json;
-                try {
-                    json = JSON.parse(packageInfo);
-                } catch (error) {
-                    json = { name: 'program' };
-                }
-                this._logger.info(`Starting ${json.name}` + (json.version ? ' v' + json.version : ''));
             });
     }
 

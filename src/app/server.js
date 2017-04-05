@@ -62,10 +62,6 @@ class Server extends App {
         return super.start(...names)
             .then(() => {
                 let config = this.get('config');
-                return this._initSubscribers(config.get('subscribers') || []);
-            })
-            .then(() => {
-                let config = this.get('config');
                 let servers = this.get('servers');
 
                 return names.reduce(
@@ -89,32 +85,6 @@ class Server extends App {
                 }
                 this._running = true;
             });
-    }
-
-    /**
-     * Start subscribers
-     * @param {string[]} names              Subscribers list
-     * @return {Promise}
-     */
-    _initSubscribers(names) {
-        let subscribers = new Map();
-        this.registerInstance(subscribers, 'subscribers');
-
-        return names.reduce(
-            (prev, cur) => {
-                let subscriber = this.get(cur);
-                subscribers.set(cur, subscriber);
-
-                return prev.then(() => {
-                    debug(`Registering subscriber '${cur}'`);
-                    let result = subscriber.register();
-                    if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
-                        throw new Error(`Subscriber '${cur}' register() did not return a Promise`);
-                    return result;
-                });
-            },
-            Promise.resolve()
-        );
     }
 }
 
