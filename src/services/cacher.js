@@ -29,7 +29,7 @@ class Cacher {
             this._redis.connect(this._config.get('cache.redis'))
                 .then(
                     client => {
-                        this._logger.debug('arpen', `Cache activated`);
+                        debug(`Cache activated`);
                         resolve(client);
                     },
                     error => {
