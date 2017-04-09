@@ -115,6 +115,8 @@ class Logger {
         if (isDefault)
             this._container.default = name;
         this._log = name;
+
+        this._startLog(log);
     }
 
     /**
