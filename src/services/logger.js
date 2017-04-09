@@ -80,15 +80,17 @@ class Logger {
 
     /**
      * Set log stream
-     * @param {string} name                 File name
+     * @param {string} name                 Stream name
+     * @param {string|function} filename    File name
      * @param {string} level                Log level: debug, warn, info, error
      * @param {boolean} [isDefault=false}   Stream is default
      * @param {object} [options]            Stream options
      */
-    setLogStream(name, level, isDefault, options) {
+    setLogStream(name, filename, level, isDefault, options) {
         let log = this._container.logs.get(name);
         if (log) {
-            log.stream.close();
+            if (log.stream)
+                log.stream.close();
             log.stream = null;
             if (options)
                 log.options = options;
@@ -98,6 +100,7 @@ class Logger {
 
             let log = {
                 name: name,
+                filename: filename,
                 level: level,
                 stream: null,
                 options: options,
@@ -276,7 +279,7 @@ class Logger {
         if (log.stream)
             return;
 
-        let stream = RotatingFileStream(log.name, log.options);
+        let stream = RotatingFileStream(log.filename, log.options);
         log.stream = stream;
         log.stream.on('error', error => {
             if (log.stream !== stream)

@@ -460,13 +460,13 @@ class App {
                     this._logger = this.get('logger');
                     for (let log of Object.keys(config.logs)) {
                         let info = Object.assign({}, config.logs[log]);
-                        let name = info.name;
+                        let filename = info.name;
                         delete info.name;
                         let level = info.level || 'info';
                         delete info.level;
                         let isDefault = info.default || false;
                         delete info.default;
-                        this._logger.setLogStream(name, level, isDefault, info);
+                        this._logger.setLogStream(log, filename, level, isDefault, info);
                     }
                     resolve();
                 } catch (error) {
