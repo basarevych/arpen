@@ -125,7 +125,7 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('error', messages, undefined, cb);
+        this.log('error', messages, undefined, true, cb);
     }
 
     /**
@@ -136,7 +136,7 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('info', messages, undefined, cb);
+        this.log('info', messages, undefined, true, cb);
     }
 
     /**
@@ -147,7 +147,7 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('warn', messages, undefined, cb);
+        this.log('warn', messages, undefined, true, cb);
     }
 
     /**
@@ -159,17 +159,29 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('debug', messages, issuer, cb);
+        this.log('debug', messages, issuer, true, cb);
+    }
+
+    /**
+     * Append messages without date
+     * @param {...*} messages       Messages
+     */
+    dump(...messages) {
+        let cb;
+        if (messages.length && typeof messages[messages.length - 1] === 'function')
+            cb = messages.pop();
+        this.log('info', messages, undefined, false, cb);
     }
 
     /**
      * Actually log the error
-     * @param {string} type         Type of the error message
-     * @param {Array} messages      Array of messages
-     * @param {string} [issuer]     Issuer if used
-     * @param {function} [cb]       File write callback: first parameter whether file was actually written
+     * @param {string} type                 Type of the error message
+     * @param {Array} messages              Array of messages
+     * @param {string|undefined} issuer     Issuer if used
+     * @param {boolean} logDate             Append date
+     * @param {function|undefined} [cb]     File write callback: first parameter whether file was actually written
      */
-    log(type, messages, issuer, cb) {
+    log(type, messages, issuer, logDate, cb) {
         let levels = [ 'debug', 'warn', 'info', 'error' ];
         if (levels.indexOf(type) === -1) {
             if (cb)
@@ -231,10 +243,17 @@ class Logger {
             }
         }
 
-        let logString = this.constructor.formatString(
-            (issuer ? `<${issuer}> ` : '') +
-            (formatted ? util.format(...flat) : lines.join("\n"))
-        );
+        let logString;
+        if (logDate) {
+            logString = this.constructor.formatString(
+                (issuer ? `<${issuer}> ` : '') +
+                (formatted ? util.format(...flat) : lines.join("\n"))
+            );
+        } else {
+            logString =
+                (issuer ? `<${issuer}> ` : '') +
+                (formatted ? util.format(...flat) : lines.join("\n"));
+        }
 
         if (logToStdOut)
             console[type === 'error' ? 'error' : 'log'](logString);
