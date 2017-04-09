@@ -89,11 +89,12 @@ class Logger {
     setLogStream(name, filename, level, isDefault, options) {
         let log = this._container.logs.get(name);
         if (log) {
-            if (log.stream)
-                log.stream.close();
-            log.stream = null;
-            if (options)
+            if (options) {
                 log.options = options;
+                if (log.stream)
+                    log.stream.close();
+                log.stream = null;
+            }
         } else {
             if (!options)
                 return;

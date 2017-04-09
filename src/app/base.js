@@ -26,7 +26,6 @@ class App {
         this._initialized = null;
         this._running = null;
         this._container = new Map();
-        this._logger = null;
 
         this.registerInstance(this, 'app');
     }
@@ -219,11 +218,13 @@ class App {
      * @param {string} signal                           Signal as SIGNAME
      */
     onSignal(signal) {
-        if (!this._logger)
-            process.exit(0);
-
-        this._logger.info(`Terminating due to ${signal} signal`, () => { process.exit(0); });
-        setTimeout(() => { process.exit(0); }, this.constructor.gracefulTimeout);
+        try {
+            let logger = this.get('logger');
+            logger.info(`Terminating due to ${signal} signal`, () => { process.nextTick(() => { process.exit(0); }); });
+            setTimeout(() => { process.nextTick(() => { process.exit(0); }); }, this.constructor.gracefulTimeout);
+        } catch (error) {
+            process.nextTick(() => { process.exit(0); });
+        }
     }
 
     /**
@@ -457,7 +458,7 @@ class App {
                     if (!config.logs)
                         return resolve();
 
-                    this._logger = this.get('logger');
+                    let logger = this.get('logger');
                     for (let log of Object.keys(config.logs)) {
                         let info = Object.assign({}, config.logs[log]);
                         let filename = info.name;
@@ -466,7 +467,7 @@ class App {
                         delete info.level;
                         let isDefault = info.default || false;
                         delete info.default;
-                        this._logger.setLogStream(log, filename, level, isDefault, info);
+                        logger.setLogStream(log, filename, level, isDefault, info);
                     }
                     resolve();
                 } catch (error) {
