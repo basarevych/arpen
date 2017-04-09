@@ -243,17 +243,12 @@ class Logger {
             }
         }
 
-        let logString;
-        if (logDate) {
-            logString = this.constructor.formatString(
-                (issuer ? `<${issuer}> ` : '') +
-                (formatted ? util.format(...flat) : lines.join("\n"))
-            );
-        } else {
-            logString =
-                (issuer ? `<${issuer}> ` : '') +
-                (formatted ? util.format(...flat) : lines.join("\n"));
-        }
+        let logString =
+            (issuer ? `<${issuer}> ` : '') +
+            (formatted ? util.format(...flat) : lines.join("\n"));
+
+        if (logDate)
+            logString = this.constructor.formatString(logString);
 
         if (logToStdOut)
             console[type === 'error' ? 'error' : 'log'](logString);
