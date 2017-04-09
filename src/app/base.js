@@ -312,6 +312,7 @@ class App {
                 } catch (error) {
                     json = {};
                 }
+                config.name = json.name;
                 config.version = json.version;
             });
     }
@@ -324,7 +325,7 @@ class App {
         let config = this.get('config');
         let filer = new Filer();
         let cache = null;
-        let mapFile = `arpen.${config.project}.${config.instance}.map.json`;
+        let mapFile = `${config.name}.${config.project}.${config.instance}.map.json`;
 
         debug('Loading application sources');
         return Promise.resolve()
