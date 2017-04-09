@@ -99,7 +99,7 @@ class Logger {
             if (!options)
                 return;
 
-            let log = {
+            log = {
                 name: name,
                 filename: filename,
                 level: level,

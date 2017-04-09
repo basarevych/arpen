@@ -152,7 +152,20 @@ class App {
                 return this.start(...args);
             })
             .catch(error => {
-                return this.error('App.run() failed:', error.message + '\n' + error.stack)
+                let msg = (error.stack ? error.stack : error.message);
+
+                try {
+                    let errService = this.get('error');
+                    if (error instanceof WError || (error.constructor && error.constructor.name === 'WError')) {
+                        msg = 'Exception data: ' + JSON.stringify(errService.info(error), undefined, 4);
+                        for (let err of errService.flatten(error))
+                            msg += '\n' + (err.stack ? err.stack : err.message);
+                    }
+                } catch (error) {
+                    // do nothing
+                }
+
+                return this.error('App.run() failed:', msg)
                     .then(() => {
                         process.exit(1);
                     });
