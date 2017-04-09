@@ -48,72 +48,48 @@ class Express {
      * @param {string} name                     Config section name
      * @return {Promise}
      */
-    bootstrap(name) {
+    init(name) {
         this._name = name;
         let exp = express();
 
         return new Promise((resolve, reject) => {
-                this._app.registerInstance(exp, 'express');
+                try {
+                    this._app.registerInstance(exp, 'express');
 
-                debug('Initializing express');
-                exp.set('env', this._config.get('env'));
-                let options = this._config.get(`servers.${name}.express`);
-                for (let option of Object.keys(options)) {
-                    let name = option.replace('_', ' ');
-                    let value = options[option];
-                    exp.set(name, value);
-                }
-
-                let views = [];
-                for (let _module of this._config.modules) {
-                    for (let view of _module.views || []) {
-                        let filename = (view[0] == '/' ? view : path.join(this._config.base_path, 'modules', _module.name, view));
-                        views.push(filename);
+                    debug('Initializing express');
+                    exp.set('env', this._config.get('env'));
+                    let options = this._config.get(`servers.${name}.express`);
+                    for (let option of Object.keys(options)) {
+                        let name = option.replace('_', ' ');
+                        let value = options[option];
+                        exp.set(name, value);
                     }
-                }
-                exp.set('views', views);
 
-                debug('Loading middleware');
-                let middlewareConfig = this._config.get(`servers.${name}.middleware`);
-                if (!Array.isArray(middlewareConfig))
-                    return resolve();
-
-                let loadedMiddleware = new Map();
-                this._app.registerInstance(loadedMiddleware, 'middleware');
-
-                middlewareConfig.reduce(
-                        (prev, cur) => {
-                            return prev.then(() => {
-                                let middleware = this._app.get(cur);
-                                loadedMiddleware.set(cur, middleware);
-
-                                debug(`Registering middleware ${cur}`);
-                                return middleware.register(name);
-                            });
-                        },
-                        Promise.resolve()
-                    )
-                    .then(
-                        () => {
-                            resolve();
-                        },
-                        error => {
-                            reject(error);
+                    let views = [];
+                    for (let _module of this._config.modules) {
+                        for (let view of _module.views || []) {
+                            let filename = (view[0] === '/' ? view : path.join(this._config.base_path, 'modules', _module.name, view));
+                            views.push(filename);
                         }
-                    );
+                    }
+                    exp.set('views', views);
+                    resolve();
+                } catch (error) {
+                    reject(new WError(error, 'Express.init()'));
+                }
             })
             .then(() => {
                 if (!this._config.get(`servers.${name}.ssl.enable`))
                     return http.createServer(exp);
 
                 let key = this._config.get(`servers.${name}.ssl.key`);
-                if (key && key[0] != '/')
+                if (key && key[0] !== '/')
                     key = path.join(this._config.base_path, key);
                 let cert = this._config.get(`servers.${name}.ssl.cert`);
-                if (cert && cert[0] != '/')
+                if (cert && cert[0] !== '/')
                     cert = path.join(this._config.base_path, cert);
                 let ca = this._config.get(`server.${name}.ssl.ca`);
-                if (ca && ca[0] != '/')
+                if (ca && ca[0] !== '/')
                     ca = path.join(this._config.base_path, ca);
 
                 let promises = [
@@ -124,7 +100,7 @@ class Express {
                     promises.push(this._filer.lockReadBuffer(ca));
 
                 return Promise.all(promises)
-                    .then(([key, cert, ca]) => {
+                    .then(([ key, cert, ca ]) => {
                         let options = {
                             key: key,
                             cert: cert,
@@ -166,12 +142,34 @@ class Express {
                 Promise.resolve()
             )
             .then(() => {
+                debug('Loading middleware');
+                let middlewareConfig = this._config.get(`servers.${name}.middleware`);
+                if (!Array.isArray(middlewareConfig))
+                    return;
+
+                let loadedMiddleware = new Map();
+                this._app.registerInstance(loadedMiddleware, 'middleware');
+
+                return middlewareConfig.reduce(
+                    (prev, cur) => {
+                        return prev.then(() => {
+                            let middleware = this._app.get(cur);
+                            loadedMiddleware.set(cur, middleware);
+
+                            debug(`Registering middleware ${cur}`);
+                            return middleware.register(name);
+                        });
+                    },
+                    Promise.resolve()
+                );
+            })
+            .then(() => {
                 debug('Starting the server');
                 let port = this._normalizePort(this._config.get(`servers.${this._name}.port`));
                 let http = this._app.get('http');
 
                 try {
-                    http.listen(port, typeof port == 'string' ? undefined : this._config.get(`servers.${this._name}.host`));
+                    http.listen(port, typeof port === 'string' ? undefined : this._config.get(`servers.${this._name}.host`));
                 } catch (error) {
                     throw new WError(error, 'Express.start()');
                 }
@@ -186,17 +184,18 @@ class Express {
         if (error.syscall !== 'listen')
             return this._logger.error(new WError(error, 'Express.onError()'));
 
+        let msg;
         switch (error.code) {
             case 'EACCES':
-                this._logger.error('Web server port requires elevated privileges');
+                msg = 'Could not bind to web server port';
                 break;
             case 'EADDRINUSE':
-                this._logger.error('Web server port is already in use');
+                msg = 'Web server port is already in use';
                 break;
             default:
-                this._logger.error(error);
+                msg = error;
         }
-        process.exit(1);
+        this._logger.error(msg, () => { process.exit(1); });
     }
 
     /**
@@ -207,7 +206,7 @@ class Express {
         this._logger.info(
             (this._config.get(`servers.${this._name}.ssl.enable`) ? 'HTTPS' : 'HTTP') +
             ' server listening on ' +
-            (typeof port == 'string' ?
+            (typeof port === 'string' ?
                 port :
             this._config.get(`servers.${this._name}.host`) + ':' + port)
         );
