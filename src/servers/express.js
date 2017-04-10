@@ -21,6 +21,12 @@ class Express {
      * @param {Logger} logger               Logger service
      */
     constructor(app, config, filer, logger) {
+        this.name = null;
+        this.express = express();
+        this.http = null;
+        this.https = null;
+        this.middleware = new Map();
+
         this._app = app;
         this._config = config;
         this._filer = filer;
@@ -49,20 +55,17 @@ class Express {
      * @return {Promise}
      */
     init(name) {
-        this._name = name;
-        let exp = express();
+        this.name = name;
 
         return new Promise((resolve, reject) => {
                 try {
-                    this._app.registerInstance(exp, 'express');
-
                     debug('Initializing express');
-                    exp.set('env', this._config.get('env'));
+                    this.express.set('env', this._config.get('env'));
                     let options = this._config.get(`servers.${name}.express`);
                     for (let option of Object.keys(options)) {
                         let name = option.replace('_', ' ');
                         let value = options[option];
-                        exp.set(name, value);
+                        this.express.set(name, value);
                     }
 
                     let views = [];
@@ -72,15 +75,17 @@ class Express {
                             views.push(filename);
                         }
                     }
-                    exp.set('views', views);
+                    this.express.set('views', views);
                     resolve();
                 } catch (error) {
                     reject(new WError(error, 'Express.init()'));
                 }
             })
             .then(() => {
-                if (!this._config.get(`servers.${name}.ssl.enable`))
-                    return http.createServer(exp);
+                if (!this._config.get(`servers.${name}.ssl.enable`)) {
+                    this.http = http.createServer(this.express);
+                    return this.http;
+                }
 
                 let key = this._config.get(`servers.${name}.ssl.key`);
                 if (key && key[0] !== '/')
@@ -108,13 +113,13 @@ class Express {
                         if (ca)
                             options.ca = ca;
 
-                        return https.createServer(options, exp);
+                        this.https = https.createServer(options, this.express);
+                        return this.https;
                     });
             })
             .then(server => {
                 server.on('error', this.onError.bind(this));
                 server.on('listening', this.onListening.bind(this));
-                this._app.registerInstance(server, 'http');
             });
     }
 
@@ -124,7 +129,7 @@ class Express {
      * @return {Promise}
      */
     start(name) {
-        if (name !== this._name)
+        if (name !== this.name)
             return Promise.reject(new Error(`Server ${name} was not properly bootstrapped`));
 
         return Array.from(this._app.get('modules')).reduce(
@@ -134,7 +139,7 @@ class Express {
                             return;
 
                         let result = curModule.register(name);
-                        if (result === null || typeof result != 'object' || typeof result.then != 'function')
+                        if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                             throw new Error(`Module '${curName}' register() did not return a Promise`);
                         return result;
                     });
@@ -147,17 +152,14 @@ class Express {
                 if (!Array.isArray(middlewareConfig))
                     return;
 
-                let loadedMiddleware = new Map();
-                this._app.registerInstance(loadedMiddleware, 'middleware');
-
                 return middlewareConfig.reduce(
                     (prev, cur) => {
                         return prev.then(() => {
                             let middleware = this._app.get(cur);
-                            loadedMiddleware.set(cur, middleware);
+                            this.middleware.set(cur, middleware);
 
                             debug(`Registering middleware ${cur}`);
-                            return middleware.register(name);
+                            return middleware.register(this);
                         });
                     },
                     Promise.resolve()
@@ -165,11 +167,11 @@ class Express {
             })
             .then(() => {
                 debug('Starting the server');
-                let port = this._normalizePort(this._config.get(`servers.${this._name}.port`));
-                let http = this._app.get('http');
+                let port = this._normalizePort(this._config.get(`servers.${name}.port`));
+                let http = this.http || this.https;
 
                 try {
-                    http.listen(port, typeof port === 'string' ? undefined : this._config.get(`servers.${this._name}.host`));
+                    http.listen(port, typeof port === 'string' ? undefined : this._config.get(`servers.${name}.host`));
                 } catch (error) {
                     throw new WError(error, 'Express.start()');
                 }
@@ -202,13 +204,13 @@ class Express {
      * Listening event handler
      */
     onListening() {
-        let port = this._normalizePort(this._config.get(`servers.${this._name}.port`));
+        let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
         this._logger.info(
-            (this._config.get(`servers.${this._name}.ssl.enable`) ? 'HTTPS' : 'HTTP') +
+            (this._config.get(`servers.${this.name}.ssl.enable`) ? 'HTTPS' : 'HTTP') +
             ' server listening on ' +
             (typeof port === 'string' ?
                 port :
-            this._config.get(`servers.${this._name}.host`) + ':' + port)
+            this._config.get(`servers.${this.name}.host`) + ':' + port)
         );
     }
 
