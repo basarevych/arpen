@@ -69,9 +69,9 @@ class Express {
                     }
 
                     let views = [];
-                    for (let _module of this._config.modules) {
-                        for (let view of _module.views || []) {
-                            let filename = (view[0] === '/' ? view : path.join(this._config.base_path, 'modules', _module.name, view));
+                    for (let [ moduleName, moduleConfig ] of this._config.modules) {
+                        for (let view of moduleConfig.views || []) {
+                            let filename = (view[0] === '/' ? view : path.join(this._config.base_path, 'modules', moduleName, view));
                             views.push(filename);
                         }
                     }
