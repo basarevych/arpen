@@ -179,6 +179,38 @@ class Express {
     }
 
     /**
+     * Stop the server
+     * @param {string} name                     Config section name
+     * @return {Promise}
+     */
+    stop(name) {
+        if (name !== this.name)
+            return Promise.reject(new Error(`Server ${name} was not properly bootstrapped`));
+
+        let http = this.http || this.https;
+        if (http) {
+            http.close();
+            this.http = null;
+            this.https = null;
+            return new Promise((resolve, reject) => {
+                try {
+                    let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
+                    this._logger.info(
+                        'Server is no longer listening on ' +
+                        (typeof port === 'string' ?
+                            port :
+                            this._config.get(`servers.${this.name}.host`) + ':' + port),
+                        () => { resolve(); });
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+
+        return Promise.resolve();
+    }
+
+    /**
      * Error handler
      * @param {object} error            The error
      */

@@ -13,6 +13,17 @@ const WError = require('verror').WError;
  */
 class Server extends App {
     /**
+     * Create app
+     * @param {string} basePath             Base path
+     * @param {string[]} argv               Arguments
+     */
+    constructor(basePath, argv) {
+        super(basePath, argv);
+
+        this._started = new Set();
+    }
+
+    /**
      * Initialize the app
      * @param {...string} names                         Server names
      * @return {Promise}
@@ -42,6 +53,9 @@ class Server extends App {
                     (prev, name) => {
                         return prev.then(() => {
                             let server = servers.get(name);
+                            if (typeof server.init !== 'function')
+                                return;
+
                             let result = server.init(name);
                             if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                                 throw new Error(`Server '${name}' init() did not return a Promise`);
@@ -67,7 +81,11 @@ class Server extends App {
                 return names.reduce(
                     (prev, name) => {
                         return prev.then(() => {
+                            this._started.add(name);
                             let server = servers.get(name);
+                            if (typeof server.start !== 'function')
+                                return;
+
                             let result = server.start(name);
                             if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                                 throw new Error(`Server '${name}' start() did not return a Promise`);
@@ -85,6 +103,46 @@ class Server extends App {
                 }
                 this._running = true;
             });
+    }
+
+    /**
+     * Handle process signal
+     * @param {string} signal                           Signal as SIGNAME
+     */
+    onSignal(signal) {
+        let servers = this.get('servers');
+        Array.from(this._started).reverse().reduce(
+                (prev, name) => {
+                    return prev.then(() => {
+                        let server = servers.get(name);
+                        if (typeof server.stop !== 'function')
+                            return;
+
+                        let result = server.stop(name);
+                        if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
+                            throw new Error(`Server '${name}' stop() did not return a Promise`);
+                        return result;
+                    });
+                },
+                Promise.resolve()
+            )
+            .then(() => {
+                this._started.clear();
+                this._running = null;
+            })
+            .then(
+                () => {
+                    super.onSignal(signal);
+                },
+                error => {
+                    try {
+                        let logger = this.get('logger');
+                        logger.error(error, () => { super.onSignal(signal) });
+                    } catch (error) {
+                        super.onSignal(signal);
+                    }
+                }
+            );
     }
 }
 
