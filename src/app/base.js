@@ -227,6 +227,21 @@ class App {
     }
 
     /**
+     * Stop the app
+     * @param {...*} args                               Descendant-specific arguments
+     * @return {Promise}
+     */
+    stop(...args) {
+        return new Promise((resolve, reject) => {
+            if (!this._running)
+                return reject(new Error('Application has not been started'));
+
+            this._running = null;
+            resolve();
+        });
+    }
+
+    /**
      * Handle process signal
      * @param {string} signal                           Signal as SIGNAME
      */

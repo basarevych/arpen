@@ -106,30 +106,43 @@ class Server extends App {
     }
 
     /**
+     * Stop the app
+     * @param {...*} names                               Server names
+     * @return {Promise}
+     */
+    stop(...names) {
+        return Promise.resolve()
+            .then(() => {
+                let servers = this.get('servers');
+                return names.reverse().reduce(
+                    (prev, name) => {
+                        return prev.then(() => {
+                            let server = servers.get(name);
+                            if (typeof server.stop !== 'function')
+                                return;
+
+                            let result = server.stop(name);
+                            if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
+                                throw new Error(`Server '${name}' stop() did not return a Promise`);
+                            return result;
+                        });
+                    },
+                    Promise.resolve()
+                )
+            })
+            .then(() => {
+                return super.stop(...names);
+            })
+    }
+
+    /**
      * Handle process signal
      * @param {string} signal                           Signal as SIGNAME
      */
     onSignal(signal) {
-        let servers = this.get('servers');
-        Array.from(this._started).reverse().reduce(
-                (prev, name) => {
-                    return prev.then(() => {
-                        let server = servers.get(name);
-                        if (typeof server.stop !== 'function')
-                            return;
-
-                        let result = server.stop(name);
-                        if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
-                            throw new Error(`Server '${name}' stop() did not return a Promise`);
-                        return result;
-                    });
-                },
-                Promise.resolve()
-            )
-            .then(() => {
-                this._started.clear();
-                this._running = null;
-            })
+        let names = Array.from(this._started);
+        this._started.clear();
+        this.stop(names)
             .then(
                 () => {
                     super.onSignal(signal);
