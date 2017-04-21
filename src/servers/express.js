@@ -25,7 +25,6 @@ class Express {
         this.express = express();
         this.http = null;
         this.https = null;
-        this.middleware = new Map();
 
         this._app = app;
         this._config = config;
@@ -120,6 +119,38 @@ class Express {
             .then(server => {
                 server.on('error', this.onError.bind(this));
                 server.on('listening', this.onListening.bind(this));
+            })
+            .then(() => {
+                debug('Loading middleware');
+                let middleware;
+                if (this._app.has('middleware')) {
+                    middleware = this._app.get('middleware');
+                } else {
+                    middleware = new Map();
+                    this._app.registerInstance(middleware, 'middleware');
+                }
+
+                let middlewareConfig = this._config.get(`servers.${name}.middleware`);
+                if (!Array.isArray(middlewareConfig))
+                    return;
+
+                return middlewareConfig.reduce(
+                    (prev, cur) => {
+                        return prev.then(() => {
+                            let obj;
+                            if (middleware.has(cur)) {
+                                obj = middleware.get(cur);
+                            } else {
+                                obj = this._app.get(cur);
+                                middleware.set(cur, obj);
+                            }
+
+                            debug(`Registering middleware ${cur}`);
+                            return obj.register(this);
+                        });
+                    },
+                    Promise.resolve()
+                );
             });
     }
 
@@ -132,39 +163,7 @@ class Express {
         if (name !== this.name)
             return Promise.reject(new Error(`Server ${name} was not properly bootstrapped`));
 
-        return Array.from(this._app.get('modules')).reduce(
-                (prev, [ curName, curModule ]) => {
-                    return prev.then(() => {
-                        if (!curModule.register)
-                            return;
-
-                        let result = curModule.register(name);
-                        if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
-                            throw new Error(`Module '${curName}' register() did not return a Promise`);
-                        return result;
-                    });
-                },
-                Promise.resolve()
-            )
-            .then(() => {
-                debug('Loading middleware');
-                let middlewareConfig = this._config.get(`servers.${name}.middleware`);
-                if (!Array.isArray(middlewareConfig))
-                    return;
-
-                return middlewareConfig.reduce(
-                    (prev, cur) => {
-                        return prev.then(() => {
-                            let middleware = this._app.get(cur);
-                            this.middleware.set(cur, middleware);
-
-                            debug(`Registering middleware ${cur}`);
-                            return middleware.register(this);
-                        });
-                    },
-                    Promise.resolve()
-                );
-            })
+        return Promise.resolve()
             .then(() => {
                 debug('Starting the server');
                 let port = this._normalizePort(this._config.get(`servers.${name}.port`));
