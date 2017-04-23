@@ -53,7 +53,7 @@ class Server extends App {
                     (prev, name) => {
                         return prev.then(() => {
                             let server = servers.get(name);
-                            if (typeof server.init !== 'function')
+                            if (!server || typeof server.init !== 'function')
                                 return;
 
                             let result = server.init(name);
@@ -81,11 +81,11 @@ class Server extends App {
                 return names.reduce(
                     (prev, name) => {
                         return prev.then(() => {
-                            this._started.add(name);
                             let server = servers.get(name);
-                            if (typeof server.start !== 'function')
+                            if (!server || typeof server.start !== 'function')
                                 return;
 
+                            this._started.add(name);
                             let result = server.start(name);
                             if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                                 throw new Error(`Server '${name}' start() did not return a Promise`);
@@ -118,7 +118,7 @@ class Server extends App {
                     (prev, name) => {
                         return prev.then(() => {
                             let server = servers.get(name);
-                            if (typeof server.stop !== 'function')
+                            if (!server || typeof server.stop !== 'function')
                                 return;
 
                             let result = server.stop(name);
