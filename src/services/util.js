@@ -159,6 +159,33 @@ class Util {
 
         return result[0].toUpperCase() + result.slice(1);
     }
+
+    /**
+     * Convert snake case name to camel case<br>
+     * example_name → exampleName
+     * @param {string} value                    Snake case name
+     * @param {boolean} [upperFirst=false]      First letter is upper case
+     * @return {string}                         Returns camel case variant
+     */
+    snakeToCamel(value, upperFirst = false) {
+        let result = '', foundUnderscore = false;
+        for (let char of value) {
+            if (char === '_') {
+                foundUnderscore = true;
+            } else {
+                if (foundUnderscore) {
+                    foundUnderscore = false;
+                    result += char.toUpperCase();
+                } else {
+                    result += char;
+                }
+            }
+        }
+        if (!upperFirst || !result.length)
+            return result;
+
+        return result[0].toUpperCase() + result.slice(1);
+    }
 }
 
 module.exports = Util;
