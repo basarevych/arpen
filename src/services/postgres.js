@@ -330,46 +330,6 @@ class Postgres {
     }
 
     /**
-     * Convert Model instance to object<br>
-     * Moment.js values are converted to strings in UTC timezone
-     * @param {Model} model                     An instance of Model
-     * @return {object}                         Returns object with the same fields
-     */
-    static serializeModel(model) {
-        let data = {};
-        for (let field of model._fields.keys()) {
-            let value = model._getField(field);
-            if (value instanceof Date)
-                value = moment(value);
-            if (moment.isMoment(value))
-                value = value.tz('UTC').format(this.datetimeFormat);
-            data[field] = value;
-        }
-        return data;
-    }
-
-    /**
-     * Load object data into Model instance<br>
-     * Date fields are expected to be in UTC timezone and are converted into local timezone Moment.js objects
-     * @param {Model} model                     Model to load values to
-     * @param {object} data                     Raw DB data object
-     */
-    static unserializeModel(model, data) {
-        for (let field of model._fields.keys()) {
-            let value;
-            if (typeof data[field] !== 'undefined') {
-                value = data[field];
-                if (value instanceof Date) {
-                    let utcMoment = moment(value); // db field is in UTC
-                    value = moment.tz(utcMoment.format(this.datetimeFormat), 'UTC').local();
-                }
-            }
-            model._setField(field, value);
-        }
-        model._dirty = false;
-    }
-
-    /**
      * Obtain Postgres client
      * @param {string} name='main'              Server name in config
      * @return {Promise}                        Resolves to connected PostgresClient instance
