@@ -1,6 +1,6 @@
 {
   "name": "arpen",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "license": "MIT",
   "author": "Ross Basarevych <basarevych@gmail.com>",
   "description": "ARPEN",
@@ -25,6 +25,6 @@
     "rimraf": "~2.6.1",
     "rotating-file-stream": "~1.2.1",
     "validator": "~7.0.0",
-    "verror": "~1.9.0"
+    "verror": "~1.10.0"
   }
 }
