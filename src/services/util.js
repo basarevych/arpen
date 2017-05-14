@@ -81,13 +81,15 @@ class Util {
      * Get random string
      * @param {number} length                   The length of a password
      * @param {object} [params]                 Parameters object
-     * @param {boolean} params.lower=true       Include lower latin letters
-     * @param {boolean} params.upper=true       Include upper latin letters
-     * @param {boolean} params.digits=true      Include digits
-     * @param {boolean} params.special=false    Include some special characters
+     * @param {boolean} [params.lower=true]     Include lower latin letters
+     * @param {boolean} [params.upper=true]     Include upper latin letters
+     * @param {boolean} [params.digits=true]    Include digits
+     * @param {boolean} [params.special=false]  Include some special characters
      * @return {string}                         Returns the string
      */
-    getRandomString(length, { lower = true, upper = true, digits = true, special = false } = {}) {
+    getRandomString(length, params = {}) {
+        let { lower = true, upper = true, digits = true, special = false } = params;
+
         let chars = '';
         if (lower)
             chars += 'abcdefghijklmnopqrstuvwxyz';

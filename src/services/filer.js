@@ -185,7 +185,9 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    lockWriteBuffer(filename, buffer, { mode = null, uid = null, gid = null } = {}) {
+    lockWriteBuffer(filename, buffer, params = {}) {
+        let { mode = null, uid = null, gid = null } = params;
+
         return new Promise((resolve, reject) => {
                 let fd;
                 try {
@@ -246,7 +248,8 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    lockWrite(filename, contents, { mode = null, uid = null, gid = null } = {}) {
+    lockWrite(filename, contents, params = {}) {
+        let { mode = null, uid = null, gid = null } = params;
         let buffer = Buffer.from(contents);
         return this.lockWriteBuffer(filename, buffer, { mode, uid, gid });
     }
@@ -261,7 +264,9 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    lockUpdateBuffer(filename, cb, { mode = null, uid = null, gid = null } = {}) {
+    lockUpdateBuffer(filename, cb, params = {}) {
+        let { mode = null, uid = null, gid = null } = params;
+
         return new Promise((resolve, reject) => {
                 let fd;
                 try {
@@ -337,7 +342,9 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    lockUpdate(filename, cb, { mode = null, uid = null, gid = null } = {}) {
+    lockUpdate(filename, cb, params = {}) {
+        let { mode = null, uid = null, gid = null } = params;
+
         let stringCb = buffer => {
             let result = cb(buffer.toString());
             if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
@@ -360,7 +367,9 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    createDirectory(filename, { mode = null, uid = null, gid = null } = {}) {
+    createDirectory(filename, params = {}) {
+        let { mode = null, uid = null, gid = null } = params;
+
         return new Promise((resolve, reject) => {
                 if (filename.length < 2 || filename[0] !== '/')
                     return reject(`Invalid path: ${filename}`);
@@ -426,7 +435,9 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    createFile(filename, { mode = null, uid = null, gid = null } = {}) {
+    createFile(filename, params = {}) {
+        let { mode = null, uid = null, gid = null } = params;
+
         return new Promise((resolve, reject) => {
                 if (filename.length < 2 || filename[0] !== '/')
                     return reject(`Invalid path: ${filename}`);

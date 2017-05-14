@@ -17,9 +17,9 @@ class Subprocess {
     /**
      * Create subprocess
      * @param {object} cmd          pty.spawn object
-     * @param {object} expect       Expect-send strings object { 'wait for regexp string': 'send this' }
+     * @param {Map} [expect]        Expect-send map { /regexp/: 'send this' }
      */
-    constructor(cmd, expect) {
+    constructor(cmd, expect = new Map()) {
         this._cmd = cmd;
         this._pending = true;
         this._promise = new Promise((resolve, reject) => {
@@ -33,7 +33,7 @@ class Subprocess {
             signal: null,
         };
 
-        if (typeof expect === 'object' && expect !== null) {
+        if (expect.size) {
             let sendKey = send => {
                 setTimeout(function () {
                     cmd.write(send + '\r');
@@ -42,10 +42,9 @@ class Subprocess {
 
             cmd.on('data', data => {
                 data.toString().split('\n').forEach(line => {
-                    for (let key of Object.keys(expect)) {
-                        let re = new RegExp(key, 'i');
+                    for (let [ re, send ] of expect) {
                         if (re.test(line))
-                            sendKey(expect[key]);
+                            sendKey(send);
                     }
                 });
             });
@@ -235,10 +234,10 @@ class Runner {
      * @param {string} command      Command name
      * @param {string[]} [params]   Command arguments
      * @param {object} [options]    Pty.js options
-     * @param {object} [expect]     Expect-send strings object { 'wait for regexp string': 'send this' }
+     * @param {Map} [expect]        Expect-send map { /regexp/: 'send this' }
      * @return {Subprocess}
      */
-    spawn(command, params = [], options = {}, expect = {}) {
+    spawn(command, params = [], options = {}, expect = new Map()) {
         let {
             env = {
                 "LANGUAGE": "C.UTF-8",

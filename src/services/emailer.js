@@ -46,7 +46,9 @@ class Emailer {
      * @param {object[]} [params.attachments]   Array of objects (see emailjs help)
      * @return {Promise}                        Resolves to the sent message details
      */
-    send({ server, from, to, cc, subject, text, html, attachments = [] }) {
+    send(params = {}) {
+        let { server, from, to, cc, subject, text, html, attachments = [] } = params;
+
         let options = {
             from: from,
             to: to,
@@ -75,8 +77,8 @@ class Emailer {
 
     /**
      * Create connection instance
-     * @param {string} [server]     SMTP server name
-     * @return {object}             Returns emailjs instance
+     * @param {string} server='main'    SMTP server name
+     * @return {object}                 Returns emailjs instance
      */
     connect(server = 'main') {
         let options = {
