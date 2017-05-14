@@ -31,9 +31,6 @@ class Server extends App {
     init(...names) {
         return super.init()
             .then(() => {
-                return this._initLogger();
-            })
-            .then(() => {
                 let config = this.get('config');
                 let servers = new Map();
                 this.registerInstance(servers, 'servers');

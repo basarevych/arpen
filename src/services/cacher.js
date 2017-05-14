@@ -29,14 +29,14 @@ class Cacher {
             this._redis.connect(this._config.get('cache.redis'))
                 .then(
                     client => {
-                        debug(`Cache activated`);
+                        this._logger.info(`[Cache] Cache activated`);
                         resolve(client);
                     },
                     error => {
                         while (error.cause)
                             error = error.cause();
 
-                        this._logger.error(`Cache disabled: ${error.message}`);
+                        this._logger.error(`[Cache] Cache disabled: ${error.message}`);
                         resolve(null);
                     }
                 );

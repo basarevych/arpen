@@ -204,6 +204,9 @@ class App {
                 return this._initSources();
             })
             .then(() => {
+                return this._initLogger();
+            })
+            .then(() => {
                 return this._initModules();
             })
             .then(() => {
@@ -496,8 +499,9 @@ class App {
                         delete info.level;
                         let isDefault = info.default || false;
                         delete info.default;
-                        logger.setLogStream(log, filename, level, isDefault, info);
+                        logger.createLogStream(log, filename, level, isDefault, info);
                     }
+                    logger.info(`${config.name} v${config.version}`);
                     resolve();
                 } catch (error) {
                     reject(new WError(error, 'App._initLogger()'));

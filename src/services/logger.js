@@ -32,6 +32,9 @@ class Logger {
             };
             this._app.registerInstance(this._container, 'logger.streamContainer');
         }
+
+        if (this._container.default)
+            this.setLogStream(this._container.default);
     }
 
     /**
@@ -79,14 +82,14 @@ class Logger {
     }
 
     /**
-     * Set log stream
+     * Create log stream
      * @param {string} name                 Stream name
      * @param {string|function} filename    File name
      * @param {string} level                Log level: debug, warn, info, error
-     * @param {boolean} [isDefault=false}   Stream is default
-     * @param {object} [options]            Stream options
+     * @param {boolean} isDefault           Stream is default
+     * @param {object} options              Stream options
      */
-    setLogStream(name, filename, level, isDefault, options) {
+    createLogStream(name, filename, level, isDefault, options) {
         let log = this._container.logs.get(name);
         if (log) {
             if (options) {
@@ -96,9 +99,6 @@ class Logger {
                 log.stream = null;
             }
         } else {
-            if (!options)
-                return;
-
             log = {
                 name: name,
                 filename: filename,
@@ -114,9 +114,17 @@ class Logger {
 
         if (isDefault)
             this._container.default = name;
-        this._log = name;
 
         this._startLog(log);
+    }
+
+    /**
+     * Set log stream
+     * @param {string} name                 Stream name
+     */
+    setLogStream(name) {
+        if (this._container.logs.has(name))
+            this._log = name;
     }
 
     /**
@@ -306,7 +314,7 @@ class Logger {
             log.open = false;
             if (!log.failed) {
                 log.failed = true;
-                console.error(this.constructor.formatString(`Could not open log (${log.name}): ${error.message}`));
+                console.error(this.constructor.formatString(`Log error (${log.name}): ${error.message}`));
             }
         });
         log.stream.on('open', () => {
