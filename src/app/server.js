@@ -40,6 +40,7 @@ class Server extends App {
                     if (!params)
                         throw new Error(`Server ${name} not found in config`);
 
+                    debug(`Creating server ${name} as '${params.class}'`);
                     let server = this.get(params.class);
                     if (!server)
                         throw new Error(`Service ${params.class} not found when initializing server ${name}`);
@@ -56,6 +57,22 @@ class Server extends App {
                             let result = server.init(name);
                             if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                                 throw new Error(`Server '${name}' init() did not return a Promise`);
+                            return result;
+                        });
+                    },
+                    Promise.resolve()
+                );
+            })
+            .then(() => {
+                let modules = this.get('modules');
+                return Array.from(modules.keys()).reduce(
+                    (prev, cur) => {
+                        let _module = modules.get(cur);
+                        return prev.then(() => {
+                            debug(`Bootstrapping module '${cur}'`);
+                            let result = _module.bootstrap();
+                            if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
+                                throw new Error(`Module '${cur}' bootstrap() did not return a Promise`);
                             return result;
                         });
                     },
@@ -83,6 +100,7 @@ class Server extends App {
                                 return;
 
                             this._started.add(name);
+
                             let result = server.start(name);
                             if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                                 throw new Error(`Server '${name}' start() did not return a Promise`);

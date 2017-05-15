@@ -510,28 +510,23 @@ class App {
     }
 
     /**
-     * Start modules
+     * Create modules
      * @return {Promise}
      */
     _initModules() {
-        let modules = new Map();
-        this.registerInstance(modules, 'modules');
+        return new Promise((resolve, reject) => {
+            try {
+                let modules = new Map();
+                this.registerInstance(modules, 'modules');
 
-        return this.search(/^modules\.[^.]+$/).reduce(
-            (prev, cur) => {
-                let _module = this.get(cur);
-                modules.set(cur, _module);
+                for (let name of this.search(/^modules\.[^.]+$/))
+                    modules.set(name, this.get(name));
 
-                return prev.then(() => {
-                    debug(`Bootstrapping module '${cur}'`);
-                    let result = _module.bootstrap();
-                    if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
-                        throw new Error(`Module '${cur}' bootstrap() did not return a Promise`);
-                    return result;
-                });
-            },
-            Promise.resolve()
-        );
+                resolve();
+            } catch (error) {
+                reject(new WError(error, 'App._initModules()'));
+            }
+        });
     }
 
     /**
