@@ -144,12 +144,14 @@ class App {
 
     /**
      * Run the app. This method will simply call .init() and then .start().
+     * @param {object} options                          Arpen options
+     * @param {boolean} [options.disableLogFiles]       When true log files will not be used
      * @param {...*} args                               Descendant-specific arguments
      */
-    run(...args) {
-        this.init(...args)
+    run(options, ...args) {
+        this.init(options, ...args)
             .then(() => {
-                return this.start(...args);
+                return this.start(options, ...args);
             })
             .catch(error => {
                 let msg = (error.stack ? error.stack : error.message);
@@ -174,10 +176,11 @@ class App {
 
     /**
      * Initialize the app
+     * @param {object} options                          App.run() options
      * @param {...*} args                               Descendant-specific arguments
      * @return {Promise}
      */
-    init(...args) {
+    init(options, ...args) {
         if (this._initialized)
             return Promise.resolve();
 
@@ -198,16 +201,16 @@ class App {
                 resolve();
             })
             .then(() => {
-                return this._initConfig();
+                return this._initConfig(options);
             })
             .then(() => {
-                return this._initSources();
+                return this._initSources(options);
             })
             .then(() => {
-                return this._initLogger();
+                return this._initLogger(options);
             })
             .then(() => {
-                return this._initModules();
+                return this._initModules(options);
             })
             .then(() => {
                 this._initialized = true;
@@ -216,10 +219,11 @@ class App {
 
     /**
      * Start the app
+     * @param {object} options                          App.run() options
      * @param {...*} args                               Descendant-specific arguments
      * @return {Promise}
      */
-    start(...args) {
+    start(options, ...args) {
         return new Promise((resolve, reject) => {
             if (this._running !== null)
                 return reject(new Error('Application is already started'));
@@ -231,10 +235,11 @@ class App {
 
     /**
      * Stop the app
+     * @param {object} options                          App.run() options
      * @param {...*} args                               Descendant-specific arguments
      * @return {Promise}
      */
-    stop(...args) {
+    stop(options, ...args) {
         return new Promise((resolve, reject) => {
             if (!this._running)
                 return reject(new Error('Application has not been started'));
@@ -260,9 +265,10 @@ class App {
 
     /**
      * Load the configuration
+     * @param {object} options                          App.run() options
      * @return {Promise}
      */
-    _initConfig() {
+    _initConfig(options) {
         let config, modules = new Map();
         debug('Loading application configuration');
         return Promise.all([
@@ -350,9 +356,10 @@ class App {
 
     /**
      * Load the source files
+     * @param {object} options                          App.run() options
      * @return {Promise}
      */
-    _initSources() {
+    _initSources(options) {
         let config = this.get('config');
         let filer = new Filer();
         let cache = null;
@@ -480,14 +487,15 @@ class App {
 
     /**
      * Create log streams
+     * @param {object} options                          App.run() options
      * @return {Promise}
      */
-    _initLogger() {
+    _initLogger(options) {
         let config;
         return new Promise((resolve, reject) => {
                 try {
                     config = this.get('config');
-                    if (!config.logs)
+                    if (!config.logs || options.disableLogFiles)
                         return resolve();
 
                     let logger = this.get('logger');
@@ -511,9 +519,10 @@ class App {
 
     /**
      * Create modules
+     * @param {object} options                          App.run() options
      * @return {Promise}
      */
-    _initModules() {
+    _initModules(options) {
         return new Promise((resolve, reject) => {
             try {
                 let modules = new Map();

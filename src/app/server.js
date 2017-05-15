@@ -25,11 +25,12 @@ class Server extends App {
 
     /**
      * Initialize the app
+     * @param {object} options                          App.run() options
      * @param {...string} names                         Server names
      * @return {Promise}
      */
-    init(...names) {
-        return super.init()
+    init(options, ...names) {
+        return super.init(options, ...names)
             .then(() => {
                 let config = this.get('config');
                 let servers = new Map();
@@ -83,11 +84,12 @@ class Server extends App {
 
     /**
      * Start the app
+     * @param {object} options                          App.run() options
      * @param {...*} names                               Server names
      * @return {Promise}
      */
-    start(...names) {
-        return super.start(...names)
+    start(options, ...names) {
+        return super.start(options, ...names)
             .then(() => {
                 let config = this.get('config');
                 let servers = this.get('servers');
@@ -122,10 +124,11 @@ class Server extends App {
 
     /**
      * Stop the app
+     * @param {object} options                          App.run() options
      * @param {...*} names                               Server names
      * @return {Promise}
      */
-    stop(...names) {
+    stop(options, ...names) {
         return Promise.resolve()
             .then(() => {
                 let servers = this.get('servers');
@@ -146,7 +149,7 @@ class Server extends App {
                 )
             })
             .then(() => {
-                return super.stop(...names);
+                return super.stop(options, ...names);
             })
     }
 
