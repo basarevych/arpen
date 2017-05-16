@@ -497,21 +497,22 @@ class App {
         let config;
         return new Promise((resolve, reject) => {
                 try {
-                    config = this.get('config');
-                    if (!config.logs || options.disableLogFiles)
-                        return resolve();
-
                     let logger = this.get('logger');
-                    for (let log of Object.keys(config.logs)) {
-                        let info = Object.assign({}, config.logs[log]);
-                        let filename = info.name;
-                        delete info.name;
-                        let level = info.level || 'info';
-                        delete info.level;
-                        let isDefault = info.default || false;
-                        delete info.default;
-                        logger.createLogStream(log, filename, level, isDefault, info);
+
+                    config = this.get('config');
+                    if (config.logs && !options.disableLogFiles) {
+                        for (let log of Object.keys(config.logs)) {
+                            let info = Object.assign({}, config.logs[log]);
+                            let filename = info.name;
+                            delete info.name;
+                            let level = info.level || 'info';
+                            delete info.level;
+                            let isDefault = info.default || false;
+                            delete info.default;
+                            logger.createLogStream(log, filename, level, isDefault, info);
+                        }
                     }
+
                     logger.info(`${config.name} v${config.version}`);
                     resolve();
                 } catch (error) {
