@@ -7,6 +7,7 @@ const fs = require('fs-ext');
 const path = require('path');
 const merge = require('merge');
 const WError = require('verror').WError;
+const ErrorHelper = require('../services/error.js');
 const Filer = require('../services/filer.js');
 
 /**
@@ -158,12 +159,13 @@ class App {
                 let msg = (error.stack ? error.stack : error.message);
 
                 try {
-                    let errService = this.get('error');
+                    let betterMsg, errService = new ErrorHelper();
                     if (error instanceof WError || (error.constructor && error.constructor.name === 'WError')) {
-                        msg = 'Exception data: ' + JSON.stringify(errService.info(error), undefined, 4);
+                        betterMsg = '\nException data: ' + JSON.stringify(errService.info(error), undefined, 4);
                         for (let err of errService.flatten(error))
-                            msg += '\n' + (err.stack ? err.stack : err.message);
+                            betterMsg += '\n' + (err.stack ? err.stack : err.message);
                     }
+                    msg = betterMsg;
                 } catch (error) {
                     // do nothing
                 }
