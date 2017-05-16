@@ -156,7 +156,7 @@ class App {
                 return this.start(options, ...args);
             })
             .catch(error => {
-                let msg = (error.stack ? error.stack : error.message);
+                let msg;
 
                 try {
                     let errService = new ErrorHelper();
@@ -166,7 +166,7 @@ class App {
                             msg += '\n' + (err.stack ? err.stack : err.message);
                     }
                 } catch (error) {
-                    // do nothing
+                    msg = (error.stack ? error.stack : error.message);
                 }
 
                 return this.error('App.run() failed:', msg)
