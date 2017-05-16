@@ -145,6 +145,7 @@ class App {
     /**
      * Run the app. This method will simply call .init() and then .start().
      * @param {object} options                          Arpen options
+     * @param {boolean} [options.disableServicesCache]  When true services cache will not be used
      * @param {boolean} [options.disableLogFiles]       When true log files will not be used
      * @param {...*} args                               Descendant-specific arguments
      */
@@ -368,7 +369,7 @@ class App {
         debug('Loading application sources');
         return Promise.resolve()
             .then(() => {
-                if (!!process.env.DEBUG)
+                if (process.env.DEBUG || options.disableServicesCache)
                     return null;
 
                 return filer.lockRead(path.join('/var/tmp', mapFile))
