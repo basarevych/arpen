@@ -159,12 +159,13 @@ class App {
                 let msg;
 
                 try {
-                    let errService = new ErrorHelper();
+                    let betterMsg, errService = new ErrorHelper();
                     if (error instanceof WError || (error.constructor && error.constructor.name === 'WError')) {
-                        msg = '\nException data: ' + JSON.stringify(errService.info(error), undefined, 4);
+                        betterMsg = '\nException data: ' + JSON.stringify(errService.info(error), undefined, 4);
                         for (let err of errService.flatten(error))
-                            msg += '\n' + (err.stack ? err.stack : err.message);
+                            betterMsg += '\n' + (err.stack ? err.stack : err.message);
                     }
+                    msg = betterMsg;
                 } catch (error) {
                     msg = (error.stack ? error.stack : error.message);
                 }
