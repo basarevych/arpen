@@ -38,9 +38,10 @@ class ErrorHelper {
      */
     info(error) {
         let loadInfo = error => {
-            let cause = error.cause && error.cause();
+            let cause = error.we_cause || error.jse_cause;
             let parent = cause ? loadInfo(cause) : {};
-            Object.assign(parent, VError.info(error));
+            if (error.jse_info)
+                Object.assign(parent, error.jse_info);
             return parent;
         };
         return loadInfo(error);
