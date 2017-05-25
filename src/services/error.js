@@ -37,7 +37,13 @@ class ErrorHelper {
      * @return {object}             Returns info object
      */
     info(error) {
-        return VError.info(error);
+        let loadInfo = error => {
+            let cause = error.cause && error.cause();
+            let parent = cause ? loadInfo(cause) : {};
+            Object.assign(parent, VError.info(error));
+            return parent;
+        };
+        return loadInfo(error);
     }
 
     /**
