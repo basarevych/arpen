@@ -5,8 +5,7 @@
 const debug = require('debug')('arpen:postgres');
 const moment = require('moment-timezone');
 const pg = require('pg');
-const VError = require('verror');
-const WError = VError.WError;
+const NError = require('nerror');
 
 /**
  * Transaction function
@@ -102,24 +101,20 @@ class PostgresClient {
                         (error, result) => {
                             if (error) {
                                 let sqlState = (typeof error.sqlState === 'undefined' ? error.code : error.sqlState);
-                                return reject(new WError(
-                                    {
-                                        cause: error,
-                                        info: {
-                                            sql_state: sqlState,
-                                            query: parsedSql,
-                                            params: parsedParams,
-                                        },
-                                    },
-                                    'Query failed: ' + sqlState
-                                ));
+                                return reject(
+                                    new NError(
+                                        error,
+                                        { sql_state: sqlState, query: parsedSql, params: parsedParams },
+                                        'Query failed: ' + sqlState
+                                    )
+                                );
                             }
 
                             resolve(result);
                         }
                     );
                 } catch (error) {
-                    reject(new WError(error, 'PostgresClient.query()'));
+                    reject(new NError(error, 'PostgresClient.query()'));
                 }
             });
     }
@@ -235,11 +230,13 @@ class PostgresClient {
 
                                 if (VError.info(error).sql_state === '40001') { // SERIALIZATION FAILURE
                                     if (++numTries > this.maxTransactionRetries) {
-                                        return reject(new WError(
-                                            error,
-                                            'Maximum transaction retries reached' +
-                                            (params.name ? ` in ${params.name}` : '')
-                                        ));
+                                        return reject(
+                                            new NError(
+                                                error,
+                                                'Maximum transaction retries reached' +
+                                                    (params.name ? ` in ${params.name}` : '')
+                                            )
+                                        );
                                     }
 
                                     this._postgres._logger.warn(
@@ -358,7 +355,7 @@ class Postgres {
 
                 pool.connect((error, client, done) => {
                     if (error)
-                        return reject(new WError(error, `Postgres: Error connecting to ${name}`));
+                        return reject(new NError(error, `Postgres: Error connecting to ${name}`));
 
                     resolve(new PostgresClient(this, client, done));
                 });

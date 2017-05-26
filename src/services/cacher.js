@@ -3,7 +3,7 @@
  * @module arpen/services/cacher
  */
 const debug = require('debug')('arpen:cacher');
-const WError = require('verror').WError;
+const NError = require('nerror');
 
 /**
  * Cacher
@@ -99,7 +99,7 @@ class Cacher {
                 }
             )
             .catch(error => {
-                this._logger.error(new WError(error, 'Cacher.set()'));
+                this._logger.error(new NError(error, 'Cacher.set()'));
                 return undefined;
             });
     }
@@ -131,7 +131,7 @@ class Cacher {
                     }
                 )
                 .catch(error => {
-                    this._logger.error(new WError(error, 'Cacher.get()'));
+                    this._logger.error(new NError(error, 'Cacher.get()'));
                     return undefined;
                 });
     }
@@ -161,7 +161,7 @@ class Cacher {
                     }
                 )
                 .catch(error => {
-                    this._logger.error(new WError(error, 'Cacher.unset()'));
+                    this._logger.error(new NError(error, 'Cacher.unset()'));
                     return undefined;
                 });
     }

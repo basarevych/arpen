@@ -4,7 +4,7 @@
  */
 const debug = require('debug')('arpen:redis');
 const redis = require('redis');
-const WError = require('verror').WError;
+const NError = require('nerror');
 
 /**
  * Transaction function
@@ -106,13 +106,13 @@ class RedisClient {
                     let args = params.slice();
                     args.push((error, reply) => {
                         if (error)
-                            return reject(new WError(error, 'Command failed: ' + command));
+                            return reject(new NError(error, 'Command failed: ' + command));
 
                         resolve(reply);
                     });
                     method.apply(this.client, args);
                 } catch (error) {
-                    reject(new WError(error, 'RedisClient.query()'));
+                    reject(new NError(error, 'RedisClient.query()'));
                 }
             });
     }
@@ -198,11 +198,13 @@ class RedisClient {
                                     return new Promise((resolve, reject) => {
                                         queue._multi.exec((error, replies) => {
                                             if (error) {
-                                                return reject(new WError(
-                                                    error,
-                                                    'Queue EXEC failed' +
-                                                    (params.name ? ` in ${params.name}` : '')
-                                                ));
+                                                return reject(
+                                                    new NError(
+                                                        error,
+                                                        'Queue EXEC failed' +
+                                                            (params.name ? ` in ${params.name}` : '')
+                                                    )
+                                                );
                                             }
 
                                             resolve(replies);
@@ -316,7 +318,7 @@ class Redis {
                     options
                 );
                 client.on('ready', () => { resolve(new RedisClient(this, client)); });
-                client.on('error', error => { reject(new WError(error, `Redis: Error connecting to ${name}`)); });
+                client.on('error', error => { reject(new NError(error, `Redis: Error connecting to ${name}`)); });
             });
     }
 }

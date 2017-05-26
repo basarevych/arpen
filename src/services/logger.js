@@ -3,7 +3,7 @@
  * @module arpen/services/logger
  */
 const util = require('util');
-const WError = require('verror').WError;
+const NError = require('nerror');
 const RotatingFileStream = require('rotating-file-stream');
 
 /**
@@ -217,45 +217,24 @@ class Logger {
             return;
         }
 
-        let flat = [];
+        let parsed = [];
         for (let msg of messages) {
-            if (msg instanceof WError || (msg.constructor && msg.constructor.name === 'WError')) {
-                flat.push('Exception data: ' + JSON.stringify(this._error.info(msg), undefined, 4));
-                flat = flat.concat(this._error.flatten(msg));
-            } else {
-                flat.push(msg);
-            }
-        }
-
-        let formatted = false, lines = [];
-        if (flat.length && /%[sdj]/.test(String(flat[0]))) {
-            formatted = true;
-        } else {
-            let first = true;
-            for (let msg of flat) {
-                let prefix = '';
-                if (first)
-                    first = false;
-                else
-                    prefix = '  ';
-
-                if (!(msg instanceof Error)) {
-                    lines.push(prefix + (typeof msg === 'object' ? JSON.stringify(msg) : msg));
-                    continue;
-                }
-
-                if (msg.stack)
-                    lines.push(prefix + msg.stack);
-                else if (msg.message)
-                    lines.push(prefix + msg.message);
-                else
-                    lines.push(prefix + msg);
-            }
+            if (msg instanceof NError)
+                parsed.push('Exception: ' + JSON.stringify(msg.info, undefined, 4) + '\n' + msg.fullStack);
+            else if (msg instanceof Error)
+                parsed.push(msg.stack);
+            else if (typeof msg === 'object')
+                parsed.push(JSON.stringify(msg, undefined, 4));
+            else
+                parsed.push(msg);
         }
 
         let logString =
-            (issuer ? `<${issuer}> ` : '') +
-            (formatted ? util.format(...flat) : lines.join("\n"));
+            (parsed.length && /%[sdj]/.test(String(parsed[0]))) ?
+                util.format(...parsed) : parsed.join("\n");
+
+        if (issuer)
+            logString = `<${issuer}> ` + logString;
 
         if (logDate)
             logString = this.constructor.formatString(logString);

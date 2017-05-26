@@ -8,7 +8,7 @@ const fs = require('fs-ext');
 const execFile = require('child_process').execFile;
 const pty = require('pty.js');
 const merge = require('merge');
-const WError = require('verror').WError;
+const NError = require('nerror');
 
 /**
  * Spawned subprocess
@@ -216,7 +216,7 @@ class Runner {
                             stderr: stderr,
                         });
                     }
-                    return reject(new WError(error, 'Runner.exec()'));
+                    return reject(new NError(error, 'Runner.exec()'));
                 }
 
                 resolve({

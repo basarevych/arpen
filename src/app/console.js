@@ -5,7 +5,6 @@
 const debug = require('debug')('arpen:app');
 const path = require('path');
 const App = require('./base');
-const WError = require('verror').WError;
 
 /**
  * Console application class

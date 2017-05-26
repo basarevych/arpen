@@ -6,8 +6,7 @@ const debug = require('debug')('arpen:app');
 const fs = require('fs-ext');
 const path = require('path');
 const merge = require('merge');
-const WError = require('verror').WError;
-const ErrorHelper = require('../services/error.js');
+const NError = require('nerror');
 const Filer = require('../services/filer.js');
 
 /**
@@ -156,21 +155,7 @@ class App {
                 return this.start(options, ...args);
             })
             .catch(error => {
-                let msg = (error.stack ? error.stack : error.message);
-
-                try {
-                    let betterMsg, errService = new ErrorHelper();
-                    if (error instanceof WError || (error.constructor && error.constructor.name === 'WError')) {
-                        betterMsg = '\nException data: ' + JSON.stringify(errService.info(error), undefined, 4);
-                        for (let err of errService.flatten(error))
-                            betterMsg += '\n' + (err.stack ? err.stack : err.message);
-                    }
-                    msg = betterMsg;
-                } catch (error) {
-                    // do nothing
-                }
-
-                return this.error('App.run() failed:', msg)
+                return this.error('App.run() failed:\n' + (error.fullStack || error.stack))
                     .then(() => {
                         process.exit(1);
                     });
@@ -422,7 +407,7 @@ class App {
                                                 try {
                                                     this.registerClass(obj, filename);
                                                 } catch (error) {
-                                                    throw new WError(error, `Registering ${filename}`);
+                                                    throw new NError(error, `Registering ${filename}`);
                                                 }
                                             });
                                     }
@@ -452,7 +437,7 @@ class App {
                                                                 try {
                                                                     this.registerClass(obj, filename);
                                                                 } catch (error) {
-                                                                    throw new WError(error, `Registering ${filename}`);
+                                                                    throw new NError(error, `Registering ${filename}`);
                                                                 }
                                                             });
                                                     }
@@ -516,7 +501,7 @@ class App {
                     logger.info(`${config.name} v${config.version}`);
                     resolve();
                 } catch (error) {
-                    reject(new WError(error, 'App._initLogger()'));
+                    reject(new NError(error, 'App._initLogger()'));
                 }
             });
     }
@@ -537,7 +522,7 @@ class App {
 
                 resolve();
             } catch (error) {
-                reject(new WError(error, 'App._initModules()'));
+                reject(new NError(error, 'App._initModules()'));
             }
         });
     }
@@ -687,7 +672,7 @@ class App {
                     resolve(require(filename));
                 } catch (err) {
                     if (typeof defaultObject === 'undefined')
-                        reject(new WError(err, `Could not load ${filename}`));
+                        reject(new NError(err, `Could not load ${filename}`));
                     else
                         resolve(defaultObject);
                 }

@@ -3,7 +3,7 @@
  * @module arpen/services/emailer
  */
 const emailjs = require('emailjs/email');
-const WError = require('verror').WError;
+const NError = require('nerror');
 
 /**
  * Emailer
@@ -68,7 +68,7 @@ class Emailer {
                 this.connect(server)
                     .send(options, (err, message) => {
                         if (err)
-                            reject(new WError(err, 'Emailer.send()'));
+                            reject(new NError(err, 'Emailer.send()'));
                         else
                             resolve(message);
                     });

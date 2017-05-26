@@ -4,7 +4,7 @@
  */
 const debug = require('debug')('arpen:pubsub');
 const PGPubSub = require('pg-pubsub');
-const WError = require('verror').WError;
+const NError = require('nerror');
 
 /**
  * Channel message callback
@@ -71,7 +71,7 @@ class PostgresPubSub {
 
                     resolve();
                 } catch (error) {
-                    reject(new WError(error, `Subscribe attempt failed (${channel})`));
+                    reject(new NError(error, `Subscribe attempt failed (${channel})`));
                 }
             });
     }
@@ -99,7 +99,7 @@ class PostgresPubSub {
 
                     resolve();
                 } catch (error) {
-                    reject(new WError(error, `Unsubscribe attempt failed (${channel})`));
+                    reject(new NError(error, `Unsubscribe attempt failed (${channel})`));
                 }
             });
     }
@@ -190,7 +190,7 @@ class RedisPubSub {
                     this._subscriptions.set(channel, resolve);
                     this.subClient.client.subscribe(channel);
                 } catch (error) {
-                    reject(new WError(error, `Subscribe attempt failed (${channel})`));
+                    reject(new NError(error, `Subscribe attempt failed (${channel})`));
                 }
             });
     }
@@ -218,7 +218,7 @@ class RedisPubSub {
 
                     resolve();
                 } catch (error) {
-                    reject(new WError(error, `Unsubscribe attempt failed (${channel})`));
+                    reject(new NError(error, `Unsubscribe attempt failed (${channel})`));
                 }
             });
     }
@@ -355,7 +355,7 @@ class PubSub {
                             });
                             resolve(new PostgresPubSub(() => { return this._postgres.connect(name); }, sub));
                         } catch (error) {
-                            reject(new WError(error, `Error creating pubsub instance ${serverName}`));
+                            reject(new NError(error, `Error creating pubsub instance ${serverName}`));
                         }
                         break;
                     case 'redis':
@@ -366,7 +366,7 @@ class PubSub {
                                 resolve(new RedisPubSub(() => { return this._redis.connect(name); }, sub));
                             })
                             .catch(error => {
-                                reject(new WError(error, `Error creating pubsub instance ${serverName}`));
+                                reject(new NError(error, `Error creating pubsub instance ${serverName}`));
                             });
                         break;
                     default:
