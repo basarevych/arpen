@@ -14,13 +14,11 @@ class Logger {
      * Create the service
      * @param {App} app             The application
      * @param {object} config       Config service
-     * @param {ErrorHelper} error   Error helper service
      * @param {Emailer} [emailer]   Emailer service if available
      */
-    constructor(app, config, error, emailer) {
+    constructor(app, config, emailer) {
         this._app = app;
         this._config = config;
-        this._error = error;
         this._emailer = emailer;
 
         this._log = null;
@@ -50,7 +48,7 @@ class Logger {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'app', 'config', 'error', 'emailer?' ];
+        return [ 'app', 'config', 'emailer?' ];
     }
 
     /**
