@@ -62,22 +62,6 @@ class Server extends App {
                     },
                     Promise.resolve()
                 );
-            })
-            .then(() => {
-                let modules = this.get('modules');
-                return Array.from(modules.keys()).reduce(
-                    (prev, cur) => {
-                        let _module = modules.get(cur);
-                        return prev.then(() => {
-                            debug(`Bootstrapping module '${cur}'`);
-                            let result = _module.bootstrap();
-                            if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
-                                throw new Error(`Module '${cur}' bootstrap() did not return a Promise`);
-                            return result;
-                        });
-                    },
-                    Promise.resolve()
-                );
             });
     }
 
