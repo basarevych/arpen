@@ -7,7 +7,6 @@
 const fs = require('fs-ext');
 const execFile = require('child_process').execFile;
 const pty = require('pty.js');
-const merge = require('merge');
 const NError = require('nerror');
 
 /**

@@ -2,9 +2,6 @@
  * Miscellaneous stuff
  * @module arpen/services/util
  */
-const bcrypt = require('bcrypt');
-const merge = require('merge');
-const validator = require('validator');
 
 /**
  * Util helper
@@ -55,7 +52,7 @@ class Util {
     trim(value) {
         switch (typeof value) {
             case 'string':
-                return validator.trim(value);
+                return value.trim();
             case 'number':
                 return String(value);
         }
@@ -121,6 +118,8 @@ class Util {
      * @return {string}                         Returns the hash
      */
     encryptPassword(password) {
+        const bcrypt = require('bcrypt');
+
         let salt = bcrypt.genSaltSync(10);
         return bcrypt.hashSync(password, salt);
     }
@@ -132,6 +131,8 @@ class Util {
      * @return {boolean}
      */
     checkPassword(password, hash) {
+        const bcrypt = require('bcrypt');
+
         return bcrypt.compareSync(password, hash);
     }
 
