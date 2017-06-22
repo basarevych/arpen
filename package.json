@@ -1,6 +1,6 @@
 {
   "name": "arpen",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "license": "MIT",
   "author": "Ross Basarevych <basarevych@gmail.com>",
   "description": "ARPEN",
@@ -20,7 +20,7 @@
     "rotating-file-stream": "~1.2.2",
     "rimraf": "~2.6.1"
   },
-  "optionalDependencies": {
+  "peerDependencies": {
     "bcrypt": "~1.0.2",
     "emailjs": "~1.0.9",
     "pg": "~6.2.4",
