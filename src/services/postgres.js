@@ -1,5 +1,5 @@
 /**
- * Postgres service
+ * Postgres service. Requires 'pg' module.
  * @module arpen/services/postgres
  */
 const debug = require('debug')('arpen:postgres');

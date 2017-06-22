@@ -1,5 +1,5 @@
 /**
- * Run command service
+ * Run command service. Requires 'pty.js' module.
  * @module arpen/services/runner
  */
 'use strict';

@@ -1,6 +1,6 @@
 {
   "name": "arpen",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "license": "MIT",
   "author": "Ross Basarevych <basarevych@gmail.com>",
   "description": "ARPEN",
@@ -21,11 +21,11 @@
     "rimraf": "~2.6.1"
   },
   "peerDependencies": {
-    "bcrypt": "~1.0.2",
-    "emailjs": "~1.0.9",
-    "pg": "~6.2.4",
-    "pg-pubsub": "~0.3.0",
-    "pty.js": "~0.3.1",
-    "redis": "~2.7.1"
+    "bcrypt": "^1.0.2",
+    "emailjs": "^1.0.9",
+    "pg": "^6.2.4",
+    "pg-pubsub": "^0.3.0",
+    "pty.js": "^0.3.1",
+    "redis": "^2.7.1"
   }
 }

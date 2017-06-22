@@ -1,5 +1,5 @@
 /**
- * Email sending service
+ * Email sending service. Requires 'emailjs' module.
  * @module arpen/services/emailer
  */
 const emailjs = require('emailjs/email');

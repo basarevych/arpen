@@ -1,9 +1,8 @@
 /**
- * PUBSUB service
+ * PUBSUB service. Requires 'pg-pubsub' module for Postgres PUBSUB and 'redis' for Redis PUBSUB.
  * @module arpen/services/pubsub
  */
 const debug = require('debug')('arpen:pubsub');
-const PGPubSub = require('pg-pubsub');
 const NError = require('nerror');
 
 /**
@@ -344,6 +343,7 @@ class PubSub {
                 let pubsub;
                 switch (server) {
                     case 'postgres':
+                        const PGPubSub = require('pg-pubsub');
                         try {
                             let connString = `postgresql://${config.user}:${config.password}@${config.host}:${config.port}/${config.db_name}`;
                             let sub = new PGPubSub(connString, {

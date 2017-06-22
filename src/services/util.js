@@ -113,7 +113,7 @@ class Util {
     }
 
     /**
-     * Create hash of a password
+     * Create hash of a password. Requires 'bcrypt' module.
      * @param {string} password                 The password
      * @return {string}                         Returns the hash
      */
@@ -125,7 +125,7 @@ class Util {
     }
 
     /**
-     * Check if password matches the hash
+     * Check if password matches the hash. Requires 'bcrypt' module.
      * @param {string} password                 Password to check
      * @param {string} hash                     Hash of the password
      * @return {boolean}
