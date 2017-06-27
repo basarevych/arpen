@@ -469,7 +469,7 @@ class App {
 
                         debug('Saving class map');
                         return filer.lockWrite(path.join('/var/tmp', mapFile), JSON.stringify(map, undefined, 4) + '\n');
-                    })
+                    });
             });
     }
 
@@ -671,7 +671,7 @@ class App {
             stream.write(output + '\n', () => {
                 stream.removeListener('error', onError);
                 resolve();
-            })
+            });
         });
     }
 

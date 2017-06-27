@@ -129,11 +129,11 @@ class Server extends App {
                         });
                     },
                     Promise.resolve()
-                )
+                );
             })
             .then(() => {
                 return super.stop(options, ...names);
-            })
+            });
     }
 
     /**
@@ -151,7 +151,7 @@ class Server extends App {
                 error => {
                     try {
                         let logger = this.get('logger');
-                        logger.error(error, () => { super.onSignal(signal) });
+                        logger.error(error, () => { super.onSignal(signal); });
                     } catch (error) {
                         super.onSignal(signal);
                     }

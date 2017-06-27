@@ -506,7 +506,8 @@ class Filer {
      * Execution is chained, if any of the callback invocations rejects then the entire process is rejected.
      * @param {string} filename                 Path to the file or directory
      * @param {ProcessFileCallback} [cbFile]    The file callback
-     * @param {ProcessDirCallback} [cbDir]      The directory callback
+     * @param {ProcessDirCallback} [cbDir]      The directory callback. Should resolve to true if this subdirectory
+     *                                          needs processing
      * @return {Promise}                        Resolves on success
      */
     process(filename, cbFile, cbDir) {

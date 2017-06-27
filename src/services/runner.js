@@ -226,7 +226,7 @@ class Runner {
                 });
             });
         });
-    };
+    }
 
     /**
      * Spawn a command

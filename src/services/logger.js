@@ -84,7 +84,7 @@ class Logger {
      * @param {string} name                 Stream name
      * @param {string|function} filename    File name
      * @param {string} level                Log level: debug, warn, info, error
-     * @param {boolean} isDefault           Stream is default
+     * @param {boolean} isDefault           This stream is the default one
      * @param {object} options              Stream options
      */
     createLogStream(name, filename, level, isDefault, options) {
@@ -117,7 +117,7 @@ class Logger {
     }
 
     /**
-     * Set log stream
+     * Switch log stream
      * @param {string} name                 Stream name
      */
     setLogStream(name) {
