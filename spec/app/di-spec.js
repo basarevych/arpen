@@ -44,6 +44,8 @@ describe('DI container', () => {
     });
 
     it('resolves dependencies', done => {
+        let lifecycle;
+
         class ClassA {
             constructor(b, c) {
                 this.b = b;
@@ -91,6 +93,10 @@ describe('DI container', () => {
             static get provides() {
                 return 'd';
             }
+
+            static get lifecycle() {
+                return lifecycle;
+            }
         }
 
         app.registerClass(ClassA);
@@ -112,6 +118,29 @@ describe('DI container', () => {
         expect(a.b.d instanceof ClassD).toBeTruthy();
         expect(a.c.d instanceof ClassD).toBeTruthy();
         expect(a.b.d).toBe(a.c.d);
+
+        lifecycle = 'singleton';
+        app.registerClass(ClassD);
+
+        a = get();
+        expect(a instanceof ClassA).toBeTruthy();
+        expect(a.b instanceof ClassB).toBeTruthy();
+        expect(a.c instanceof ClassC).toBeTruthy();
+        expect(a.b.d instanceof ClassD).toBeTruthy();
+        expect(a.c.d instanceof ClassD).toBeTruthy();
+        expect(a.b.d).toBe(a.c.d);
+        expect(a.b.d).toBe(app.get('d'));
+
+        lifecycle = 'unique';
+        app.registerClass(ClassD);
+
+        a = get();
+        expect(a instanceof ClassA).toBeTruthy();
+        expect(a.b instanceof ClassB).toBeTruthy();
+        expect(a.c instanceof ClassC).toBeTruthy();
+        expect(a.b.d instanceof ClassD).toBeTruthy();
+        expect(a.c.d instanceof ClassD).toBeTruthy();
+        expect(a.b.d).not.toBe(a.c.d);
 
         done();
     });
