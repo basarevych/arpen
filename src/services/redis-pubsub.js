@@ -4,7 +4,7 @@
  */
 const debug = require('debug')('arpen:pubsub');
 const NError = require('nerror');
-const Pubsub = require('pubsub');
+const Pubsub = require('./pubsub');
 
 /**
  * Redis PUBSUB client
