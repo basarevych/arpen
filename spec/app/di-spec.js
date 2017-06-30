@@ -112,6 +112,7 @@ describe('DI container', () => {
         app.registerClass(ClassD);
 
         let a = get();
+        expect(a).not.toBe(get());
         expect(a instanceof ClassA).toBeTruthy();
         expect(a.b instanceof ClassB).toBeTruthy();
         expect(a.c instanceof ClassC).toBeTruthy();
@@ -123,6 +124,7 @@ describe('DI container', () => {
         app.registerClass(ClassD);
 
         a = get();
+        expect(a).not.toBe(get());
         expect(a instanceof ClassA).toBeTruthy();
         expect(a.b instanceof ClassB).toBeTruthy();
         expect(a.c instanceof ClassC).toBeTruthy();
@@ -135,12 +137,24 @@ describe('DI container', () => {
         app.registerClass(ClassD);
 
         a = get();
+        expect(a).not.toBe(get());
         expect(a instanceof ClassA).toBeTruthy();
         expect(a.b instanceof ClassB).toBeTruthy();
         expect(a.c instanceof ClassC).toBeTruthy();
         expect(a.b.d instanceof ClassD).toBeTruthy();
         expect(a.c.d instanceof ClassD).toBeTruthy();
         expect(a.b.d).not.toBe(a.c.d);
+
+        let d = { test: 'value' };
+        app.registerInstance(d, 'd');
+
+        a = get();
+        expect(a).not.toBe(get());
+        expect(a instanceof ClassA).toBeTruthy();
+        expect(a.b instanceof ClassB).toBeTruthy();
+        expect(a.c instanceof ClassC).toBeTruthy();
+        expect(a.b.d).toBe(d);
+        expect(a.c.d).toBe(d);
 
         done();
     });
