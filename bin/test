@@ -1,0 +1,15 @@
+#!/bin/sh
+
+basepath=`dirname "$0"`
+basepath=`cd "$basepath" && cd .. && pwd`
+if [ ! -d "$basepath" ]; then
+    echo "Could not get base path"
+    exit 1
+fi
+
+if [ ! -x "$basepath/node_modules/.bin/jasmine" ]; then
+    echo "jasmine is not installed"
+    exit 1
+fi
+cd "$basepath"
+"$basepath/node_modules/.bin/jasmine"
