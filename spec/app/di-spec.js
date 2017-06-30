@@ -42,4 +42,121 @@ describe('DI container', () => {
 
         done();
     });
+
+    it('resolves dependencies', done => {
+        class ClassA {
+            constructor(b, c) {
+                this.b = b;
+                this.c = c;
+            }
+
+            static get provides() {
+                return 'a';
+            }
+
+            static get requires() {
+                return [ 'b', 'c' ];
+            }
+        }
+
+        class ClassB {
+            constructor(d) {
+                this.d = d;
+            }
+
+            static get provides() {
+                return 'b';
+            }
+
+            static get requires() {
+                return [ 'd' ];
+            }
+        }
+
+        class ClassC {
+            constructor(d) {
+                this.d = d;
+            }
+
+            static get provides() {
+                return 'c';
+            }
+
+            static get requires() {
+                return [ 'd' ];
+            }
+        }
+
+        class ClassD {
+            static get provides() {
+                return 'd';
+            }
+        }
+
+        app.registerClass(ClassA);
+        app.registerClass(ClassB);
+        app.registerClass(ClassC);
+        app.registerClass(ClassD);
+
+        let a = app.get('a');
+        expect(a instanceof ClassA).toBeTruthy();
+        expect(a.b instanceof ClassB).toBeTruthy();
+        expect(a.c instanceof ClassC).toBeTruthy();
+        expect(a.b.d instanceof ClassD).toBeTruthy();
+        expect(a.c.d instanceof ClassD).toBeTruthy();
+        expect(a.b.d).toBe(a.c.d);
+
+        done();
+    });
+
+    it('detects cyclic dependencies', done => {
+        let withError;
+
+        class ClassA {
+            static get provides() {
+                return 'a';
+            }
+
+            static get requires() {
+                return [ 'b' ];
+            }
+        }
+
+        class ClassB {
+            static get provides() {
+                return 'b';
+            }
+
+            static get requires() {
+                return [ 'c' ];
+            }
+        }
+
+        class ClassC {
+            static get provides() {
+                return 'c';
+            }
+
+            static get requires() {
+                return withError ? [ 'b' ] : [];
+            }
+        }
+
+        app.registerClass(ClassA);
+        app.registerClass(ClassB);
+
+        let get = () => {
+            return app.get('a');
+        };
+
+        withError = true;
+        app.registerClass(ClassC);
+        expect(get).toThrow();
+
+        withError = false;
+        app.registerClass(ClassC);
+        expect(get).not.toThrow();
+
+        done();
+    });
 });
