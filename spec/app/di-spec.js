@@ -96,9 +96,16 @@ describe('DI container', () => {
         app.registerClass(ClassA);
         app.registerClass(ClassB);
         app.registerClass(ClassC);
+
+        let get = () => {
+            return app.get('a');
+        };
+
+        expect(get).toThrow();
+
         app.registerClass(ClassD);
 
-        let a = app.get('a');
+        let a = get();
         expect(a instanceof ClassA).toBeTruthy();
         expect(a.b instanceof ClassB).toBeTruthy();
         expect(a.c instanceof ClassC).toBeTruthy();
