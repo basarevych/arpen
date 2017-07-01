@@ -1,5 +1,8 @@
 {
-    "templates": {
-        "sort": false
-    }
+  "source": {
+    "excludePattern": "/config/"
+  },
+  "templates": {
+    "sort": false
+  }
 }

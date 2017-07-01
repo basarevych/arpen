@@ -11,4 +11,7 @@ if [ ! -x "$basepath/node_modules/.bin/jshint" ]; then
     echo "jsHint is not installed"
     exit 1
 fi
-find "$basepath/src" -type f | xargs "$basepath/node_modules/.bin/jshint"
+
+find "$basepath" -name "*.js" \
+    -not \( -path "$basepath/node_modules/*" -o -path "$basepath/spec/*" -o -path "$basepath/docs/*" -o -path "$basepath/.*" \) | \
+    xargs "$basepath/node_modules/.bin/jshint"

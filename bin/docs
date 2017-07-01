@@ -11,9 +11,11 @@ if [ ! -x "$basepath/node_modules/.bin/jsdoc" ]; then
     echo "jsDoc is not installed"
     exit 1
 fi
+
 rm -rf "$basepath/docs"
-"$basepath/node_modules/.bin/jsdoc" \
+find "$basepath" -depth 1 -type d \
+    -not \( -path "$basepath/node_modules" -o -path "$basepath/spec" -o -path "$basepath/docs" -o -path "$basepath/.*" \) | \
+    xargs "$basepath/node_modules/.bin/jsdoc" \
     -c "$basepath/jsdoc.json" \
     -t "$basepath/node_modules/ink-docstrap/template" \
-    -R README.md -d "$basepath/docs" -r \
-    "$basepath/src"
+    -R README.md -d "$basepath/docs" -r
