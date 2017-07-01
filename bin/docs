@@ -14,7 +14,7 @@ fi
 
 rm -rf "$basepath/docs"
 find "$basepath" -depth 1 -type d \
-    -not \( -path "$basepath/node_modules" -o -path "$basepath/spec" -o -path "$basepath/docs" -o -path "$basepath/.*" \) | \
+    -not \( -path "$basepath/node_modules" -o -path "$basepath/spec" -o -path "$basepath/.*" \) | \
     xargs "$basepath/node_modules/.bin/jsdoc" \
     -c "$basepath/jsdoc.json" \
     -t "$basepath/node_modules/ink-docstrap/template" \
