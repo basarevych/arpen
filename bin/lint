@@ -12,6 +12,5 @@ if [ ! -x "$basepath/node_modules/.bin/jshint" ]; then
     exit 1
 fi
 
-find "$basepath" -name "*.js" \
-    -not \( -path "$basepath/node_modules/*" -o -path "$basepath/spec/*" -o -path "$basepath/docs/*" -o -path "$basepath/.*" \) | \
+find "$basepath/src" -name "*.js" | \
     xargs "$basepath/node_modules/.bin/jshint"
