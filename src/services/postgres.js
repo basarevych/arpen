@@ -2,9 +2,15 @@
  * Postgres service. Requires 'pg' module.
  * @module arpen/services/postgres
  */
+let pg;
+try {
+    pg = require('pg');
+} catch (error) {
+    // do nothing
+}
+
 const debug = require('debug')('arpen:postgres');
 const moment = require('moment-timezone');
-const pg = require('pg');
 const NError = require('nerror');
 
 /**
@@ -292,6 +298,9 @@ class Postgres {
         this._util = util;
 
         this._pool = new Map();
+
+        if (!pg)
+            throw new Error('pg module is required for Postgres service');
     }
 
     /**

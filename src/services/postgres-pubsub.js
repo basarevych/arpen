@@ -2,6 +2,13 @@
  * Postgres PUBSUB service. Requires 'pg-pubsub' module.
  * @module arpen/services/postgres-pubsub
  */
+let PGPubSub;
+try {
+    PGPubSub = require('pg-pubsub');
+} catch (error) {
+    // do nothing
+}
+
 const debug = require('debug')('arpen:pubsub');
 const NError = require('nerror');
 const Pubsub = require('./pubsub');
@@ -125,6 +132,9 @@ class PostgresPubSub extends Pubsub {
         this._config = config;
         this._postgres = postgres;
         this._logger = logger;
+
+        if (!PGPubSub)
+            throw new Error('pg-pubsub module is required for PostgresPubSub service');
     }
 
     /**
@@ -164,7 +174,6 @@ class PostgresPubSub extends Pubsub {
                 if (!config)
                     return reject(new Error(`Undefined server name: ${fullName}`));
 
-                const PGPubSub = require('pg-pubsub');
                 try {
                     let connString = `postgresql://${config.user}:${config.password}@${config.host}:${config.port}/${config.db_name}`;
                     let sub = new PGPubSub(connString, {

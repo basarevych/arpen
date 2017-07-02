@@ -2,6 +2,12 @@
  * Miscellaneous stuff
  * @module arpen/services/util
  */
+let bcrypt;
+try {
+    bcrypt = require('bcrypt');
+} catch (error) {
+    // do nothing
+}
 
 /**
  * Util helper
@@ -118,7 +124,8 @@ class Util {
      * @return {string}                         Returns the hash
      */
     encryptPassword(password) {
-        const bcrypt = require('bcrypt');
+        if (!bcrypt)
+            throw new Error('bcrypt module is required for password methods of Util service');
 
         let salt = bcrypt.genSaltSync(10);
         return bcrypt.hashSync(password, salt);
@@ -131,7 +138,8 @@ class Util {
      * @return {boolean}
      */
     checkPassword(password, hash) {
-        const bcrypt = require('bcrypt');
+        if (!bcrypt)
+            throw new Error('bcrypt module is required for password methods of Util service');
 
         return bcrypt.compareSync(password, hash);
     }

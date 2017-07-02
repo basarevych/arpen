@@ -2,11 +2,15 @@
  * Run command service. Requires 'pty.js' module.
  * @module arpen/services/runner
  */
-'use strict';
+let pty;
+try {
+    pty = require('pty.js');
+} catch (error) {
+    // do nothing
+}
 
 const fs = require('fs-ext');
 const execFile = require('child_process').execFile;
-const pty = require('pty.js');
 const NError = require('nerror');
 
 /**
@@ -152,6 +156,8 @@ class Runner {
      * Create the service
      */
     constructor() {
+        if (!pty)
+            throw new Error('pty.js module is required for Runner service');
     }
 
     /**

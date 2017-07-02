@@ -2,8 +2,14 @@
  * Redis service
  * @module arpen/services/redis
  */
+let redis;
+try {
+    redis = require('redis');
+} catch (error) {
+    // do nothing
+}
+
 const debug = require('debug')('arpen:redis');
-const redis = require('redis');
 const NError = require('nerror');
 
 /**
@@ -272,6 +278,9 @@ class Redis {
         this._config = config;
         this._logger = logger;
         this._util = util;
+
+        if (!redis)
+            throw new Error('redis module is required for Redis service');
     }
 
     /**

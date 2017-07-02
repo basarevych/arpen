@@ -2,7 +2,13 @@
  * Email sending service. Requires 'emailjs' module.
  * @module arpen/services/emailer
  */
-const emailjs = require('emailjs/email');
+let emailjs;
+try {
+    emailjs = require('emailjs/email');
+} catch (error) {
+    // do nothing
+}
+
 const NError = require('nerror');
 
 /**
@@ -15,6 +21,9 @@ class Emailer {
      */
     constructor(config) {
         this._config = config;
+
+        if (!emailjs)
+            throw new Error('emailjs modules is required for Emailer service');
     }
 
     /**
