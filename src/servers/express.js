@@ -17,7 +17,7 @@ const NError = require('nerror');
 /**
  * Express-based server class
  * <br><br>
- * express module is required
+ * express module is required and also a module for view templating, i.e. pug
  */
 class Express {
     /**
