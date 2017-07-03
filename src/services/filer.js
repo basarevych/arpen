@@ -40,12 +40,6 @@ const rimraf = require('rimraf');
  */
 class Filer {
     /**
-     * Create the service
-     */
-    constructor() {
-    }
-
-    /**
      * Service name is 'filer'
      * @type {string}
      */

@@ -13,6 +13,8 @@ const NError = require('nerror');
 
 /**
  * Emailer
+ * <br><br>
+ * emailjs module is required
  */
 class Emailer {
     /**
@@ -74,7 +76,7 @@ class Emailer {
             options.attachment = attachments;
 
         return new Promise((resolve, reject) => {
-                this.connect(server)
+                this._connect(server)
                     .send(options, (err, message) => {
                         if (err)
                             reject(new NError(err, 'Emailer.send()'));
@@ -89,7 +91,7 @@ class Emailer {
      * @param {string} server='main'    SMTP server name
      * @return {object}                 Returns emailjs instance
      */
-    connect(server = 'main') {
+    _connect(server = 'main') {
         let options = {
             host: this._config.smtp[server].host,
             port: this._config.smtp[server].port,

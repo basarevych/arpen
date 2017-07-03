@@ -149,7 +149,9 @@ class Subprocess {
 
 
 /**
- * Run a command
+ * Command execution service
+ * <br><br>
+ * pty.js module is required
  */
 class Runner {
     /**

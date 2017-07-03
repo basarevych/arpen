@@ -11,17 +11,20 @@ const Filer = require('../services/filer.js');
 
 /**
  * Base application class
+ * <br><br>
+ * Main purpose is DI container with class autoloading through configuration files.
  */
 class App {
     /**
      * Create app
-     * @param {string} basePath             Base path
-     * @param {string[]} argv               Arguments
+     * @param {string} basePath             Path to the root of the project
+     * @param {string[]} argv               Command line arguments
      */
     constructor(basePath, argv) {
         debug('Constructing the app');
         this.basePath = basePath;
         this.argv = argv;
+        this.options = {};
 
         this._initialized = null;
         this._running = null;
@@ -35,7 +38,7 @@ class App {
      * @type {number}
      */
     static get gracefulTimeout() {
-        return 10 * 1000; // ms
+        return 5 * 1000; // ms
     }
 
     /**
@@ -118,6 +121,7 @@ class App {
     /**
      * Debug output
      * @param {...*} messages                           Messages
+     * @return {Promise}
      */
     debug(...messages) {
         if (!(!!process.env.DEBUG))
@@ -129,6 +133,7 @@ class App {
     /**
      * Info output
      * @param {...*} messages                           Messages
+     * @return {Promise}
      */
     info(...messages) {
         return this._output(process.stdout, messages);
@@ -137,6 +142,7 @@ class App {
     /**
      * Error output
      * @param {...*} messages                           Messages
+     * @return {Promise}
      */
     error(...messages) {
         return this._output(process.stderr, messages);
@@ -147,12 +153,13 @@ class App {
      * @param {object} options                          Arpen options
      * @param {boolean} [options.disableServicesCache]  When true services cache will not be used
      * @param {boolean} [options.disableLogFiles]       When true log files will not be used
-     * @param {...*} args                               Descendant-specific arguments
+     * @param {...*} args                               Descendant class specific arguments
      */
     run(options, ...args) {
-        this.init(options, ...args)
+        this.options = options;
+        this.init(...args)
             .then(() => {
-                return this.start(options, ...args);
+                return this.start(...args);
             })
             .catch(error => {
                 return this.error('App.run() failed:\n' + (error.fullStack || error.stack))
@@ -164,11 +171,10 @@ class App {
 
     /**
      * Initialize the app
-     * @param {object} options                          App.run() options
-     * @param {...*} args                               Descendant-specific arguments
+     * @param {...*} args                               Descendant class specific arguments
      * @return {Promise}
      */
-    init(options, ...args) {
+    init(...args) {
         if (this._initialized)
             return Promise.resolve();
 
@@ -189,16 +195,16 @@ class App {
                 resolve();
             })
             .then(() => {
-                return this._initConfig(options);
+                return this._initConfig();
             })
             .then(() => {
-                return this._initSources(options);
+                return this._initSources();
             })
             .then(() => {
-                return this._initLogger(options);
+                return this._initLogger();
             })
             .then(() => {
-                return this._initModules(options);
+                return this._initModules();
             })
             .then(() => {
                 this._initialized = true;
@@ -207,11 +213,12 @@ class App {
 
     /**
      * Start the app
-     * @param {object} options                          App.run() options
-     * @param {...*} args                               Descendant-specific arguments
+     * <br><br>
+     * Descendant must set _running to true
+     * @param {...*} args                               Descendant class specific arguments
      * @return {Promise}
      */
-    start(options, ...args) {
+    start(...args) {
         return new Promise((resolve, reject) => {
             if (this._running !== null)
                 return reject(new Error('Application is already started'));
@@ -222,17 +229,17 @@ class App {
     }
 
     /**
-     * Stop the app
-     * @param {object} options                          App.run() options
+     * Stop the app. Gets called from default onSignal() handler
+     * <br><br>
+     * Descendant must set _running to false
      * @param {...*} args                               Descendant-specific arguments
      * @return {Promise}
      */
-    stop(options, ...args) {
+    stop(...args) {
         return new Promise((resolve, reject) => {
             if (!this._running)
                 return reject(new Error('Application has not been started'));
-
-            this._running = null;
+            this._startArgs = args;
             resolve();
         });
     }
@@ -242,10 +249,23 @@ class App {
      * @param {string} signal                           Signal as SIGNAME
      */
     onSignal(signal) {
+        setTimeout(() => { process.nextTick(() => { process.exit(0); }); }, this.constructor.gracefulTimeout);
+
         try {
             let logger = this.get('logger');
-            logger.info(`Terminating due to ${signal} signal`, () => { process.nextTick(() => { process.exit(0); }); });
-            setTimeout(() => { process.nextTick(() => { process.exit(0); }); }, this.constructor.gracefulTimeout);
+            let args = this._startArgs || [];
+            this.stop(...args)
+                .then(() => {
+                    logger.info(`Terminating due to ${signal} signal`, () => {
+                        process.nextTick(() => { process.exit(0); });
+                    });
+                })
+                .catch(error => {
+                    return this.error('App.stop() failed:\n' + (error.fullStack || error.stack))
+                        .then(() => {
+                            process.nextTick(() => { process.exit(1); });
+                        });
+                });
         } catch (error) {
             process.nextTick(() => { process.exit(0); });
         }
@@ -253,10 +273,9 @@ class App {
 
     /**
      * Load the configuration
-     * @param {object} options                          App.run() options
      * @return {Promise}
      */
-    _initConfig(options) {
+    _initConfig() {
         let config, modules = new Map();
         debug('Loading application configuration');
         return Promise.all([
@@ -297,7 +316,7 @@ class App {
                                 return Promise.all([
                                     this.constructor._require(
                                         path.join(this.basePath, 'modules', cur, 'config', 'global.js'),
-                                        { autoload: [] }
+                                        {}
                                     ),
                                     this.constructor._require(
                                         path.join(this.basePath, 'modules', cur, 'config', 'local.js'),
@@ -344,19 +363,20 @@ class App {
 
     /**
      * Load the source files
-     * @param {object} options                          App.run() options
      * @return {Promise}
      */
-    _initSources(options) {
-        let config = this.get('config');
+    _initSources() {
+        let config, mapFile;
         let filer = new Filer();
         let cache = null;
-        let mapFile = `${config.name}.${config.project}.${config.instance}.map.json`;
 
         debug('Loading application sources');
         return Promise.resolve()
             .then(() => {
-                if (process.env.DEBUG || options.disableServicesCache)
+                config = this.get('config');
+                mapFile = `${config.name}.${config.project}.${config.instance}.map.json`;
+
+                if (process.env.DEBUG || this.options.disableServicesCache)
                     return null;
 
                 return filer.lockRead(path.join('/var/tmp', mapFile))
@@ -393,7 +413,7 @@ class App {
                             return prev.then(() => {
                                 let file = cur;
                                 if (cur[0] === '!')
-                                    file = path.join(this.basePath, 'node_modules', 'arpen', cur.slice(1));
+                                    file = path.join(this.basePath, 'node_modules', cur.slice(1));
                                 else if (cur[0] !== '/')
                                     file = path.join(this.basePath, cur);
                                 return filer.process(
@@ -426,7 +446,7 @@ class App {
                                             return prevLoad.then(() => {
                                                 let file = curLoad;
                                                 if (curLoad[0] === '!')
-                                                    file = path.join(this.basePath, 'node_modules', 'arpen', curLoad.slice(1));
+                                                    file = path.join(this.basePath, 'modules', curModule, 'node_modules', curLoad.slice(1));
                                                 else if (curLoad[0] !== '/')
                                                     file = path.join(this.basePath, 'modules', curModule, curLoad);
                                                 return filer.process(
@@ -475,17 +495,16 @@ class App {
 
     /**
      * Create log streams
-     * @param {object} options                          App.run() options
      * @return {Promise}
      */
-    _initLogger(options) {
+    _initLogger() {
         let config;
         return new Promise((resolve, reject) => {
                 try {
                     let logger = this.get('logger');
 
                     config = this.get('config');
-                    if (config.logs && !options.disableLogFiles) {
+                    if (config.logs && !this.options.disableLogFiles) {
                         for (let log of Object.keys(config.logs)) {
                             let info = Object.assign({}, config.logs[log]);
                             let filename = info.name;
@@ -508,10 +527,9 @@ class App {
 
     /**
      * Create modules
-     * @param {object} options                          App.run() options
      * @return {Promise}
      */
-    _initModules(options) {
+    _initModules() {
         let modules = new Map();
         return new Promise((resolve, reject) => {
                 try {
@@ -543,7 +561,7 @@ class App {
     }
 
     /**
-     * Returns item of the service container, adding new one if it does not exist yet
+     * Initialize as empty and return the item of service container, adding new one if it does not exist yet
      * @param {string} name                 Name of the service
      * @param {string} [filename]           Path to the class
      * @return {object}                     Returns service object
@@ -656,6 +674,7 @@ class App {
      * Print output
      * @param {*} stream                    Stream for output
      * @param {Array} messages              Messages
+     * @return {Promise}
      */
     _output(stream, messages) {
         return new Promise((resolve, reject) => {

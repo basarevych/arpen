@@ -266,6 +266,8 @@ class RedisClient {
 
 /**
  * Redis service
+ * <br><br>
+ * redis module is required
  */
 class Redis {
     /**

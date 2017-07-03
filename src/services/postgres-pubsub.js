@@ -118,7 +118,9 @@ class PostgresPubSubClient extends Pubsub.client {
 }
 
 /**
- * PubSub service
+ * Postgres PubSub service
+ * <br><br>
+ * pg-pubsub module is required
  */
 class PostgresPubSub extends Pubsub {
     /**
@@ -159,6 +161,14 @@ class PostgresPubSub extends Pubsub {
      */
     static get lifecycle() {
         return 'singleton';
+    }
+
+    /**
+     * PUBSUB client class
+     * @return {PostgresPubSubClient}
+     */
+    static get client() {
+        return PostgresPubSubClient;
     }
 
     /**

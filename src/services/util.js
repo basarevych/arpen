@@ -11,6 +11,8 @@ try {
 
 /**
  * Util helper
+ * <br><br>
+ * bcrypt module is required for password methods
  */
 class Util {
     /**

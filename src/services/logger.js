@@ -8,18 +8,26 @@ const RotatingFileStream = require('rotating-file-stream');
 
 /**
  * Logger service
+ * <br><br>
+ * Provides logging services via .info(), .warn(), .error() and .debug().
+ * <br><br>
+ * First argument might contain util.format() formatting (%[sdj]) as accepted by console.log(). If the last argument is
+ * a function it is used as completion callback with the first argument being a flag indicating if the data was actually
+ * written to the file.
+ * <br><br>
+ * Logs are always echoed to stdout/stderr if DEBUG environment variable is defined and are written to the file or
+ * emailed if configured
  */
 class Logger {
     /**
      * Create the service
      * @param {App} app             The application
      * @param {object} config       Config service
-     * @param {Emailer} [emailer]   Emailer service if available
      */
-    constructor(app, config, emailer) {
+    constructor(app, config) {
         this._app = app;
         this._config = config;
-        this._emailer = emailer;
+        this._emailer =  this._config.get('email.log.enable') ? this._app.get('emailer') : null;
 
         this._log = null;
         this._container = this._app.get('logger.streamContainer?');
@@ -48,7 +56,7 @@ class Logger {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'app', 'config', 'emailer?' ];
+        return [ 'app', 'config' ];
     }
 
     /**
@@ -171,7 +179,7 @@ class Logger {
     }
 
     /**
-     * Append messages without date
+     * Log messages without prepending the date (equivalent of .info())
      * @param {...*} messages       Messages
      */
     dump(...messages) {
@@ -186,7 +194,7 @@ class Logger {
      * @param {string} type                 Type of the error message
      * @param {Array} messages              Array of messages
      * @param {string|undefined} issuer     Issuer if used
-     * @param {boolean} logDate             Append date
+     * @param {boolean} logDate             Prepend current date
      * @param {function|undefined} [cb]     File write callback: first parameter whether file was actually written
      */
     log(type, messages, issuer, logDate, cb) {
@@ -204,7 +212,7 @@ class Logger {
         let logToStdOut = !!process.env.DEBUG, logToFile = false, logToMail = false;
         if (logInfo)
             logToFile =  (levels.indexOf(logInfo.level) !== -1 && levels.indexOf(type) >= levels.indexOf(logInfo.level));
-        if (this._config.get('email.log.enable')) {
+        if (this._emailer) {
             let mailLevel = this._config.get('email.log.level');
             logToMail = (levels.indexOf(mailLevel) !== -1 && levels.indexOf(type) >= levels.indexOf(mailLevel));
         }
@@ -268,7 +276,7 @@ class Logger {
                     text: logString,
                 })
                 .catch(error => {
-                    console.error(this.constructor.formatString(`Could not email log message: ${error}`));
+                    console.error(this.constructor.formatString(`Could not email log message: ${error.messages || error.message}`));
                 });
         }
     }

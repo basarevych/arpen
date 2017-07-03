@@ -140,7 +140,7 @@ class PubSub {
      * @return {Promise}
      */
     _createClient(serverName, subscriberName) {
-        return Promise.reject(new Error('Should be overriden'));
+        return Promise.reject(new Error('Should be overridden'));
     }
 }
 

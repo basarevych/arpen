@@ -7,18 +7,21 @@ const path = require('path');
 const App = require('./base');
 
 /**
- * Console application class
  * @extends module:arpen/app/base~App
+ *
+ * Console application class
+ * <br><br>
+ * This implementation will get command name from argv[0], convert dashed to camel case, resolve
+ * 'commands.<command-name>' as the command class and invoke .run() on it
  */
 class Console extends App {
     /**
      * Start the app
-     * @param {object} options                          App.run() options
      * @param {...*} args                               Parent arguments
      * @return {Promise}
      */
-    start(options, ...args) {
-        return super.start(options, ...args)
+    start(...args) {
+        return super.start(...args)
             .then(() => {
                 let config = this.get('config');
                 if (!this.argv.length) {
@@ -35,7 +38,7 @@ class Console extends App {
                         throw null;
                     command = this.get(name);
                 } catch (error) {
-                    return this.error(error ? `Error: ${error.message}\n` : 'Unknown command\n')
+                    return this.error(error ? 'Error' + (error.fullStack || error.stack) : 'Unknown command\n')
                         .then(() => {
                             process.exit(1);
                         });

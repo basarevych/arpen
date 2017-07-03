@@ -7,6 +7,10 @@ const NError = require('nerror');
 
 /**
  * Cacher
+ * <br><br>
+ * Will temporarily cache object in Redis if cache is enabled or instantly return undefined if it isn't
+ * <br><br>
+ * redis module is required
  */
 class Cacher {
     /**
@@ -33,10 +37,7 @@ class Cacher {
                         resolve(client);
                     },
                     error => {
-                        while (error.cause)
-                            error = error.cause();
-
-                        this._logger.error(`[Cache] Cache disabled: ${error.message}`);
+                        this._logger.error(`[Cache] Cache disabled: ${error.messages || error.message}`);
                         resolve(null);
                     }
                 );

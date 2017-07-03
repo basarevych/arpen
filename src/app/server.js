@@ -7,29 +7,20 @@ const path = require('path');
 const App = require('./base');
 
 /**
- * Server application class
  * @extends module:arpen/app/base~App
+ *
+ * Server application class
+ * <br><br>
+ * This implementation will read server class names from the supplied arguments, instantiate and start them
  */
 class Server extends App {
     /**
-     * Create app
-     * @param {string} basePath             Base path
-     * @param {string[]} argv               Arguments
-     */
-    constructor(basePath, argv) {
-        super(basePath, argv);
-
-        this._started = new Set();
-    }
-
-    /**
      * Initialize the app
-     * @param {object} options                          App.run() options
-     * @param {...string} names                         Server names
+     * @param {...*} names                              Server names
      * @return {Promise}
      */
-    init(options, ...names) {
-        return super.init(options, ...names)
+    init(...names) {
+        return super.init(...names)
             .then(() => {
                 let config = this.get('config');
                 let servers = new Map();
@@ -67,12 +58,11 @@ class Server extends App {
 
     /**
      * Start the app
-     * @param {object} options                          App.run() options
      * @param {...*} names                               Server names
      * @return {Promise}
      */
-    start(options, ...names) {
-        return super.start(options, ...names)
+    start(...names) {
+        return super.start(...names)
             .then(() => {
                 let config = this.get('config');
                 let servers = this.get('servers');
@@ -83,8 +73,6 @@ class Server extends App {
                             let server = servers.get(name);
                             if (!server || typeof server.start !== 'function')
                                 return;
-
-                            this._started.add(name);
 
                             let result = server.start(name);
                             if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
@@ -107,11 +95,10 @@ class Server extends App {
 
     /**
      * Stop the app
-     * @param {object} options                          App.run() options
      * @param {...*} names                               Server names
      * @return {Promise}
      */
-    stop(options, ...names) {
+    stop(...names) {
         return Promise.resolve()
             .then(() => {
                 let servers = this.get('servers');
@@ -132,31 +119,8 @@ class Server extends App {
                 );
             })
             .then(() => {
-                return super.stop(options, ...names);
+                return super.stop(...names);
             });
-    }
-
-    /**
-     * Handle process signal
-     * @param {string} signal                           Signal as SIGNAME
-     */
-    onSignal(signal) {
-        let names = Array.from(this._started);
-        this._started.clear();
-        this.stop(names)
-            .then(
-                () => {
-                    super.onSignal(signal);
-                },
-                error => {
-                    try {
-                        let logger = this.get('logger');
-                        logger.error(error, () => { super.onSignal(signal); });
-                    } catch (error) {
-                        super.onSignal(signal);
-                    }
-                }
-            );
     }
 }
 

@@ -284,6 +284,8 @@ class PostgresClient {
 
 /**
  * Postgres service
+ * <br><br>
+ * pg module is required
  */
 class Postgres {
     /**

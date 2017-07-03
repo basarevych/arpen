@@ -199,6 +199,14 @@ class RedisPubSub extends Pubsub {
     }
 
     /**
+     * PUBSUB client class
+     * @return {RedisPubSubClient}
+     */
+    static get client() {
+        return RedisPubSubClient;
+    }
+
+    /**
      * Create actual PUBSUB client
      * @param {string} serverName                   Server name as in config
      * @param {string} [subscriberName]             Client name
