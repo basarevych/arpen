@@ -224,6 +224,7 @@ class App {
                 return reject(new Error('Application is already started'));
 
             this._running = false;
+            this._startArgs = args;
             resolve();
         });
     }
@@ -239,7 +240,6 @@ class App {
         return new Promise((resolve, reject) => {
             if (!this._running)
                 return reject(new Error('Application has not been started'));
-            this._startArgs = args;
             resolve();
         });
     }
