@@ -171,7 +171,7 @@ class Express {
      */
     start(name) {
         if (name !== this.name)
-            return Promise.reject(new Error(`Server ${name} was not properly bootstrapped`));
+            return Promise.reject(new Error(`Server ${name} was not properly initialized`));
 
         return Promise.resolve()
             .then(() => {
@@ -194,7 +194,7 @@ class Express {
      */
     stop(name) {
         if (name !== this.name)
-            return Promise.reject(new Error(`Server ${name} was not properly bootstrapped`));
+            return Promise.reject(new Error(`Server ${name} was not properly initialized`));
 
         let http = this.http || this.https;
         if (http) {
