@@ -43,19 +43,19 @@ class Ini {
      * Parse INI file
      * @param {string} contents                     INI file as string
      * @param {object} [params]
-     * @param {boolean} [params.escaped=false]      Symbols .;# in section names are escaped
+     * @param {boolean} [params.simple=true]        Dots in section names have no special meaning (see ini module)
      * @return {object}
      */
     parse(contents, params = {}) {
-        let { escaped = false } = params;
-
-        if (escaped)
-            return ini.parse(contents);
+        let { simple = true } = params;
 
         let prepared = [];
         for (let line of contents.split('\n')) {
-            if (/^\s*\[.+\]\s*$/.test(line))
-                line = line.replace(/\./g, '\\.').replace(/#/g, '\\#').replace(/;/g, '\\;');
+            if (/^\s*\[.+\]\s*$/.test(line)) {
+                line = line.replace(/#/g, '\\#').replace(/;/g, '\\;');
+                if (simple)
+                    line = line.replace(/\./g, '\\.');
+            }
             prepared.push(line);
         }
 
@@ -66,20 +66,19 @@ class Ini {
      * Stringify INI object
      * @param {object} obj                          INI as object
      * @param {object} [params]
-     * @param {boolean} [params.escaped=false]      Symbols .;# in section names are escaped
+     * @param {boolean} [params.simple=true]        Dots in section names have no special meaning (see ini module)
      * @return {string}
      */
     stringify(obj, params = {}) {
-        let { escaped = false } = params;
-
-        let contents = ini.stringify(obj);
-        if (escaped)
-            return contents;
+        let { simple = true } = params;
 
         let prepared = [];
-        for (let line of contents.split('\n')) {
-            if (/^\s*\[.+\]\s*$/.test(line))
-                line = line.replace(/\\\./g, '.').replace(/\\#/g, '#').replace(/\\;/g, ';');
+        for (let line of ini.stringify(obj).split('\n')) {
+            if (/^\s*\[.+\]\s*$/.test(line)) {
+                line = line.replace(/\\#/g, '#').replace(/\\;/g, ';');
+                if (simple)
+                    line = line.replace(/\\\./g, '.');
+            }
             prepared.push(line);
         }
 
