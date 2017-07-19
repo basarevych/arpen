@@ -38,7 +38,7 @@ class App {
      * @type {number}
      */
     static get gracefulTimeout() {
-        return 5 * 1000; // ms
+        return 60 * 1000; // ms
     }
 
     /**
