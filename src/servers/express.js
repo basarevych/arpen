@@ -238,7 +238,7 @@ class Express {
             default:
                 msg = error;
         }
-        this._logger.error(msg, () => { process.exit(1); });
+        this._logger.error(msg, () => { process.exit(255); });
     }
 
     /**
