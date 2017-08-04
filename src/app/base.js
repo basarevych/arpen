@@ -374,7 +374,7 @@ class App {
         return Promise.resolve()
             .then(() => {
                 config = this.get('config');
-                mapFile = `${config.name}.${config.project}.${config.instance}.map.json`;
+                mapFile = `${config.project}.${config.instance}.map.json`;
 
                 if (process.env.DEBUG || this.options.disableServicesCache)
                     return null;
