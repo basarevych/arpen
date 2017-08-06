@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: Favicon</title>
+	<title>Documentation Class: BaseModel</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,20 +72,18 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Favicon</h1>
+	<h1 class="page-title">Class: BaseModel</h1>
 <section>
 
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-arpen_middleware_favicon.html">arpen/middleware/favicon</a>~</span>
+            <span class="ancestors"><a href="module-arpen_models_base.html">arpen/models/base</a>~</span>
         
-        Favicon
+        BaseModel
         </h2>
         
-            <div class="class-description">Favicon
-<br><br>
-serve-favicon module is required</div>
+            <div class="class-description">Base class for models</div>
         
     
 </header>
@@ -97,7 +95,7 @@ serve-favicon module is required</div>
         
 <hr>
 <dt>
-    <h4 class="name" id="Favicon"><span class="type-signature"></span>new Favicon(config)</h4>
+    <h4 class="name" id="BaseModel"><span class="type-signature"></span>new BaseModel(postgres, util)</h4>
     
     
 </dt>
@@ -105,7 +103,7 @@ serve-favicon module is required</div>
 
     
     <div class="description">
-        Create the service
+        Create model
     </div>
     
 
@@ -140,13 +138,13 @@ serve-favicon module is required</div>
 
         <tr>
             
-                <td class="name"><code>config</code></td>
+                <td class="name"><code>postgres</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Postgres</span>
 
 
 
@@ -157,7 +155,31 @@ serve-favicon module is required</div>
 
             
 
-            <td class="description last">Configuration</td>
+            <td class="description last">Postgres service</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>util</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Util</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Util service</td>
         </tr>
 
     
@@ -168,6 +190,59 @@ serve-favicon module is required</div>
 
     
 <dl class="details">
+    
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>_dirty</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Model has been changed flag</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
     
 
 	
@@ -248,7 +323,7 @@ serve-favicon module is required</div>
 <dd>
     
     <div class="description">
-        Service name is 'middleware.favicon'
+        Service name is 'models.base'
     </div>
     
 
@@ -389,7 +464,7 @@ serve-favicon module is required</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="register"><span class="type-signature"></span>register(server)</h4>
+    <h4 class="name" id="_setField"><span class="type-signature"></span>_setField(field, value)</h4>
     
     
 </dt>
@@ -397,7 +472,7 @@ serve-favicon module is required</div>
 
     
     <div class="description">
-        Register middleware
+        Set a field to a value
     </div>
     
 
@@ -432,13 +507,13 @@ serve-favicon module is required</div>
 
         <tr>
             
-                <td class="name"><code>server</code></td>
+                <td class="name"><code>field</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Express</span>
+<span class="param-type">string</span>
 
 
 
@@ -449,7 +524,159 @@ serve-favicon module is required</div>
 
             
 
-            <td class="description last">The server</td>
+            <td class="description last">DB field name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">New value</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="_getField"><span class="type-signature"></span>_getField(field)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Get field
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>field</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">DB field name</td>
         </tr>
 
     
@@ -512,6 +739,10 @@ serve-favicon module is required</div>
     <h5>Returns:</h5>
     
             
+<div class="param-desc">
+    Returns current value
+</div>
+
 
 
 <dl>
@@ -520,7 +751,7 @@ serve-favicon module is required</div>
     </dt>
     <dd>
         
-<span class="param-type">Promise</span>
+<span class="param-type">*</span>
 
 
 
@@ -529,6 +760,236 @@ serve-favicon module is required</div>
 
 
         
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="_serialize"><span class="type-signature"></span>_serialize()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Convert to object. Dates are converted to strings in UTC timezone
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Returns serialized object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="_unserialize"><span class="type-signature"></span>_unserialize(data)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Load data. Dates are expected to be in UTC and are converted into local timezone
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Raw DB data object</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
     
 </dd>

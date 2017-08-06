@@ -174,6 +174,22 @@ class Util {
     }
 
     /**
+     * Convert camel case name to dashed<br>
+     * exampleName → example-name
+     * @param {string} value                    Camel case name
+     * @return {string}                         Returns dashed variant
+     */
+    camelToDashed(value) {
+        let result = '';
+        for (let i = 0; i < value.length; i++) {
+            if (i && /[A-Z]/.test(value[i]))
+                result += '-';
+            result += value[i].toLowerCase();
+        }
+        return result;
+    }
+
+    /**
      * Convert snake case name to camel case<br>
      * example_name → exampleName
      * @param {string} value                    Snake case name
@@ -198,6 +214,22 @@ class Util {
             return result;
 
         return result[0].toUpperCase() + result.slice(1);
+    }
+
+    /**
+     * Convert camel case name to snake case<br>
+     * exampleName → example_name
+     * @param {string} value                    Camel case name
+     * @return {string}                         Returns snake case variant
+     */
+    camelToSnake(value) {
+        let result = '';
+        for (let i = 0; i < value.length; i++) {
+            if (i && /[A-Z]/.test(value[i]))
+                result += '_';
+            result += value[i].toLowerCase();
+        }
+        return result;
     }
 }
 
