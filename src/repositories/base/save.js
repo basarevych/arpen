@@ -26,7 +26,10 @@ module.exports = function (model, pg) {
             return Promise.resolve()
                 .then(() => {
                     let data = model._serialize();
-                    let fields = Object.keys(data);
+                    let fields = Object.keys(data)
+                        .filter(field => {
+                            return field !== 'id';
+                        });
 
                     let query, params = [];
                     if (model.id) {

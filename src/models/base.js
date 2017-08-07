@@ -59,11 +59,15 @@ class BaseModel {
 
     /**
      * Convert to object. Dates are converted to strings in UTC timezone
+     * @param {string[]} [fields]       Fields to save
      * @return {object}                 Returns serialized object
      */
-    _serialize() {
+    _serialize(fields) {
+        if (!fields)
+            fields = Array.from(this._fields.keys());
+
         let data = {};
-        for (let field of this._fields.keys()) {
+        for (let field of fields) {
             let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
             let value = (desc && desc.get) ? desc.get.call(this) : this._getField(field);
             if (moment.isMoment(value))
@@ -79,6 +83,9 @@ class BaseModel {
      */
     _unserialize(data) {
         for (let field of this._fields.keys()) {
+            if (typeof data[field] === 'undefined')
+                continue;
+
             let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
             let value = (desc && desc.set) ? desc.set.call(this, data[field]) : this._setField(field, data[field]);
             if (moment.isMoment(value)) {
