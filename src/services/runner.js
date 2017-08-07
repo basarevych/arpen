@@ -189,7 +189,8 @@ class Runner {
      * Execute a command
      * @param {string} command              Command name
      * @param {string[]} [params]           Command arguments
-     * @param {object} [options]            execFile() options
+     * @param {object} [options]            execFile() options with the following addition
+     * @param {object} [options.pipe]       The command will be piped to and from this process
      * @return {object}
      * <code>
      * {
@@ -210,10 +211,11 @@ class Runner {
             },
             timeout = this.constructor.execTimeout,
             killSignal = 'SIGKILL',
+            pipe = null,
         } = options;
 
         return new Promise((resolve, reject) => {
-            execFile(command, params, {env, timeout, killSignal}, (error, stdout, stderr) => {
+            let proc = execFile(command, params, {env, timeout, killSignal}, (error, stdout, stderr) => {
                 if (error) {
                     if (typeof error.code === 'number' || error.signal) {
                         return resolve({
@@ -233,6 +235,12 @@ class Runner {
                     stderr: stderr,
                 });
             });
+
+            if (pipe) {
+                proc.stdout.pipe(pipe.stdout);
+                proc.stderr.pipe(pipe.stderr);
+                pipe.stdin.pipe(proc.stdin);
+            }
         });
     }
 
