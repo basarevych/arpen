@@ -190,7 +190,8 @@ class Runner {
      * @param {string} command              Command name
      * @param {string[]} [params]           Command arguments
      * @param {object} [options]            execFile() options with the following addition
-     * @param {object} [options.pipe]       The command will be piped to and from this process
+     * @param {object} [options.pipe]       The command's stdout, stderr will be piped to this process and stdin of this
+     *                                      process will be piped to the command
      * @return {object}
      * <code>
      * {
