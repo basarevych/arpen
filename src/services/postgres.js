@@ -110,7 +110,7 @@ class PostgresClient {
                                 return reject(
                                     new NError(
                                         error,
-                                        { sql_state: sqlState, query: parsedSql, params: parsedParams },
+                                        { sqlState: sqlState, query: parsedSql, params: parsedParams },
                                         'Query failed: ' + sqlState
                                     )
                                 );
@@ -234,7 +234,7 @@ class PostgresClient {
                                 if (error instanceof RollbackError)
                                     return resolve(error.result);
 
-                                if (VError.info(error).sql_state === '40001') { // SERIALIZATION FAILURE
+                                if (error.info && error.info.sqlState === '40001') { // SERIALIZATION FAILURE
                                     if (++numTries > this.maxTransactionRetries) {
                                         return reject(
                                             new NError(
