@@ -66,7 +66,7 @@ class Express {
     init(name) {
         this.name = name;
 
-        if (!(this._config.get(`servers.${name}.enable`) || true))
+        if (this._config.get(`servers.${name}.enable`) === false)
             return Promise.resolve();
 
         return new Promise((resolve, reject) => {
@@ -176,7 +176,7 @@ class Express {
         if (name !== this.name)
             return Promise.reject(new Error(`Server ${name} was not properly initialized`));
 
-        if (!(this._config.get(`servers.${name}.enable`) || true))
+        if (this._config.get(`servers.${name}.enable`) === false)
             return Promise.resolve();
 
         return Promise.resolve()
@@ -202,7 +202,7 @@ class Express {
         if (name !== this.name)
             return Promise.reject(new Error(`Server ${name} was not properly initialized`));
 
-        if (!(this._config.get(`servers.${name}.enable`) || true))
+        if (this._config.get(`servers.${name}.enable`) === false)
             return Promise.resolve();
 
         let http = this.http || this.https;
