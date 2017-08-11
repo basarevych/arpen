@@ -22,6 +22,7 @@ class BaseRepository {
         this._postgres = postgres;
         this._cacher = cacher;
         this._util = util;
+        this._enableCache = true;
 
         this._loadMethods(path.join(__dirname, 'base'));
     }

@@ -17,7 +17,11 @@ const NError = require('nerror');
 module.exports = function (id, pg) {
     let key = `sql:${this.constructor.table}-by-id:${id}`;
 
-    return this._cacher.get(key)
+    return Promise.resolve()
+        .then(() => {
+            if (this._enableCache)
+                return this._cacher.get(key);
+        })
         .then(value => {
             if (value)
                 return value;
@@ -38,7 +42,7 @@ module.exports = function (id, pg) {
                         )
                         .then(result => {
                             let rows = result.rowCount ? result.rows : [];
-                            if (!rows.length)
+                            if (!rows.length || !this._enableCache)
                                 return rows;
 
                             return this._cacher.set(key, rows)
