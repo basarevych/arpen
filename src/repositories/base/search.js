@@ -21,16 +21,16 @@ const NError = require('nerror');
  * @param {PostgresClient|string} [pg]          Will reuse the Postgres client provided, or if string then will
  *                                              connect to this instance of Postgres.
  * @return {Promise}                            Returns promise resolving to the following:
- * <code><pre>
+ * <pre>
  * {
-     *      totalRows: 1, // total rows in result
-     *      totalPages: 1, // total number of pages
-     *      pageSize: 0, // page size
-     *      pageNumber: 1, // returned page number
-     *      sort: [ ... ], // keys used to sort the result
-     *      data: [ ... ], // resulting rows as array
-     * }
- * </pre></code>
+ *      totalRows: 1, // total rows in result
+ *      totalPages: 1, // total number of pages
+ *      pageSize: 0, // page size
+ *      pageNumber: 1, // returned page number
+ *      sort: [ ... ], // keys used to sort the result
+ *      data: [ ... ], // resulting rows as array
+ * }
+ * </pre>
  */
 module.exports = async function (options = {}, pg = undefined) {
     let {

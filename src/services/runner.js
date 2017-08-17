@@ -188,14 +188,14 @@ class Runner {
      * @param {object} [options.pipe]       The command's stdout, stderr will be piped to this process and stdin of this
      *                                      process will be piped to the command
      * @return {Promise}
-     * <code><pre>
+     * <pre>
      * {
      *   code: 0,
      *   signal: null,
      *   stdout: '',
      *   stderr: '',
      * }
-     * </pre></code>
+     * </pre>
      */
     async exec(command, params = [], options = {}) {
         let {
