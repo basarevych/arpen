@@ -7,6 +7,7 @@ const NError = require('nerror');
 
 /**
  * Delete a model
+ * @instance
  * @method delete
  * @memberOf module:arpen/repositories/base~BaseRepository
  * @param {BaseModel|number} model          Model or ID

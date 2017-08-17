@@ -7,6 +7,7 @@ const NError = require('nerror');
 
 /**
  * Search repository
+ * @instance
  * @method search
  * @memberOf module:arpen/repositories/base~BaseRepository
  * @param {object} [options]
@@ -20,7 +21,7 @@ const NError = require('nerror');
  * @param {PostgresClient|string} [pg]          Will reuse the Postgres client provided, or if string then will
  *                                              connect to this instance of Postgres.
  * @return {Promise}                            Returns promise resolving to the following:
- * <code>
+ * <code><pre>
  * {
      *      totalRows: 1, // total rows in result
      *      totalPages: 1, // total number of pages
@@ -29,7 +30,7 @@ const NError = require('nerror');
      *      sort: [ ... ], // keys used to sort the result
      *      data: [ ... ], // resulting rows as array
      * }
- * </code>
+ * </pre></code>
  */
 module.exports = async function (options = {}, pg = undefined) {
     let {

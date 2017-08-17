@@ -7,6 +7,7 @@ const NError = require('nerror');
 
 /**
  * Find all models
+ * @instance
  * @method findAll
  * @memberOf module:arpen/repositories/base~BaseRepository
  * @param {PostgresClient|string} [pg]      Will reuse the Postgres client provided, or if it is a string then will

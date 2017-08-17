@@ -7,6 +7,7 @@ const NError = require('nerror');
 
 /**
  * Find a model by ID
+ * @instance
  * @method find
  * @memberOf module:arpen/repositories/base~BaseRepository
  * @param {number} id                       ID to search by

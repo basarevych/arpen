@@ -7,6 +7,7 @@ const NError = require('nerror');
 
 /**
  * Save model
+ * @instance
  * @method save
  * @memberOf module:arpen/repositories/base~BaseRepository
  * @param {BaseModel} model                 The model
