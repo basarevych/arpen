@@ -9,7 +9,6 @@ try {
     // do nothing
 }
 
-const fs = require('fs-ext');
 const execFile = require('child_process').execFile;
 const NError = require('nerror');
 
@@ -38,9 +37,7 @@ class Subprocess {
 
         if (expect.size) {
             let sendKey = send => {
-                setTimeout(function () {
-                    cmd.write(send + '\r');
-                }, 250);
+                setTimeout(function () { cmd.write(send + '\r'); }, 250);
             };
 
             cmd.on('data', data => {
@@ -60,7 +57,7 @@ class Subprocess {
             this._cmd = null;
         });
         cmd.on('error', error => {
-            if (error.errno === 'EIO' && error.syscall === 'read')    // TODO: check the status of this bug
+            if (error.errno === 'EIO' && error.syscall === 'read')  // TODO: check the status of this bug
                 return;                                             // Do nothing here as this is a Debian-specific bug
 
             this._reject(error);
@@ -82,7 +79,6 @@ class Subprocess {
     get cmd() {
         return this._cmd;
     }
-
 
     /**
      * Get result promise
@@ -142,11 +138,10 @@ class Subprocess {
         if (!this.isRunning)
             return false;
 
-        this.cmd.kill(sig ? sig : 'SIGKILL');
+        this.cmd.kill(sig || 'SIGKILL');
         return true;
     }
 }
-
 
 /**
  * Command execution service
@@ -192,7 +187,7 @@ class Runner {
      * @param {object} [options]            execFile() options with the following addition
      * @param {object} [options.pipe]       The command's stdout, stderr will be piped to this process and stdin of this
      *                                      process will be piped to the command
-     * @return {object}
+     * @return {Promise}
      * <code>
      * {
      *   code: 0,
@@ -202,13 +197,13 @@ class Runner {
      * }
      * </code>
      */
-    exec(command, params = [], options = {}) {
+    async exec(command, params = [], options = {}) {
         let {
             env = {
-                "LANGUAGE": "C.UTF-8",
-                "LANG": "C.UTF-8",
-                "LC_ALL": "C.UTF-8",
-                "PATH": "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin",
+                'LANGUAGE': 'C.UTF-8',
+                'LANG': 'C.UTF-8',
+                'LC_ALL': 'C.UTF-8',
+                'PATH': '/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin',
             },
             timeout = this.constructor.execTimeout,
             killSignal = 'SIGKILL',
@@ -256,10 +251,10 @@ class Runner {
     spawn(command, params = [], options = {}, expect = new Map()) {
         let {
             env = {
-                "LANGUAGE": "C.UTF-8",
-                "LANG": "C.UTF-8",
-                "LC_ALL": "C.UTF-8",
-                "PATH": "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin",
+                'LANGUAGE': 'C.UTF-8',
+                'LANG': 'C.UTF-8',
+                'LC_ALL': 'C.UTF-8',
+                'PATH': '/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin',
             },
             timeout = this.constructor.execTimeout,
             killSignal = 'SIGKILL',

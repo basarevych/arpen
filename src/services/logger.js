@@ -3,7 +3,6 @@
  * @module arpen/services/logger
  */
 const util = require('util');
-const NError = require('nerror');
 const RotatingFileStream = require('rotating-file-stream');
 
 /**
@@ -27,7 +26,7 @@ class Logger {
     constructor(app, config) {
         this._app = app;
         this._config = config;
-        this._emailer =  this._config.get('email.log.enable') ? this._app.get('emailer') : null;
+        this._emailer = this._config.get('email.log.enable') ? this._app.get('emailer') : null;
 
         this._log = null;
         this._container = this._app.get('logger.streamContainer?');
@@ -80,11 +79,11 @@ class Logger {
         }
 
         let date = new Date();
-        let dateString = date.getFullYear() + '-' + padZero(date.getMonth()+1) + '-' + padZero(date.getDate());
+        let dateString = date.getFullYear() + '-' + padZero(date.getMonth() + 1) + '-' + padZero(date.getDate());
         dateString += ' ' + padZero(date.getHours()) + ':' + padZero(date.getMinutes()) + ':' + padZero(date.getSeconds());
         dateString += '.' + padZero(date.getTime() % 1000, 3);
 
-        return "[" + dateString + "] " + string;
+        return '[' + dateString + '] ' + string;
     }
 
     /**
@@ -205,13 +204,16 @@ class Logger {
             return;
         }
 
-        let logInfo, logName = this._log || this._container.default;
+        let logInfo;
+        let logName = this._log || this._container.default;
         if (logName)
             logInfo = this._container.logs.get(logName);
 
-        let logToStdOut = !!process.env.DEBUG, logToFile = false, logToMail = false;
+        let logToStdOut = !!process.env.DEBUG;
+        let logToFile = false;
+        let logToMail = false;
         if (logInfo)
-            logToFile =  (levels.indexOf(logInfo.level) !== -1 && levels.indexOf(type) >= levels.indexOf(logInfo.level));
+            logToFile = (levels.indexOf(logInfo.level) !== -1 && levels.indexOf(type) >= levels.indexOf(logInfo.level));
         if (this._emailer) {
             let mailLevel = this._config.get('email.log.level');
             logToMail = (levels.indexOf(mailLevel) !== -1 && levels.indexOf(type) >= levels.indexOf(mailLevel));
@@ -236,8 +238,9 @@ class Logger {
         }
 
         let logString =
-            (parsed.length && /%[sdj]/.test(String(parsed[0]))) ?
-                util.format(...parsed) : parsed.join("\n");
+            (parsed.length && /%[sdj]/.test(String(parsed[0])))
+                ? util.format(...parsed)
+                : parsed.join('\n');
 
         if (issuer)
             logString = `<${issuer}> ` + logString;
@@ -307,7 +310,8 @@ class Logger {
                 return;
 
             if (log.buffer.length) {
-                let str = '', callbacks = [];
+                let str = '';
+                let callbacks = [];
                 for (let buf of log.buffer) {
                     str += buf.log + '\n';
                     if (buf.cb)

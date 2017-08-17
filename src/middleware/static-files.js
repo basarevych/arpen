@@ -49,16 +49,15 @@ class StaticFiles {
      * @param {Express} server          The server
      * @return {Promise}
      */
-    register(server) {
+    async register(server) {
         for (let [ moduleName, moduleConfig ] of this._config.modules) {
             for (let dir of moduleConfig.static || []) {
-                let filename = dir[0] === '/' ?
-                    dir :
-                    path.join(this._config.base_path, 'modules', moduleName, dir);
+                let filename = dir[0] === '/'
+                    ? dir
+                    : path.join(this._config.base_path, 'modules', moduleName, dir);
                 server.express.use(express.static(filename));
             }
         }
-        return Promise.resolve();
     }
 }
 

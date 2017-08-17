@@ -51,11 +51,9 @@ class RequestLogger {
      * @param {Express} server          The server
      * @return {Promise}
      */
-    register(server) {
+    async register(server) {
         server.express.use(morgan('dev'));
         server.express.use(morgan('combined', { stream: this._logStreams.logs.get('access').stream }));
-
-        return Promise.resolve();
     }
 }
 

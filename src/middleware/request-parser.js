@@ -56,7 +56,7 @@ class RequestParser {
      * @param {Express} server          The server
      * @return {Promise}
      */
-    register(server) {
+    async register(server) {
         server.express.use(bodyParser.json({
             limit: this._config.get(`servers.${server.name}.options.body_limit`),
         }));
@@ -66,8 +66,6 @@ class RequestParser {
         }));
 
         server.express.use(cookieParser());
-
-        return Promise.resolve();
     }
 }
 

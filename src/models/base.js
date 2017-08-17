@@ -19,6 +19,8 @@ class BaseModel {
         this._fields = new Map();
         this._postgres = postgres;
         this._util = util;
+
+        this.id = undefined;
     }
 
     /**
@@ -35,6 +37,22 @@ class BaseModel {
      */
     static get requires() {
         return [ 'postgres', 'util' ];
+    }
+
+    /**
+     * ID setter
+     * @type {undefined|number}
+     */
+    set id(id) {
+        return this._setField('id', id);
+    }
+
+    /**
+     * ID getter
+     * @type {undefined|number}
+     */
+    get id() {
+        return this._getField('id');
     }
 
     /**

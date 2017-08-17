@@ -2,8 +2,6 @@
  * PUBSUB base service
  * @module arpen/services/pubsub
  */
-const debug = require('debug')('arpen:pubsub');
-const NError = require('nerror');
 
 /**
  * Channel message callback
@@ -43,8 +41,8 @@ class PubSubClient {
      * @param {Subscriber} handler                  Handler function
      * @return {Promise}                            Resolves on success
      */
-    subscribe(channel, handler) {
-        return Promise.reject(new Error('Not implemented'));
+    async subscribe(channel, handler) {
+        throw new Error('Not implemented');
     }
 
     /**
@@ -53,8 +51,8 @@ class PubSubClient {
      * @param {Subscriber} handler                  Handler function
      * @return {Promise}                            Resolves on success
      */
-    unsubscribe(channel, handler) {
-        return Promise.reject(new Error('Not implemented'));
+    async unsubscribe(channel, handler) {
+        throw new Error('Not implemented');
     }
 
     /**
@@ -63,8 +61,8 @@ class PubSubClient {
      * @param {*} message                           Message
      * @return {Promise}                            Resolves on success
      */
-    publish(channel, message) {
-        return Promise.reject(new Error('Not implemented'));
+    async publish(channel, message) {
+        throw new Error('Not implemented');
     }
 }
 
@@ -118,19 +116,14 @@ class PubSub {
      * @param {string|null} [cacheName=null]        Store and later reuse this pubsub client under this name
      * @return {Promise}                            Resolves to pubsub client instance
      */
-    connect(serverName = 'main', subscriberName = null, cacheName = null) {
-        return Promise.resolve()
-            .then(() => {
-                if (cacheName && this._cache.has(cacheName))
-                    return this._cache.get(cacheName);
+    async connect(serverName = 'main', subscriberName = null, cacheName = null) {
+        if (cacheName && this._cache.has(cacheName))
+            return this._cache.get(cacheName);
 
-                return this._createClient(serverName, subscriberName)
-                    .then(pubsub => {
-                        if (cacheName)
-                            this._cache.set(cacheName, pubsub);
-                        return pubsub;
-                    });
-            });
+        let pubsub = await this._createClient(serverName, subscriberName);
+        if (cacheName)
+            this._cache.set(cacheName, pubsub);
+        return pubsub;
     }
 
     /**
@@ -139,8 +132,8 @@ class PubSub {
      * @param {string} [subscriberName]             Client name
      * @return {Promise}
      */
-    _createClient(serverName, subscriberName) {
-        return Promise.reject(new Error('Should be overridden'));
+    async _createClient(serverName, subscriberName) {
+        throw new Error('Not implemented');
     }
 }
 

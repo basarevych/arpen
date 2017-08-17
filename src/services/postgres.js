@@ -62,7 +62,7 @@ class PostgresClient {
      * @param {Array} [params]                      Query parameters
      * @return {Promise}                            Resolves to query result
      */
-    query(sql, params = []) {
+    async query(sql, params = []) {
         let parsedSql = sql.trim().replace(/\s+/g, ' ');
         let parsedParams = [];
 
@@ -98,7 +98,7 @@ class PostgresClient {
         debug(debugSql);
 
         if (!this.client)
-            return Promise.reject(new Error('Query on terminated client'));
+            throw Error('Query on terminated client');
 
         return new Promise((resolve, reject) => {
                 try {
@@ -133,8 +133,9 @@ class PostgresClient {
      * @param {PostgresTransaction} cb                      The transaction
      * @return {Promise}                                    Resolves to transaction result
      */
-    transaction() {
-        let params = { isolation: 'serializable' }, cb;
+    async transaction() {
+        let params = { isolation: 'serializable' };
+        let cb;
         if (arguments.length >= 2) {
             if (arguments[0].name)
                 params.name = arguments[0].name;
@@ -171,114 +172,95 @@ class PostgresClient {
         if (++this._transactionLevel !== 1) {
             let savepoint = 'arpen_' + this._postgres._util.getRandomString(16, { lower: true, digits: true });
             let savepointCreated = false;
-            return this.query("SAVEPOINT " + savepoint)
-                .then(() => {
-                    savepointCreated = true;
-                    let result = cb(rollback(savepoint));
-                    if (result === null || typeof result !== 'object' || typeof result.then !== 'function') {
-                        throw new Error(
-                            'Transaction ' +
-                            (params.name ? params.name + ' ' : '') +
-                            'function must return a Promise'
-                        );
-                    }
-                    return result;
-                })
-                .then(
-                    value => {
-                        this._transactionLevel--;
-                        return value;
-                    },
-                    error => {
-                        this._transactionLevel--;
-                        if (error instanceof RollbackError && error.savepoint === savepoint) {
-                            if (!savepointCreated)
-                                return error.result;
-
-                            return this.query("ROLLBACK TO " + savepoint)
-                                .then(() => {
-                                    return error.result;
-                                });
-                        }
-                        throw error;
-                    }
-                );
+            try {
+                await this.query('SAVEPOINT ' + savepoint);
+                savepointCreated = true;
+                let result = cb(rollback(savepoint));
+                if (result === null || typeof result !== 'object' || typeof result.then !== 'function') {
+                    throw new Error(
+                        'Transaction ' +
+                        (params.name ? params.name + ' ' : '') +
+                        'function must return a Promise'
+                    );
+                }
+                let value = await result;
+                this._transactionLevel--;
+                return value;
+            } catch (error) {
+                this._transactionLevel--;
+                if (error instanceof RollbackError && error.savepoint === savepoint) {
+                    if (savepointCreated)
+                        await this.query('ROLLBACK TO ' + savepoint);
+                    return error.result;
+                }
+                throw error;
+            }
         }
 
-        return new Promise((resolve, reject) => {
+        let value;
+        try {
+            value = await new Promise(async (resolve, reject) => {
                 let numTries = 0;
-                let tryAgain = () => {
+                let tryAgain = async () => {
                     let transactionStarted = false;
-                    this.query("BEGIN TRANSACTION ISOLATION LEVEL " + params.isolation.toUpperCase())
-                        .then(() => {
-                            transactionStarted = true;
+                    try {
+                        await this.query('BEGIN TRANSACTION ISOLATION LEVEL ' + params.isolation.toUpperCase());
+                        transactionStarted = true;
 
-                            let result = cb(rollback(null));
-                            if (result === null || typeof result !== 'object' || typeof result.then !== 'function') {
-                                throw new Error(
-                                    'Transaction ' +
-                                    (params.name ? params.name + ' ' : '') +
-                                    'function must return a Promise'
+                        let result = cb(rollback(null));
+                        if (result === null || typeof result !== 'object' || typeof result.then !== 'function') {
+                            throw new Error(
+                                'Transaction ' +
+                                (params.name ? params.name + ' ' : '') +
+                                'function must return a Promise'
+                            );
+                        }
+
+                        let value = await result;
+                        await this.query('COMMIT TRANSACTION');
+                        resolve(value);
+                    } catch (error) {
+                        if (transactionStarted)
+                            await this.query('ROLLBACK TRANSACTION');
+
+                        if (error instanceof RollbackError)
+                            return resolve(error.result);
+
+                        if (error.info && error.info.sqlState === '40001') { // SERIALIZATION FAILURE
+                            if (++numTries > this.maxTransactionRetries) {
+                                return reject(
+                                    new NError(
+                                        error,
+                                        'Maximum transaction retries reached' +
+                                        (params.name ? ` in ${params.name}` : '')
+                                    )
                                 );
                             }
-                            return result;
-                        })
-                        .then(result => {
-                            return this.query("COMMIT TRANSACTION")
-                                .then(() => {
-                                    resolve(result);
-                                });
-                        })
-                        .catch(error => {
-                            let cleanup = () => {
-                                if (error instanceof RollbackError)
-                                    return resolve(error.result);
 
-                                if (error.info && error.info.sqlState === '40001') { // SERIALIZATION FAILURE
-                                    if (++numTries > this.maxTransactionRetries) {
-                                        return reject(
-                                            new NError(
-                                                error,
-                                                'Maximum transaction retries reached' +
-                                                    (params.name ? ` in ${params.name}` : '')
-                                            )
-                                        );
-                                    }
+                            this._postgres._logger.warn(
+                                'Postgres transaction serialization failure' +
+                                (params.name ? ` in ${params.name}` : '')
+                            );
 
-                                    this._postgres._logger.warn(
-                                        'Postgres transaction serialization failure' +
-                                        (params.name ? ` in ${params.name}` : '')
-                                    );
+                            let delay = this._postgres._util.getRandomInt(
+                                this.minTransactionDelay,
+                                this.maxTransactionDelay
+                            );
+                            return setTimeout(async () => { await tryAgain(); }, delay);
+                        }
 
-                                    let delay = this._postgres._util.getRandomInt(
-                                        this.minTransactionDelay,
-                                        this.maxTransactionDelay
-                                    );
-                                    return setTimeout(() => { tryAgain(); }, delay);
-                                }
-
-                                reject(error);
-                            };
-
-                            if (!transactionStarted)
-                                return cleanup();
-
-                            return this.query("ROLLBACK TRANSACTION")
-                                .then(cleanup, cleanup);
-                        });
+                        reject(error);
+                    }
                 };
-                tryAgain();
-            })
-            .then(
-                value => {
-                    this._transactionLevel--;
-                    return value;
-                },
-                error => {
-                    this._transactionLevel--;
-                    throw error;
-                }
-            );
+                await tryAgain();
+            });
+        } catch (error) {
+            this._transactionLevel--;
+            throw error;
+        }
+
+        this._transactionLevel--;
+        return value;
     }
 }
 
@@ -342,7 +324,7 @@ class Postgres {
      * @param {string} name='main'              Server name in config
      * @return {Promise}                        Resolves to connected PostgresClient instance
      */
-    connect(name = 'main') {
+    async connect(name = 'main') {
         return new Promise((resolve, reject) => {
                 if (!this._config.postgres[name])
                     return reject(new Error(`Undefined Postgres server name: ${name}`));

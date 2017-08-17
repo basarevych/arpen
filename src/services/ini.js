@@ -20,7 +20,7 @@ class Ini {
      */
     constructor() {
         if (!ini)
-            throw new Error('ini modules is required for Ini service');
+            throw new Error('ini module is required for Ini service');
     }
 
     /**
@@ -87,4 +87,3 @@ class Ini {
 }
 
 module.exports = Ini;
-

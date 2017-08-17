@@ -333,7 +333,215 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="read"><span class="type-signature"></span>read(fd)</h4>
+    <h4 class="name" id="exists"><span class="type-signature">&lt;async> </span>exists(filename [, followSymlinks])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Check if filename exists
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>filename</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">File path</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>followSymlinks</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">Check the file symlink points to</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Resolves to boolean
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="read"><span class="type-signature">&lt;async> </span>read(fd)</h4>
     
     
 </dt>
@@ -485,7 +693,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="write"><span class="type-signature"></span>write(fd, buffer)</h4>
+    <h4 class="name" id="write"><span class="type-signature">&lt;async> </span>write(fd, buffer)</h4>
     
     
 </dt>
@@ -661,7 +869,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="lockReadBuffer"><span class="type-signature"></span>lockReadBuffer(filename)</h4>
+    <h4 class="name" id="lockReadBuffer"><span class="type-signature">&lt;async> </span>lockReadBuffer(filename)</h4>
     
     
 </dt>
@@ -670,6 +878,7 @@
     
     <div class="description">
         Lock a file (shared) and read it returning as a Buffer. Maximum file size is Buffer.kMaxLength bytes.
+File must exist.
     </div>
     
 
@@ -813,7 +1022,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="lockRead"><span class="type-signature"></span>lockRead(filename)</h4>
+    <h4 class="name" id="lockRead"><span class="type-signature">&lt;async> </span>lockRead(filename)</h4>
     
     
 </dt>
@@ -965,7 +1174,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="lockWriteBuffer"><span class="type-signature"></span>lockWriteBuffer(filename, buffer [, params])</h4>
+    <h4 class="name" id="lockWriteBuffer"><span class="type-signature">&lt;async> </span>lockWriteBuffer(filename, buffer [, params])</h4>
     
     
 </dt>
@@ -1343,7 +1552,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="lockWrite"><span class="type-signature"></span>lockWrite(filename, contents [, params])</h4>
+    <h4 class="name" id="lockWrite"><span class="type-signature">&lt;async> </span>lockWrite(filename, contents [, params])</h4>
     
     
 </dt>
@@ -1721,7 +1930,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="lockUpdateBuffer"><span class="type-signature"></span>lockUpdateBuffer(filename, cb [, params])</h4>
+    <h4 class="name" id="lockUpdateBuffer"><span class="type-signature">&lt;async> </span>lockUpdateBuffer(filename, cb [, params])</h4>
     
     
 </dt>
@@ -2099,7 +2308,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="lockUpdate"><span class="type-signature"></span>lockUpdate(filename, cb [, params])</h4>
+    <h4 class="name" id="lockUpdate"><span class="type-signature">&lt;async> </span>lockUpdate(filename, cb [, params])</h4>
     
     
 </dt>
@@ -2477,7 +2686,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="createDirectory"><span class="type-signature"></span>createDirectory(filename [, params])</h4>
+    <h4 class="name" id="createDirectory"><span class="type-signature">&lt;async> </span>createDirectory(filename [, params])</h4>
     
     
 </dt>
@@ -2823,7 +3032,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="createFile"><span class="type-signature"></span>createFile(filename [, params])</h4>
+    <h4 class="name" id="createFile"><span class="type-signature">&lt;async> </span>createFile(filename [, params])</h4>
     
     
 </dt>
@@ -3169,7 +3378,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="remove"><span class="type-signature"></span>remove(filename)</h4>
+    <h4 class="name" id="remove"><span class="type-signature">&lt;async> </span>remove(filename)</h4>
     
     
 </dt>
@@ -3229,7 +3438,7 @@
 
             
 
-            <td class="description last">Path of a file or directory</td>
+            <td class="description last">Absolute path of a file or directory</td>
         </tr>
 
     
@@ -3304,7 +3513,7 @@
     </dt>
     <dd>
         
-<span class="param-type">object</span>
+<span class="param-type">Promise</span>
 
 
 
@@ -3321,7 +3530,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="process"><span class="type-signature"></span>process(filename [, cbFile] [, cbDir])</h4>
+    <h4 class="name" id="process"><span class="type-signature">&lt;async> </span>process(filename [, cbFile] [, cbDir])</h4>
     
     
 </dt>
@@ -3393,7 +3602,7 @@ Execution is chained, if any of the callback invocations rejects then the entire
 
             
 
-            <td class="description last">Path to the file or directory</td>
+            <td class="description last">Absolute path to the file or directory</td>
         </tr>
 
     
@@ -3526,7 +3735,7 @@ Execution is chained, if any of the callback invocations rejects then the entire
     
             
 <div class="param-desc">
-    Resolves on success
+    Resolves to true on success if filename exists or to false if it does not
 </div>
 
 
@@ -3598,9 +3807,9 @@ Execution is chained, if any of the callback invocations rejects then the entire
 
 
 <span class="jsdoc-message">
-	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a>
 	
-		on 2017-08-07T14:42:26+03:00
+		on 2017-08-17T03:55:31+03:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

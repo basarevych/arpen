@@ -27,8 +27,10 @@ class Cacher {
         this._util = util;
 
         this._clientPromise = new Promise((resolve, reject) => {
-            if (!this._config.get('cache.enable'))
-                return reject();
+            if (!this._config.get('cache.enable')) {
+                this._logger.info(`[Cache] Cache disabled`);
+                return resolve(null);
+            }
 
             this._redis.connect(this._config.get('cache.redis'))
                 .then(
@@ -37,7 +39,7 @@ class Cacher {
                         resolve(client);
                     },
                     error => {
-                        this._logger.error(`[Cache] Cache disabled: ${error.messages || error.message}`);
+                        this._logger.error(`[Cache] Cache could not be activated: ${error.messages || error.message}`);
                         resolve(null);
                     }
                 );
@@ -75,34 +77,28 @@ class Cacher {
      *                                          If undefined then default (random) value will be used
      * @return {Promise}                        Resolves on success
      */
-    set(name, value, ttl) {
-        value = JSON.stringify(value);
-        if (Buffer.byteLength(value) > 512 * 1024 * 1024)
-            return Promise.reject(new Error(`Cache overflow for ${name}`));
+    async set(name, value, ttl) {
+        try {
+            value = JSON.stringify(value);
+            if (Buffer.byteLength(value) > 512 * 1024 * 1024)
+                throw new Error(`Cache overflow for ${name}`);
 
-        if (typeof ttl === 'undefined')
-            ttl = this._util.getRandomInt(this._config.get('cache.expire_min'), this._config.get('cache.expire_max'));
+            if (typeof ttl === 'undefined')
+                ttl = this._util.getRandomInt(this._config.get('cache.expire_min'), this._config.get('cache.expire_max'));
 
-        return this._clientPromise
-            .then(
-                client => {
-                    if (!client) {
-                        debug(`Cache disabled, couldn't set ${name}`);
-                        return undefined;
-                    }
+            let client = await this._clientPromise;
+            if (!client) {
+                debug(`Cache disabled, couldn't set ${name}`);
+                return;
+            }
 
-                    debug(`Setting ${name}`);
-                    return client.query('SET', [ this._getKey(name), value ])
-                        .then(() => {
-                            if (ttl)
-                                return client.query('EXPIRE', [ this._getKey(name), ttl ]);
-                        });
-                }
-            )
-            .catch(error => {
-                this._logger.error(new NError(error, 'Cacher.set()'));
-                return undefined;
-            });
+            debug(`Setting ${name}`);
+            await client.query('SET', [this._getKey(name), value]);
+            if (ttl)
+                await client.query('EXPIRE', [this._getKey(name), ttl]);
+        } catch (error) {
+            this._logger.error(new NError(error, { name }, 'Cacher.set()'));
+        }
     }
 
     /**
@@ -110,31 +106,25 @@ class Cacher {
      * @param {string} name                     The name
      * @return {Promise}                        Resolves to variable value or undefined
      */
-    get(name) {
-        return this._clientPromise
-                .then(
-                    client => {
-                        if (!client) {
-                            debug(`Cache disabled, couldn't get ${name}`);
-                            return undefined;
-                        }
+    async get(name) {
+        try {
+            let client = await this._clientPromise;
+            if (!client) {
+                debug(`Cache disabled, couldn't get ${name}`);
+                return;
+            }
 
-                        return client.query('GET', [ this._getKey(name) ])
-                            .then(result => {
-                                if (result === null) {
-                                    debug(`Missed ${name}`);
-                                    return undefined;
-                                }
+            let result = await client.query('GET', [this._getKey(name)]);
+            if (result === null) {
+                debug(`Missed ${name}`);
+                return;
+            }
 
-                                debug(`Getting ${name}`);
-                                return JSON.parse(result);
-                            });
-                    }
-                )
-                .catch(error => {
-                    this._logger.error(new NError(error, 'Cacher.get()'));
-                    return undefined;
-                });
+            debug(`Getting ${name}`);
+            return JSON.parse(result);
+        } catch (error) {
+            this._logger.error(new NError(error, { name }, 'Cacher.get()'));
+        }
     }
 
     /**
@@ -142,29 +132,23 @@ class Cacher {
      * @param {string} name                     The name
      * @return {Promise}                        Resolves on success
      */
-    unset(name) {
-        return this._clientPromise
-                .then(
-                    client => {
-                        if (!client) {
-                            debug(`Cache disabled, couldn't unset ${name}`);
-                            return undefined;
-                        }
+    async unset(name) {
+        try {
+            let client = await this._clientPromise;
+            if (!client) {
+                debug(`Cache disabled, couldn't unset ${name}`);
+                return;
+            }
 
-                        return client.query('EXISTS', [ this._getKey(name) ])
-                            .then(result => {
-                                if (!result)
-                                    return null;
+            let result = await client.query('EXISTS', [ this._getKey(name) ]);
+            if (!result)
+                return;
 
-                                debug(`Unsetting ${name}`);
-                                return client.query('DEL', [ this._getKey(name) ]);
-                            });
-                    }
-                )
-                .catch(error => {
-                    this._logger.error(new NError(error, 'Cacher.unset()'));
-                    return undefined;
-                });
+            debug(`Unsetting ${name}`);
+            await client.query('DEL', [ this._getKey(name) ]);
+        } catch (error) {
+            this._logger.error(new NError(error, { name }, 'Cacher.get()'));
+        }
     }
 
     /**

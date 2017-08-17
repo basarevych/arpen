@@ -25,7 +25,7 @@ class Emailer {
         this._config = config;
 
         if (!emailjs)
-            throw new Error('emailjs modules is required for Emailer service');
+            throw new Error('emailjs module is required for Emailer service');
     }
 
     /**
@@ -57,14 +57,14 @@ class Emailer {
      * @param {object[]} [params.attachments]   Array of objects (see emailjs help)
      * @return {Promise}                        Resolves to the sent message details
      */
-    send(params = {}) {
+    async send(params = {}) {
         let { server, from, to, cc, subject, text, html, attachments = [] } = params;
 
         let options = {
             from: from,
             to: to,
             subject: subject,
-            text: text ? text : '',
+            text: text || '',
         };
 
         if (cc)
@@ -77,9 +77,9 @@ class Emailer {
 
         return new Promise((resolve, reject) => {
                 this._connect(server)
-                    .send(options, (err, message) => {
-                        if (err)
-                            reject(new NError(err, 'Emailer.send()'));
+                    .send(options, (error, message) => {
+                        if (error)
+                            reject(new NError(error, { server, from, to, subject }, 'Emailer.send()'));
                         else
                             resolve(message);
                     });
@@ -93,14 +93,18 @@ class Emailer {
      */
     _connect(server = 'main') {
         let options = {
-            host: this._config.smtp[server].host,
-            port: this._config.smtp[server].port,
-            ssl: this._config.smtp[server].ssl,
+            host: this._config.get(`smtp.${server}.host`),
+            port: this._config.get(`smtp.${server}.port`),
+            ssl: this._config.get(`smtp.${server}.ssl`),
         };
-        if (this._config.smtp[server].user)
-            options.user = this._config.smtp[server].user;
-        if (this._config.smtp[server].password)
-            options.password = this._config.smtp[server].password;
+
+        let user = this._config.get(`smtp.${server}.user`);
+        if (user)
+            options.user = user;
+
+        let password = this._config.get(`smtp.${server}.password`);
+        if (password)
+            options.password = password;
 
         return emailjs.server.connect(options);
     }

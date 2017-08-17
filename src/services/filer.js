@@ -5,6 +5,7 @@
 const fs = require('fs-ext');
 const path = require('path');
 const rimraf = require('rimraf');
+const NError = require('nerror');
 
 /**
  * Buffer updater callback
@@ -56,37 +57,50 @@ class Filer {
     }
 
     /**
+     * Check if filename exists
+     * @param {string} filename                     File path
+     * @param {boolean} [followSymlinks=true]       Check the file symlink points to
+     * @return {Promise}                            Resolves to boolean
+     */
+    async exists(filename, followSymlinks = true) {
+        return new Promise(resolve => {
+            let query = followSymlinks ? fs.stat : fs.lstat;
+            query(filename, error => { resolve(!error); });
+        });
+    }
+
+    /**
      * Read file descriptor
      * @param {number} fd       File descriptor
      * @return {Promise}        Resolves to file contents as Buffer
      */
-    read(fd) {
+    async read(fd) {
         return new Promise((resolve, reject) => {
-                fs.fstat(fd, (err, stats) => {
-                    if (err)
-                        return reject(err);
+            fs.fstat(fd, (error, stats) => {
+                if (error)
+                    return reject(error);
 
-                    if (stats.size === 0)
-                        return resolve(Buffer.from(''));
+                let buffer = Buffer.allocUnsafe(stats.size);
+                if (!stats.size)
+                    return resolve(buffer);
 
-                    let buffer = Buffer.allocUnsafe(stats.size);
-                    fs.read(
-                        fd,
-                        buffer,
-                        0,
-                        buffer.length,
-                        null,
-                        (err, bytesRead, buffer) => {
-                            if (err)
-                                return reject(err);
-                            if (bytesRead !== stats.size)
-                                return reject(new Error(`Only ${bytesRead} out of ${stats.size} has been read on fd ${fd}`));
+                fs.read(
+                    fd,
+                    buffer,
+                    0,
+                    buffer.length,
+                    null,
+                    (error, bytesRead, buffer) => {
+                        if (error)
+                            return reject(error);
+                        if (bytesRead !== stats.size)
+                            return reject(new Error(`Only ${bytesRead} out of ${stats.size} has been read on fd ${fd}`));
 
-                            resolve(buffer);
-                        }
-                    );
-                });
+                        resolve(buffer);
+                    }
+                );
             });
+        });
     }
 
     /**
@@ -95,66 +109,90 @@ class Filer {
      * @param {Buffer} buffer       New contents of the file
      * @return {Promise}            Resolves to true on success
      */
-    write(fd, buffer) {
+    async write(fd, buffer) {
         return new Promise((resolve, reject) => {
+            fs.ftruncate(fd, 0, error => {
+                if (error)
+                    return reject(error);
+
+                if (!buffer.length)
+                    return resolve(true);
+
                 fs.write(
                     fd,
                     buffer,
                     0,
                     buffer.length,
                     null,
-                    err => {
-                        if (err)
-                            return reject(err);
+                    error => {
+                        if (error)
+                            return reject(error);
 
                         resolve(true);
                     }
                 );
             });
+        });
     }
 
     /**
      * Lock a file (shared) and read it returning as a Buffer. Maximum file size is Buffer.kMaxLength bytes.
+     * File must exist.
      * @param {string} filename     File path and name
      * @return {Promise}            Resolves to Buffer of file contents
      */
-    lockReadBuffer(filename) {
-        return new Promise((resolve, reject) => {
-                let fd;
-                try {
-                    fd = fs.openSync(filename, 'r');
-                } catch (err) {
-                    return reject(err);
-                }
+    async lockReadBuffer(filename) {
+        let fd, locked, buffer, lastError;
 
-                fs.flock(fd, 'sh', err => {
-                    if (err)
-                        return reject(err);
+        try {
+            fd = await new Promise((resolve, reject) => {
+                fs.open(filename, 'r', (error, fd) => {
+                    if (error)
+                        return reject(error);
 
-                    this.read(fd)
-                        .then(data => {
-                            fs.flock(fd, 'un', err => {
-                                if (fd) {
-                                    fs.closeSync(fd);
-                                    fd = null;
-                                }
-
-                                if (err)
-                                     return reject(err);
-
-                                resolve(data);
-                            });
-                        })
-                        .catch(err => {
-                            if (fd) {
-                                fs.closeSync(fd);
-                                fd = null;
-                            }
-
-                            reject(err);
-                        });
+                    resolve(fd);
                 });
             });
+            locked = await new Promise((resolve, reject) => {
+                fs.flock(fd, 'sh', async error => {
+                    if (error)
+                        return reject(error);
+
+                    resolve(true);
+                });
+            });
+            buffer = await this.read(fd);
+        } catch (error) {
+            lastError = error;
+        }
+
+        await new Promise(resolve => {
+            if (!fd || !locked)
+                return resolve();
+
+            fs.flock(fd, 'un', error => {
+                if (error && !lastError)
+                    lastError = error;
+
+                resolve();
+            });
+        });
+        await new Promise(resolve => {
+            if (!fd)
+                return resolve();
+
+            fs.close(fd, error => {
+                if (error && !lastError)
+                    lastError = error;
+
+                resolve();
+            });
+        });
+
+        if (lastError)
+            throw new NError(lastError, { filename }, 'Filer.lockReadBuffer()');
+
+        return buffer;
     }
 
     /**
@@ -162,11 +200,9 @@ class Filer {
      * @param {string} filename             File path and name
      * @return {Promise}                    Resolves to file contents
      */
-    lockRead(filename) {
-        return this.lockReadBuffer(filename)
-            .then(buffer => {
-                return buffer.toString();
-            });
+    async lockRead(filename) {
+        let buffer = await this.lockReadBuffer(filename);
+        return buffer.toString();
     }
 
     /**
@@ -179,57 +215,92 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    lockWriteBuffer(filename, buffer, params = {}) {
+    async lockWriteBuffer(filename, buffer, params = {}) {
         let { mode = null, uid = null, gid = null } = params;
+        let fd, locked, stats, lastError;
 
-        return new Promise((resolve, reject) => {
-                let fd;
-                try {
-                    fd = fs.openSync(filename, 'w');
-                } catch (err) {
-                    return reject(err);
-                }
+        try {
+            fd = await new Promise((resolve, reject) => {
+                fs.open(filename, 'w', (error, fd) => {
+                    if (error)
+                        return reject(error);
 
-                fs.flock(fd, 'ex', err => {
-                    if (err)
-                        return reject(err);
-
-                    this.write(fd, buffer)
-                        .then(() => {
-                            try {
-                                if (mode !== null)
-                                    fs.chmodSync(filename, mode);
-                            } catch (error) {
-                                // do nothing
-                            }
-                            try {
-                                if (uid !== null && gid !== null)
-                                    fs.chownSync(filename, uid, gid);
-                            } catch (error) {
-                                // do nothing
-                            }
-                            fs.flock(fd, 'un', err => {
-                                if (fd) {
-                                    fs.closeSync(fd);
-                                    fd = null;
-                                }
-
-                                if (err)
-                                    return reject(err);
-
-                                resolve(true);
-                            });
-                        })
-                        .catch(err => {
-                            if (fd) {
-                                fs.closeSync(fd);
-                                fd = null;
-                            }
-
-                            reject(err);
-                        });
+                    resolve(fd);
                 });
             });
+            locked = await new Promise((resolve, reject) => {
+                fs.flock(fd, 'ex', async error => {
+                    if (error)
+                        return reject(error);
+
+                    resolve(true);
+                });
+            });
+
+            await this.write(fd, buffer);
+
+            stats = await new Promise((resolve, reject) => {
+                fs.fstat(fd, (error, stats) => {
+                    if (error)
+                        return reject(error);
+
+                    resolve(stats);
+                });
+            });
+
+            await new Promise((resolve, reject) => {
+                if (mode === null || stats.mode === mode)
+                    return resolve();
+
+                fs.chmod(filename, mode, error => {
+                    if (error)
+                        return reject(error);
+
+                    resolve();
+                });
+            });
+            await new Promise((resolve, reject) => {
+                if (uid === null || gid === null || (stats.uid === uid && stats.gid === gid))
+                    return resolve();
+
+                fs.chown(filename, uid, gid, error => {
+                    if (error)
+                        return reject(error);
+
+                    resolve();
+                });
+            });
+        } catch (error) {
+            lastError = error;
+        }
+
+        await new Promise(resolve => {
+            if (!fd || !locked)
+                return resolve();
+
+            fs.flock(fd, 'un', error => {
+                if (error && !lastError)
+                    lastError = error;
+
+                resolve();
+            });
+        });
+        await new Promise(resolve => {
+            if (!fd)
+                return resolve();
+
+            fs.close(fd, error => {
+                if (error && !lastError)
+                    lastError = error;
+
+                resolve();
+            });
+        });
+
+        if (lastError)
+            throw new NError(lastError, { filename }, 'Filer.lockWriteBuffer()');
+
+        return true;
     }
 
     /**
@@ -242,10 +313,9 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    lockWrite(filename, contents, params = {}) {
+    async lockWrite(filename, contents, params = {}) {
         let { mode = null, uid = null, gid = null } = params;
-        let buffer = Buffer.from(contents);
-        return this.lockWriteBuffer(filename, buffer, { mode, uid, gid });
+        return this.lockWriteBuffer(filename, Buffer.from(contents), { mode, uid, gid });
     }
 
     /**
@@ -258,72 +328,96 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    lockUpdateBuffer(filename, cb, params = {}) {
+    async lockUpdateBuffer(filename, cb, params = {}) {
         let { mode = null, uid = null, gid = null } = params;
+        let fd, locked, stats, lastError;
 
-        return new Promise((resolve, reject) => {
-                let fd;
-                try {
-                    fd = fs.openSync(filename, 'a+');
-                } catch (err) {
-                    return reject(err);
-                }
+        try {
+            fd = await new Promise((resolve, reject) => {
+                fs.open(filename, 'w', (error, fd) => {
+                    if (error)
+                        return reject(error);
 
-                fs.flock(fd, 'ex', err => {
-                    if (err)
-                        return reject(err);
-
-                    let oldBuffer;
-                    this.read(fd)
-                        .then(buffer => {
-                            oldBuffer = buffer;
-                            let result = cb(buffer);
-                            if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
-                                throw new Error(`The callback did not return a Promise`);
-                            return result;
-                        })
-                        .then(newBuffer => {
-                            if (oldBuffer.equals(newBuffer))
-                                return;
-
-                            fs.ftruncateSync(fd, 0);
-                            return this.write(fd, newBuffer);
-                        })
-                        .then(() => {
-                            try {
-                                if (mode !== null)
-                                    fs.chmodSync(filename, mode);
-                            } catch (error) {
-                                // do nothing
-                            }
-                            try {
-                                if (uid !== null && gid !== null)
-                                    fs.chownSync(filename, uid, gid);
-                            } catch (error) {
-                                // do nothing
-                            }
-                            fs.flock(fd, 'un', err => {
-                                if (fd) {
-                                    fs.closeSync(fd);
-                                    fd = null;
-                                }
-
-                                if (err)
-                                    return reject(err);
-
-                                resolve(true);
-                            });
-                        })
-                        .catch(err => {
-                            if (fd) {
-                                fs.closeSync(fd);
-                                fd = null;
-                            }
-
-                            reject(err);
-                        });
+                    resolve(fd);
                 });
             });
+            locked = await new Promise((resolve, reject) => {
+                fs.flock(fd, 'ex', async error => {
+                    if (error)
+                        return reject(error);
+
+                    resolve(true);
+                });
+            });
+
+            let oldBuffer = await this.read(fd);
+            let newBuffer = await cb(oldBuffer);
+            if (!oldBuffer.equals(newBuffer)) {
+                await this.write(fd, newBuffer);
+
+                stats = await new Promise((resolve, reject) => {
+                    fs.fstat(fd, (error, stats) => {
+                        if (error)
+                            return reject(error);
+
+                        resolve(stats);
+                    });
+                });
+
+                await new Promise((resolve, reject) => {
+                    if (mode === null || stats.mode === mode)
+                        return resolve();
+
+                    fs.chmod(filename, mode, error => {
+                        if (error)
+                            return reject(error);
+
+                        resolve();
+                    });
+                });
+                await new Promise((resolve, reject) => {
+                    if (uid === null || gid === null || (stats.uid === uid && stats.gid === gid))
+                        return resolve();
+
+                    fs.chown(filename, uid, gid, error => {
+                        if (error)
+                            return reject(error);
+
+                        resolve();
+                    });
+                });
+            }
+        } catch (error) {
+            lastError = error;
+        }
+
+        await new Promise(resolve => {
+            if (!fd || !locked)
+                return resolve();
+
+            fs.flock(fd, 'un', error => {
+                if (error && !lastError)
+                    lastError = error;
+
+                resolve();
+            });
+        });
+        await new Promise(resolve => {
+            if (!fd)
+                return resolve();
+
+            fs.close(fd, error => {
+                if (error && !lastError)
+                    lastError = error;
+
+                resolve();
+            });
+        });
+
+        if (lastError)
+            throw new NError(lastError, { filename }, 'Filer.lockUpdateBuffer()');
+
+        return true;
     }
 
     /**
@@ -336,18 +430,12 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    lockUpdate(filename, cb, params = {}) {
+    async lockUpdate(filename, cb, params = {}) {
         let { mode = null, uid = null, gid = null } = params;
 
-        let stringCb = buffer => {
-            let result = cb(buffer.toString());
-            if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
-                return Promise.reject(new Error(`The callback did not return a Promise`));
-
-            return result
-                .then(str => {
-                    return Buffer.from(str);
-                });
+        let stringCb = async buffer => {
+            let result = await cb(buffer.toString());
+            return Buffer.from(result);
         };
         return this.lockUpdateBuffer(filename, stringCb, { mode, uid, gid });
     }
@@ -361,63 +449,85 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    createDirectory(filename, params = {}) {
+    async createDirectory(filename, params = {}) {
         let { mode = null, uid = null, gid = null } = params;
 
-        return new Promise((resolve, reject) => {
-                if (filename.length < 2 || filename[0] !== '/')
-                    return reject(`Invalid path: ${filename}`);
+        if (filename.length < 2 || filename[0] !== '/')
+            throw new Error(`Invalid path: ${filename}`);
 
-                let parts = filename.split('/');
-                parts.shift();
+        let parts = filename.split('/');
+        parts.shift();
 
-                let dirs = [];
-                for (let i = 0; i < parts.length; i++) {
-                    let dir = '';
-                    for (let j = 0; j <= i; j++)
-                        dir += '/' + parts[j];
-                    dirs.push(dir);
-                }
+        let dirs = [];
+        for (let i = 0; i < parts.length; i++) {
+            let dir = '';
+            for (let j = 0; j <= i; j++)
+                dir += '/' + parts[j];
+            dirs.push(dir);
+        }
 
-                dirs.reduce(
-                        (prev, cur) => {
-                            return prev.then(() => {
-                                let stats;
-                                try {
-                                    stats = fs.statSync(cur);
-                                } catch (err) {
-                                    // do nothing
-                                }
+        try {
+            await dirs.reduce(
+                async (prev, cur) => {
+                    await prev;
 
-                                if (stats) {
-                                    if (!stats.isDirectory())
-                                        throw new Error(`Path exists and not a directory: ${cur}`);
-                                } else {
-                                    fs.mkdirSync(cur);
-                                    try {
-                                        if (mode !== null)
-                                            fs.chmodSync(cur, mode);
-                                    } catch (error) {
-                                        // do nothing
-                                    }
-                                    try {
-                                        if (uid !== null && gid !== null)
-                                            fs.chownSync(cur, uid, gid);
-                                    } catch (error) {
-                                        // do nothing
-                                    }
-                                }
-                            });
-                        },
-                        Promise.resolve()
-                    )
-                    .then(() => {
-                        resolve(true);
-                    })
-                    .catch(err => {
-                        reject(err);
+                    let stats = await new Promise(resolve => {
+                        fs.stat(cur, (error, stats) => {
+                            resolve(error ? null : stats);
+                        });
                     });
-            });
+
+                    if (stats) {
+                        if (!stats.isDirectory())
+                            throw new Error(`Path exists and not a directory: ${cur}`);
+                    } else {
+                        await new Promise((resolve, reject) => {
+                            fs.mkdir(cur, error => {
+                                if (error)
+                                    return reject(error);
+
+                                resolve();
+                            });
+                        });
+                        stats = await new Promise((resolve, reject) => {
+                            fs.stat(cur, (error, stats) => {
+                                if (error)
+                                    return reject(error);
+
+                                resolve(stats);
+                            });
+                        });
+                        await new Promise((resolve, reject) => {
+                            if (mode === null || stats.mode === mode)
+                                return resolve();
+
+                            fs.chmod(cur, mode, error => {
+                                if (error)
+                                    return reject(error);
+
+                                resolve();
+                            });
+                        });
+                        await new Promise((resolve, reject) => {
+                            if (uid === null || gid === null || (stats.uid === uid && stats.gid === gid))
+                                return resolve();
+
+                            fs.chown(cur, uid, gid, error => {
+                                if (error)
+                                    return reject(error);
+
+                                resolve();
+                            });
+                        });
+                    }
+                },
+                Promise.resolve()
+            );
+        } catch (error) {
+            throw new NError(error, { filename, params }, 'Filer.createDirectory()');
+        }
+
+        return true;
     }
 
     /**
@@ -429,136 +539,186 @@ class Filer {
      * @param {number} [params.gid=null]    GID
      * @return {Promise}                    Resolves to true on success
      */
-    createFile(filename, params = {}) {
+    async createFile(filename, params = {}) {
         let { mode = null, uid = null, gid = null } = params;
 
-        return new Promise((resolve, reject) => {
-                if (filename.length < 2 || filename[0] !== '/')
-                    return reject(`Invalid path: ${filename}`);
+        if (filename.length < 2 || filename[0] !== '/')
+            throw new Error(`Invalid path: ${filename}`);
 
-                try {
-                    if (!fs.statSync(filename).isFile())
+        try {
+            let exists = await new Promise((resolve, reject) => {
+                if (filename.length < 2 || filename[0] !== '/')
+                    return reject(new Error(`Invalid path: ${filename}`));
+
+                fs.stat(filename, (error, stats) => {
+                    if (error)
+                        return resolve(false);
+
+                    if (!stats.isFile())
                         return reject(new Error(`Path exists and not a file: ${filename}`));
-
-                    return resolve(true);
-                } catch (err) {
-                    // do nothing
-                }
-
-                try {
-                    let fd = fs.openSync(filename, 'a');
-                    fs.closeSync(fd);
-
-                    try {
-                        if (mode !== null)
-                            fs.chmodSync(filename, mode);
-                    } catch (error) {
-                        // do nothing
-                    }
-                    try {
-                        if (uid !== null && gid !== null)
-                            fs.chownSync(filename, uid, gid);
-                    } catch (error) {
-                        // do nothing
-                    }
-
-                    resolve(true);
-                } catch (err) {
-                    reject(err);
-                }
-            });
-    }
-
-    /**
-     * Remove a file or directory recursively
-     * @param {string} filename     Path of a file or directory
-     * @return {object}             Resolves to true on success
-     */
-    remove(filename) {
-        return new Promise((resolve, reject) => {
-                if (filename.length < 2 || filename[0] !== '/')
-                    return reject(`Invalid path: ${filename}`);
-
-                try {
-                    fs.lstatSync(filename);
-                } catch (err) {
-                    return reject(err);
-                }
-
-                rimraf(filename, { disableGlob: true }, err => {
-                    if (err)
-                        return reject(err);
 
                     resolve(true);
                 });
             });
+
+            if (exists)
+                return true;
+
+            let fd = await new Promise((resolve, reject) => {
+                fs.open(filename, 'a', (error, fd) => {
+                    if (error)
+                        return reject(error);
+
+                    resolve(fd);
+                });
+            });
+            await new Promise((resolve, reject) => {
+                fs.close(fd, error => {
+                    if (error)
+                        return reject(error);
+
+                    resolve();
+                });
+            });
+            let stats = await new Promise((resolve, reject) => {
+                fs.fstat(fd, (error, stats) => {
+                    if (error)
+                        return reject(error);
+
+                    resolve(stats);
+                });
+            });
+            await new Promise((resolve, reject) => {
+                if (mode === null || stats.mode === mode)
+                    return resolve();
+
+                fs.chmod(filename, mode, error => {
+                    if (error)
+                        return reject(error);
+
+                    resolve();
+                });
+            });
+            await new Promise((resolve, reject) => {
+                if (uid === null || gid === null || (stats.uid === uid && stats.gid === gid))
+                    return resolve();
+
+                fs.chown(filename, uid, gid, error => {
+                    if (error)
+                        return reject(error);
+
+                    resolve();
+                });
+            });
+        } catch (error) {
+            throw new NError(error, { filename, params }, 'Filer.createFile()');
+        }
+
+        return true;
+    }
+
+    /**
+     * Remove a file or directory recursively
+     * @param {string} filename     Absolute path of a file or directory
+     * @return {Promise}            Resolves to true on success
+     */
+    async remove(filename) {
+        if (filename.length < 2 || filename[0] !== '/')
+            throw new Error(`Invalid path: ${filename}`);
+
+        try {
+            if (!await this.exists(filename, false))
+                return true;
+
+            await new Promise((resolve, reject) => {
+                rimraf(filename, { disableGlob: true }, error => {
+                    if (error)
+                        return reject(error);
+
+                    resolve();
+                });
+            });
+        } catch (error) {
+            throw new NError(error, { filename }, 'Filer.remove()');
+        }
+
+        return true;
     }
 
     /**
      * Execute a callback for the filename if it is a file. If it is a directory then execute it for every file in that
      * directory recursively.<br>
      * Execution is chained, if any of the callback invocations rejects then the entire process is rejected.
-     * @param {string} filename                 Path to the file or directory
+     * @param {string} filename                 Absolute path to the file or directory
      * @param {ProcessFileCallback} [cbFile]    The file callback
      * @param {ProcessDirCallback} [cbDir]      The directory callback. Should resolve to true if this subdirectory
      *                                          needs processing
-     * @return {Promise}                        Resolves on success
+     * @return {Promise}                        Resolves to true on success if filename exists or to false if it does not
      */
-    process(filename, cbFile, cbDir) {
+    async process(filename, cbFile, cbDir) {
+        if (filename.length < 2 || filename[0] !== '/')
+            throw new Error(`Invalid path: ${filename}`);
+
         try {
-            if (!fs.statSync(filename).isDirectory()) {
-                if (!cbFile)
-                    return Promise.resolve();
+            let isFile;
+            let exists = await new Promise(resolve => {
+                fs.stat(filename, (error, stats) => {
+                    if (error)
+                        return resolve(false);
 
-                let result = cbFile(filename);
-                if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
-                    return Promise.reject(new Error(`The file callback did not return a Promise for "${name}"`));
-                return result;
-            }
-        } catch (err) {
-            return Promise.resolve();
-        }
-
-        let names;
-        try {
-            names = fs.readdirSync(filename);
-        } catch (err) {
-            return Promise.resolve();
-        }
-
-        names.sort();
-        return names.reduce((prev, cur) => {
-            let name = path.join(filename, cur);
-            try {
-                if (fs.statSync(name).isDirectory()) {
-                    return prev.then(() => {
-                        if (!cbDir)
-                            return this.process(name, cbFile, cbDir);
-
-                        let result = cbDir(name);
-                        if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
-                            return Promise.reject(new Error(`The dir callback did not return a Promise for "${name}"`));
-                        return result
-                            .then(accept => {
-                                if (accept)
-                                    return this.process(name, cbFile, cbDir);
-                            });
-                    });
-                }
-            } catch (err) {
-                return prev;
-            }
-
-            return prev.then(() => {
-                if (!cbFile)
-                    return Promise.resolve();
-
-                let result = cbFile(name);
-                if (typeof result !== 'object' || result === null || typeof result.then !== 'function')
-                    throw new Error(`The file callback did not return a Promise for "${name}"`);
-                return result;
+                    isFile = stats.isFile();
+                    resolve(true);
+                });
             });
-        }, Promise.resolve());
+
+            if (!exists)
+                return false;
+
+            if (isFile) {
+                if (cbFile)
+                    await cbFile(filename);
+
+                return true;
+            }
+
+            let names = await new Promise((resolve, reject) => {
+                fs.readdir(filename, (error, files) => {
+                    if (error)
+                        return reject(error);
+
+                    resolve(files);
+                });
+            });
+
+            names.sort();
+            await names.reduce(
+                async (prev, cur) => {
+                    await prev;
+
+                    let name = path.join(filename, cur);
+                    let isDir = await new Promise((resolve, reject) => {
+                        fs.stat(name, (error, stats) => {
+                            if (error)
+                                return reject(error);
+
+                            resolve(stats.isDirectory());
+                        });
+                    });
+
+                    if (isDir) {
+                        if (cbDir ? await cbDir(name) : true)
+                            return this.process(name, cbFile, cbDir);
+                    } else if (cbFile) {
+                        return cbFile(name);
+                    }
+                },
+                Promise.resolve()
+            );
+        } catch (error) {
+            throw new NError(error, { filename }, 'Filer.process()');
+        }
+
+        return true;
     }
 }
 

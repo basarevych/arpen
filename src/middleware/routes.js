@@ -36,16 +36,14 @@ class Routes {
      * @param {Express} server          The server
      * @return {Promise}
      */
-    register(server) {
-        for (let [ moduleName, moduleInstance ] of this._modules) {
+    async register(server) {
+        for (let moduleInstance of this._modules.values()) {
             if (typeof moduleInstance.routers !== 'function')
                 continue;
 
             for (let router of moduleInstance.routers())
                 server.express.use('/', router);
         }
-
-        return Promise.resolve();
     }
 }
 

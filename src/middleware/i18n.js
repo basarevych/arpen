@@ -60,82 +60,70 @@ class I18n {
      * @param {Express} server          The server
      * @return {Promise}
      */
-    register(server) {
-        return Promise.resolve()
-            .then(() => {
-                if (this._loaded)
-                    return;
+    async register(server) {
+        if (this._loaded)
+            return;
 
-                this._loaded = true;
-                return new Promise((resolve, reject) => {
-                        try {
-                            for (let [ moduleName, moduleConfig ] of this._config.modules) {
-                                for (let dir of moduleConfig.i18n || []) {
-                                    let filename = dir[0] === '/' ?
-                                        dir :
-                                        path.join(this._config.base_path, 'modules', moduleName, dir);
+        this._loaded = true;
+        for (let [ moduleName, moduleConfig ] of this._config.modules) {
+            for (let dir of moduleConfig.i18n || []) {
+                let filename = dir[0] === '/'
+                    ? dir
+                    : path.join(this._config.base_path, 'modules', moduleName, dir);
 
-                                    for (let file of fs.readdirSync(filename)) {
-                                        if (!file.endsWith('.json'))
-                                            continue;
+                for (let file of fs.readdirSync(filename)) {
+                    if (!file.endsWith('.json'))
+                        continue;
 
-                                        let locale = path.basename(file, '.json');
-                                        if (!this.translations[locale])
-                                            this.translations[locale] = {};
+                    let locale = path.basename(file, '.json');
+                    if (!this.translations[locale])
+                        this.translations[locale] = {};
 
-                                        merge.recursive(this.translations[locale], require(path.join(filename, file)));
-                                    }
-                                }
-                            }
+                    merge.recursive(this.translations[locale], require(path.join(filename, file)));
+                }
+            }
+        }
 
-                            for (let locale of Object.keys(this.translations)) {
-                                let formatMessage = require('format-message');
-                                formatMessage.setup({
-                                    locale: locale,
-                                    translations: this.translations,
-                                });
-                                this.formatters.set(locale, formatMessage);
-                            }
-
-                            resolve();
-                        } catch (error) {
-                            reject(error);
-                        }
-                    })
-                    .then(() => {
-                        if (Object.keys(this.translations).indexOf(this.constructor.defaultLocale) !== -1)
-                            this.locale = this.constructor.defaultLocale;
-                    });
-            })
-            .then(() => {
-                server.express.use((req, res, next) => {
-                    res.locals.locale = null;
-                    if (Object.keys(this.translations).length) {
-                        if (req.cookies)
-                            res.locals.locale = Object.keys(this.translations).indexOf(req.cookies.locale) === -1 ? null : req.cookies.locale;
-                        if (!res.locals.locale)
-                            res.locals.locale = req.acceptsLanguages(Object.keys(this.translations));
-                    }
-                    if (!res.locals.locale)
-                        res.locals.locale = this.locale;
-
-                    res.locals.i18n = (id, ...args) => {
-                        let options = {}, locale = res.locals.locale;
-                        if (args.length >= 2) {
-                            options = args[0];
-                            locale = args[1];
-                        } else if (args.length === 1) {
-                            if (typeof args[0] === 'object')
-                                options = args[0];
-                            else
-                                locale = args[0];
-                        }
-                        return this.translate(id, options, locale);
-                    };
-
-                    next();
-                });
+        for (let locale of Object.keys(this.translations)) {
+            let formatMessage = require('format-message');
+            formatMessage.setup({
+                locale: locale,
+                translations: this.translations,
             });
+            this.formatters.set(locale, formatMessage);
+        }
+
+        if (Object.keys(this.translations).includes(this.constructor.defaultLocale))
+            this.locale = this.constructor.defaultLocale;
+
+        server.express.use((req, res, next) => {
+            res.locals.locale = null;
+            if (Object.keys(this.translations).length) {
+                if (req.cookies)
+                    res.locals.locale = Object.keys(this.translations).includes(req.cookies.locale) ? req.cookies.locale : null;
+                if (!res.locals.locale)
+                    res.locals.locale = req.acceptsLanguages(Object.keys(this.translations));
+            }
+            if (!res.locals.locale)
+                res.locals.locale = this.locale;
+
+            res.locals.i18n = (id, ...args) => {
+                let options = {};
+                let locale = res.locals.locale;
+                if (args.length >= 2) {
+                    options = args[0];
+                    locale = args[1];
+                } else if (args.length === 1) {
+                    if (typeof args[0] === 'object')
+                        options = args[0];
+                    else
+                        locale = args[0];
+                }
+                return this.translate(id, options, locale);
+            };
+
+            next();
+        });
     }
 
     /**
@@ -143,9 +131,11 @@ class I18n {
      * @param {string} id
      * @param {object} [options]
      * @param {string} [locale]
+     * @return {string}
      */
     translate(id, ...args) {
-        let options = {}, locale = this.locale;
+        let options = {};
+        let locale = this.locale;
         if (args.length >= 2) {
             options = args[0];
             locale = args[1];

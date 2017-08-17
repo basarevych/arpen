@@ -1210,7 +1210,7 @@ Main purpose is DI container with class autoloading through configuration files.
             
 <hr>
 <dt>
-    <h4 class="name" id="debug"><span class="type-signature"></span>debug(messages)</h4>
+    <h4 class="name" id="debug"><span class="type-signature">&lt;async> </span>debug(messages)</h4>
     
     
 </dt>
@@ -1370,7 +1370,7 @@ Main purpose is DI container with class autoloading through configuration files.
             
 <hr>
 <dt>
-    <h4 class="name" id="info"><span class="type-signature"></span>info(messages)</h4>
+    <h4 class="name" id="info"><span class="type-signature">&lt;async> </span>info(messages)</h4>
     
     
 </dt>
@@ -1530,7 +1530,7 @@ Main purpose is DI container with class autoloading through configuration files.
             
 <hr>
 <dt>
-    <h4 class="name" id="error"><span class="type-signature"></span>error(messages)</h4>
+    <h4 class="name" id="error"><span class="type-signature">&lt;async> </span>error(messages)</h4>
     
     
 </dt>
@@ -1690,7 +1690,7 @@ Main purpose is DI container with class autoloading through configuration files.
             
 <hr>
 <dt>
-    <h4 class="name" id="run"><span class="type-signature"></span>run(options, args)</h4>
+    <h4 class="name" id="run"><span class="type-signature">&lt;async> </span>run(options, args)</h4>
     
     
 </dt>
@@ -1950,6 +1950,26 @@ Main purpose is DI container with class autoloading through configuration files.
     
 
     
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
 
     
 </dd>
@@ -1958,7 +1978,7 @@ Main purpose is DI container with class autoloading through configuration files.
             
 <hr>
 <dt>
-    <h4 class="name" id="init"><span class="type-signature"></span>init(args)</h4>
+    <h4 class="name" id="init"><span class="type-signature">&lt;async> </span>init(args)</h4>
     
     
 </dt>
@@ -2118,7 +2138,7 @@ Main purpose is DI container with class autoloading through configuration files.
             
 <hr>
 <dt>
-    <h4 class="name" id="start"><span class="type-signature"></span>start(args)</h4>
+    <h4 class="name" id="start"><span class="type-signature">&lt;async> </span>start(args)</h4>
     
     
 </dt>
@@ -2280,7 +2300,7 @@ Descendant must set _running to true
             
 <hr>
 <dt>
-    <h4 class="name" id="stop"><span class="type-signature"></span>stop(args)</h4>
+    <h4 class="name" id="stop"><span class="type-signature">&lt;async> </span>stop(args)</h4>
     
     
 </dt>
@@ -2442,7 +2462,7 @@ Descendant must set _running to false
             
 <hr>
 <dt>
-    <h4 class="name" id="onSignal"><span class="type-signature"></span>onSignal(signal)</h4>
+    <h4 class="name" id="onSignal"><span class="type-signature">&lt;async> </span>onSignal(signal)</h4>
     
     
 </dt>
@@ -2562,6 +2582,26 @@ Descendant must set _running to false
     
 
     
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
 
     
 </dd>
@@ -2570,7 +2610,7 @@ Descendant must set _running to false
             
 <hr>
 <dt>
-    <h4 class="name" id="_initConfig"><span class="type-signature"></span>_initConfig()</h4>
+    <h4 class="name" id="_initConfig"><span class="type-signature">&lt;async> </span>_initConfig()</h4>
     
     
 </dt>
@@ -2668,7 +2708,7 @@ Descendant must set _running to false
             
 <hr>
 <dt>
-    <h4 class="name" id="_initSources"><span class="type-signature"></span>_initSources()</h4>
+    <h4 class="name" id="_initSources"><span class="type-signature">&lt;async> </span>_initSources()</h4>
     
     
 </dt>
@@ -2766,7 +2806,7 @@ Descendant must set _running to false
             
 <hr>
 <dt>
-    <h4 class="name" id="_initLogger"><span class="type-signature"></span>_initLogger()</h4>
+    <h4 class="name" id="_initLogger"><span class="type-signature">&lt;async> </span>_initLogger()</h4>
     
     
 </dt>
@@ -2864,7 +2904,7 @@ Descendant must set _running to false
             
 <hr>
 <dt>
-    <h4 class="name" id="_initModules"><span class="type-signature"></span>_initModules()</h4>
+    <h4 class="name" id="_initModules"><span class="type-signature">&lt;async> </span>_initModules()</h4>
     
     
 </dt>
@@ -3558,7 +3598,7 @@ Descendant must set _running to false
             
 <hr>
 <dt>
-    <h4 class="name" id="_output"><span class="type-signature"></span>_output(stream, messages)</h4>
+    <h4 class="name" id="_output"><span class="type-signature">&lt;async> </span>_output(stream, messages)</h4>
     
     
 </dt>
@@ -3730,7 +3770,7 @@ Descendant must set _running to false
             
 <hr>
 <dt>
-    <h4 class="name" id="._require"><span class="type-signature">&lt;static> </span>_require(filename [, defaultObject])</h4>
+    <h4 class="name" id="._require"><span class="type-signature">&lt;async, static> </span>_require(filename [, defaultObject])</h4>
     
     
 </dt>
@@ -3970,9 +4010,9 @@ Descendant must set _running to false
 
 
 <span class="jsdoc-message">
-	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a>
 	
-		on 2017-08-07T14:42:26+03:00
+		on 2017-08-17T03:55:30+03:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

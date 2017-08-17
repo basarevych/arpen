@@ -97,30 +97,30 @@ class RedisClient {
      * @param {Array} [params]                      Command parameters
      * @return {Promise}                            Resolves to command reply
      */
-    query(command, params = []) {
+    async query(command, params = []) {
         debug(command.toUpperCase() + ' ' + params);
 
         if (!this.client)
-            return Promise.reject(new Error('Query on terminated client'));
+            throw new Error('Query on terminated client');
 
         return new Promise((resolve, reject) => {
-                try {
-                    let method = this.client[command.toLowerCase()];
-                    if (typeof method !== 'function')
-                        return reject('Unknown command: ' + command);
+            try {
+                let method = this.client[command.toLowerCase()];
+                if (typeof method !== 'function')
+                    return reject(new Error('Unknown command: ' + command));
 
-                    let args = params.slice();
-                    args.push((error, reply) => {
-                        if (error)
-                            return reject(new NError(error, 'Command failed: ' + command));
+                let args = params.slice();
+                args.push((error, reply) => {
+                    if (error)
+                        return reject(new NError(error, 'Command failed: ' + command));
 
-                        resolve(reply);
-                    });
-                    method.apply(this.client, args);
-                } catch (error) {
-                    reject(new NError(error, 'RedisClient.query()'));
-                }
-            });
+                    resolve(reply);
+                });
+                method.apply(this.client, args);
+            } catch (error) {
+                reject(new NError(error, 'RedisClient.query()'));
+            }
+        });
     }
 
     /**
@@ -132,8 +132,9 @@ class RedisClient {
      * @return {Promise}                            Resolves to an array of two items: transaction result and queue
      *                                              exec replies array
      */
-    transaction() {
-        let params = { watch: [] }, cb;
+    async transaction() {
+        let params = { watch: [] };
+        let cb;
         if (arguments.length >= 2) {
             if (arguments[0].name)
                 params.name = arguments[0].name;
@@ -145,122 +146,124 @@ class RedisClient {
         }
 
         if (!this.client) {
-            return Promise.reject(new Error(
+            throw new Error(
                 'Transaction ' +
                 (params.name ? params.name + ' ' : '') +
                 'on terminated client'
-            ));
+            );
         }
 
         if (++this._transactionLevel !== 1) {
             this._transactionLevel--;
-            return Promise.reject(new Error(
+            throw new Error(
                 'Nested Redis transactions are not supported' +
                 (params.name ? ` (called in ${params.name})` : '')
-            ));
+            );
         }
 
-        let unwatch = () => {
+        let unwatch = async () => {
             let promises = [];
             for (let key of params.watch) {
                 promises.push(
-                    this.query('UNWATCH', [ key ])
-                        .then(() => {}, () => {})
+                    this.query('UNWATCH', [ key ]).catch(() => {})
                 );
             }
-            return promises.length ? Promise.all(promises) : Promise.resolve();
+            if (promises.length)
+                return Promise.all(promises);
         };
 
-        return new Promise((resolve, reject) => {
+        let value;
+        try {
+            value = await new Promise(async (resolve, reject) => {
                 let numTries = 0;
-                let tryAgain = () => {
-                    let queue = new RedisQueue(this.client);
+                let tryAgain = async () => {
                     let watched = false;
 
-                    let promises = [];
-                    for (let key of params.watch)
-                        promises.push(this.query('WATCH', [key]));
+                    try {
+                        let queue = new RedisQueue(this.client);
+                        let promises = [];
+                        for (let key of params.watch)
+                            promises.push(this.query('WATCH', [key]));
 
-                    (promises.length ? Promise.all(promises) : Promise.resolve())
-                        .then(() => {
+                        if (promises.length) {
+                            await Promise.all(promises);
                             watched = true;
-                            let result = cb(queue);
-                            if (result === null || typeof result !== 'object' || typeof result.then !== 'function') {
-                                throw new Error(
-                                    'Transaction ' +
-                                    (params.name ? params.name + ' ' : '') +
-                                    'function must return a Promise'
-                                );
-                            }
-                            return result;
-                        })
-                        .then(result => {
-                            return ((queue.empty && watched) ? unwatch() : Promise.resolve())
-                                .then(() => {
-                                    watched = false;
-                                    if (queue.empty)
-                                        return [];
+                        }
 
-                                    return new Promise((resolve, reject) => {
-                                        queue._multi.exec((error, replies) => {
-                                            if (error) {
-                                                return reject(
-                                                    new NError(
-                                                        error,
-                                                        'Queue EXEC failed' +
-                                                            (params.name ? ` in ${params.name}` : '')
-                                                    )
-                                                );
-                                            }
+                        let result = cb(queue);
+                        if (result === null || typeof result !== 'object' || typeof result.then !== 'function') {
+                            throw new Error(
+                                'Transaction ' +
+                                (params.name ? params.name + ' ' : '') +
+                                'function must return a Promise'
+                            );
+                        }
 
-                                            resolve(replies);
-                                        });
-                                    });
-                                })
-                                .then(replies => {
-                                    if (replies === null) { // SERIALIZATION FAILURE
-                                        if (++numTries > this.maxTransactionRetries) {
-                                            return reject(new Error(
-                                                'Maximum transaction retries reached' +
+                        let value = await result;
+                        if (queue.empty && watched) {
+                            await unwatch();
+                            watched = false;
+                        }
+
+                        let replies;
+                        if (queue.empty) {
+                            replies = [];
+                        } else {
+                            replies = await new Promise((resolve, reject) => {
+                                queue._multi.exec((error, replies) => {
+                                    if (error) {
+                                        return reject(
+                                            new NError(
+                                                error,
+                                                'Queue EXEC failed' +
                                                 (params.name ? ` in ${params.name}` : '')
-                                            ));
-                                        }
-
-                                        this._redis._logger.warn(
-                                            'Redis transaction serialization failure' +
-                                            (params.name ? ` in ${params.name}` : '')
+                                            )
                                         );
-
-                                        let delay = this._redis._util.getRandomInt(
-                                            this.minTransactionDelay,
-                                            this.maxTransactionDelay
-                                        );
-                                        return setTimeout(() => { tryAgain(); }, delay);
                                     }
 
-                                    resolve([ result, replies ]);
+                                    resolve(replies);
                                 });
-                        })
-                        .catch(error => {
-                            return (watched ? unwatch() : Promise.resolve())
-                                .then(() => {
-                                    watched = false;
-                                    reject(error);
-                                });
-                        });
+                            });
+                        }
+
+                        if (replies === null) { // SERIALIZATION FAILURE
+                            if (++numTries > this.maxTransactionRetries) {
+                                return reject(new Error(
+                                    'Maximum transaction retries reached' +
+                                    (params.name ? ` in ${params.name}` : '')
+                                ));
+                            }
+
+                            this._redis._logger.warn(
+                                'Redis transaction serialization failure' +
+                                (params.name ? ` in ${params.name}` : '')
+                            );
+
+                            let delay = this._redis._util.getRandomInt(
+                                this.minTransactionDelay,
+                                this.maxTransactionDelay
+                            );
+                            return setTimeout(async () => { await tryAgain(); }, delay);
+                        }
+
+                        resolve([value, replies]);
+                    } catch (error) {
+                        if (watched) {
+                            await unwatch();
+                            watched = false;
+                        }
+                        reject(error);
+                    }
                 };
-                tryAgain();
-            })
-            .then(
-                value => {
-                    this._transactionLevel--;
-                    return value;
-                },
-                error => {
-                    this._transactionLevel--;
-                    throw error;
-                }
-            );
+                await tryAgain();
+            });
+        } catch (error) {
+            this._transactionLevel--;
+            throw error;
+        }
+
+        this._transactionLevel--;
+        return value;
     }
 }
 
@@ -314,23 +317,30 @@ class Redis {
      * @param {string} name='main'              Server name in config
      * @return {Promise}                        Resolves to connected RedisClient instance
      */
-    connect(name = 'main') {
+    async connect(name = 'main') {
         return new Promise((resolve, reject) => {
-                if (!this._config.redis[name])
-                    return reject(new Error(`Undefined Redis server name: ${name}`));
+            if (!this._config.redis[name])
+                return reject(new Error(`Undefined Redis server name: ${name}`));
 
-                let options = {};
-                if (this._config.redis[name].password)
-                    options.auth_pass = this._config.redis[name].password;
+            let options = {};
+            if (this._config.redis[name].password)
+                options.auth_pass = this._config.redis[name].password;
 
-                let client = redis.createClient(
-                    this._config.redis[name].port,
-                    this._config.redis[name].host,
-                    options
-                );
-                client.on('ready', () => { resolve(new RedisClient(this, client)); });
-                client.on('error', error => { reject(new NError(error, `Redis: Error connecting to ${name}`)); });
+            let client = redis.createClient(
+                this._config.redis[name].port,
+                this._config.redis[name].host,
+                options
+            );
+            let onError = error => {
+                reject(new NError(error, `Redis: Error connecting to ${name}`));
+            };
+
+            client.once('error', onError);
+            client.once('ready', () => {
+                client.removeListener('error', onError);
+                resolve(new RedisClient(this, client));
             });
+        });
     }
 }
 

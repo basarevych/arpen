@@ -43,32 +43,33 @@ class RedisPubSubClient extends Pubsub.client {
      * @param {Subscriber} handler                  Handler function
      * @return {Promise}                            Resolves on success
      */
-    subscribe(channel, handler) {
-        return new Promise((resolve, reject) => {
-                try {
-                    let needSubscribe, handlers = new Set();
-                    if (this.channels.has(channel)) {
-                        needSubscribe = false;
-                        handlers = this.channels.get(channel);
-                    } else {
-                        needSubscribe = true;
-                        this.channels.set(channel, handlers);
-                    }
-
-                    if (handlers.has(handler))
-                        return reject(new Error(`Channel already subscribed: ${channel}`));
-
-                    handlers.add(handler);
-
-                    if (!needSubscribe)
-                        return resolve();
-
-                    this._subscriptions.set(channel, resolve);
-                    this.subClient.client.subscribe(channel);
-                } catch (error) {
-                    reject(new NError(error, `Subscribe attempt failed (${channel})`));
+    async subscribe(channel, handler) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let needSubscribe;
+                let handlers = new Set();
+                if (this.channels.has(channel)) {
+                    needSubscribe = false;
+                    handlers = this.channels.get(channel);
+                } else {
+                    needSubscribe = true;
+                    this.channels.set(channel, handlers);
                 }
-            });
+
+                if (handlers.has(handler))
+                    return reject(new Error(`Channel already subscribed: ${channel}`));
+
+                handlers.add(handler);
+
+                if (!needSubscribe)
+                    return resolve();
+
+                this._subscriptions.set(channel, resolve);
+                await this.subClient.client.subscribe(channel);
+            } catch (error) {
+                reject(new NError(error, `Subscribe attempt failed (${channel})`));
+            }
+        });
     }
 
     /**
@@ -77,26 +78,22 @@ class RedisPubSubClient extends Pubsub.client {
      * @param {Subscriber} handler                  Handler function
      * @return {Promise}                            Resolves on success
      */
-    unsubscribe(channel, handler) {
-        return new Promise((resolve, reject) => {
-                try {
-                    let handlers = this.channels.get(channel);
-                    if (!handlers)
-                        return reject(new Error(`No such channel: ${channel}`));
-                    if (!handlers.has(handler))
-                        return reject(new Error(`No such handler in the channel: ${channel}`));
+    async unsubscribe(channel, handler) {
+        try {
+            let handlers = this.channels.get(channel);
+            if (!handlers)
+                throw new Error(`No such channel: ${channel}`);
+            if (!handlers.has(handler))
+                throw new Error(`No such handler in the channel: ${channel}`);
 
-                    handlers.delete(handler);
-                    if (!handlers.size) {
-                        this.subClient.client.unsubscribe(channel);
-                        this.channels.delete(channel);
-                    }
-
-                    resolve();
-                } catch (error) {
-                    reject(new NError(error, `Unsubscribe attempt failed (${channel})`));
-                }
-            });
+            handlers.delete(handler);
+            if (!handlers.size) {
+                await this.subClient.client.unsubscribe(channel);
+                this.channels.delete(channel);
+            }
+        } catch (error) {
+            throw new NError(error, `Unsubscribe attempt failed (${channel})`);
+        }
     }
 
     /**
@@ -105,21 +102,17 @@ class RedisPubSubClient extends Pubsub.client {
      * @param {*} message                           Message
      * @return {Promise}                            Resolves on success
      */
-    publish(channel, message) {
-        return this.pubConnector()
-            .then(pub => {
-                return pub.query('PUBLISH', [ channel, JSON.stringify(message) ])
-                    .then(
-                        value => {
-                            pub.done();
-                            return value;
-                        },
-                        error => {
-                            pub.done();
-                            throw error;
-                        }
-                    );
-            });
+    async publish(channel, message) {
+        let pub;
+        try {
+            pub = await this.pubConnector();
+            await pub.query('PUBLISH', [ channel, JSON.stringify(message) ]);
+            pub.done();
+        } catch (error) {
+            if (pub)
+                pub.done();
+            throw error;
+        }
     }
 
     /**
@@ -212,25 +205,26 @@ class RedisPubSub extends Pubsub {
      * @param {string} [subscriberName]             Client name
      * @return {Promise}
      */
-    _createClient(serverName, subscriberName) {
+    async _createClient(serverName, subscriberName) {
         let fullName = `redis.${serverName}`;
-        return new Promise((resolve, reject) => {
-                let config = this._config.get(fullName);
-                if (!config)
-                    return reject(new Error(`Undefined server name: ${fullName}`));
+        try {
+            let config = this._config.get(fullName);
+            if (!config)
+                throw new Error(`Undefined server name: ${fullName}`);
 
-                this._redis.connect(serverName)
-                    .then(sub => {
-                        if (subscriberName) {
-                            sub.client.on('reconnecting', () => { this._logger.info(`[${subscriberName}] Connection lost. Reconnecting...`); });
-                            sub.client.on('subscribe', () => { this._logger.info(`[${subscriberName}] Subscribed successfully`); });
-                        }
-                        resolve(new RedisPubSubClient(() => { return this._redis.connect(serverName); }, sub));
-                    })
-                    .catch(error => {
-                        reject(new NError(error, `Error creating pubsub instance to ${fullName}`));
-                    });
-            });
+            let sub = await this._redis.connect(serverName);
+            if (subscriberName) {
+                sub.client.on('reconnecting', () => {
+                    this._logger.info(`[${subscriberName}] Connection lost. Reconnecting...`);
+                });
+                sub.client.on('subscribe', () => {
+                    this._logger.info(`[${subscriberName}] Subscribed successfully`);
+                });
+            }
+            return new RedisPubSubClient(async () => { return this._redis.connect(serverName); }, sub);
+        } catch (error) {
+            throw new NError(error, `Error creating pubsub instance to ${fullName}`);
+        }
     }
 }
 

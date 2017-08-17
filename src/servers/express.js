@@ -29,7 +29,7 @@ class Express {
      */
     constructor(app, config, filer, logger) {
         if (!express)
-            throw new Error('express modules is required for Express server');
+            throw new Error('express module is required for Express server');
 
         this.name = null;
         this.express = express();
@@ -63,108 +63,95 @@ class Express {
      * @param {string} name                     Config section name
      * @return {Promise}
      */
-    init(name) {
+    async init(name) {
         this.name = name;
 
         if (this._config.get(`servers.${name}.enable`) === false)
-            return Promise.resolve();
+            return;
 
-        return new Promise((resolve, reject) => {
-                try {
-                    this._logger.debug('express', `${this.name}: Initializing express`);
-                    this.express.set('env', this._config.get('env'));
-                    let options = this._config.get(`servers.${name}.express`);
-                    for (let option of Object.keys(options)) {
-                        let name = option.replace('_', ' ');
-                        let value = options[option];
-                        this.express.set(name, value);
-                    }
+        this._logger.debug('express', `${this.name}: Initializing express`);
+        this.express.set('env', this._config.get('env'));
+        let options = this._config.get(`servers.${name}.express`);
+        for (let option of Object.keys(options)) {
+            let name = option.replace('_', ' ');
+            let value = options[option];
+            this.express.set(name, value);
+        }
 
-                    let views = [];
-                    for (let [ moduleName, moduleConfig ] of this._config.modules) {
-                        for (let view of moduleConfig.views || []) {
-                            let filename = (view[0] === '/' ? view : path.join(this._config.base_path, 'modules', moduleName, view));
-                            views.push(filename);
-                        }
-                    }
-                    this.express.set('views', views);
-                    resolve();
-                } catch (error) {
-                    reject(new NError(error, 'Express.init()'));
-                }
-            })
-            .then(() => {
-                if (!this._config.get(`servers.${name}.ssl.enable`)) {
-                    this.http = http.createServer(this.express);
-                    return this.http;
-                }
+        let views = [];
+        for (let [ moduleName, moduleConfig ] of this._config.modules) {
+            for (let view of moduleConfig.views || []) {
+                let filename = (view[0] === '/' ? view : path.join(this._config.base_path, 'modules', moduleName, view));
+                views.push(filename);
+            }
+        }
+        this.express.set('views', views);
 
-                let key = this._config.get(`servers.${name}.ssl.key`);
-                if (key && key[0] !== '/')
-                    key = path.join(this._config.base_path, key);
-                let cert = this._config.get(`servers.${name}.ssl.cert`);
-                if (cert && cert[0] !== '/')
-                    cert = path.join(this._config.base_path, cert);
-                let ca = this._config.get(`server.${name}.ssl.ca`);
-                if (ca && ca[0] !== '/')
-                    ca = path.join(this._config.base_path, ca);
+        if (this._config.get(`servers.${name}.ssl.enable`)) {
+            let key = this._config.get(`servers.${name}.ssl.key`);
+            if (key && key[0] !== '/')
+                key = path.join(this._config.base_path, key);
+            let cert = this._config.get(`servers.${name}.ssl.cert`);
+            if (cert && cert[0] !== '/')
+                cert = path.join(this._config.base_path, cert);
+            let ca = this._config.get(`server.${name}.ssl.ca`);
+            if (ca && ca[0] !== '/')
+                ca = path.join(this._config.base_path, ca);
 
-                let promises = [
-                    this._filer.lockReadBuffer(key),
-                    this._filer.lockReadBuffer(cert),
-                ];
-                if (ca)
-                    promises.push(this._filer.lockReadBuffer(ca));
+            let promises = [
+                this._filer.lockReadBuffer(key),
+                this._filer.lockReadBuffer(cert),
+            ];
+            if (ca)
+                promises.push(this._filer.lockReadBuffer(ca));
 
-                return Promise.all(promises)
-                    .then(([ key, cert, ca ]) => {
-                        let options = {
-                            key: key,
-                            cert: cert,
-                        };
-                        if (ca)
-                            options.ca = ca;
+            let [keyVal, certVal, caVal] = await Promise.all(promises);
+            let options = {
+                key: keyVal,
+                cert: certVal,
+            };
+            if (caVal)
+                options.ca = caVal;
 
-                        this.https = https.createServer(options, this.express);
-                        return this.https;
-                    });
-            })
-            .then(server => {
-                server.on('error', this.onError.bind(this));
-                server.on('listening', this.onListening.bind(this));
-            })
-            .then(() => {
-                this._logger.debug('express', `${this.name}: Loading middleware`);
-                let middleware;
-                if (this._app.has('middleware')) {
-                    middleware = this._app.get('middleware');
+            this.https = https.createServer(options, this.express);
+        } else {
+            this.http = http.createServer(this.express);
+        }
+
+        let server = this.https || this.http;
+        server.on('error', this.onError.bind(this));
+        server.on('listening', this.onListening.bind(this));
+
+        let middlewareConfig = this._config.get(`servers.${name}.middleware`);
+        if (!Array.isArray(middlewareConfig))
+            return;
+
+        this._logger.debug('express', `${this.name}: Loading middleware`);
+        let middleware;
+        if (this._app.has('middleware')) {
+            middleware = this._app.get('middleware');
+        } else {
+            middleware = new Map();
+            this._app.registerInstance(middleware, 'middleware');
+        }
+
+        return middlewareConfig.reduce(
+            async (prev, cur) => {
+                await prev;
+
+                let obj;
+                if (middleware.has(cur)) {
+                    obj = middleware.get(cur);
                 } else {
-                    middleware = new Map();
-                    this._app.registerInstance(middleware, 'middleware');
+                    obj = this._app.get(cur);
+                    middleware.set(cur, obj);
                 }
 
-                let middlewareConfig = this._config.get(`servers.${name}.middleware`);
-                if (!Array.isArray(middlewareConfig))
-                    return;
-
-                return middlewareConfig.reduce(
-                    (prev, cur) => {
-                        return prev.then(() => {
-                            let obj;
-                            if (middleware.has(cur)) {
-                                obj = middleware.get(cur);
-                            } else {
-                                obj = this._app.get(cur);
-                                middleware.set(cur, obj);
-                            }
-
-                            this._logger.debug('express', `${this.name}: Registering middleware ${cur}`);
-                            return obj.register(this);
-                        });
-                    },
-                    Promise.resolve()
-                );
-            });
+                this._logger.debug('express', `${this.name}: Registering middleware ${cur}`);
+                return obj.register(this);
+            },
+            Promise.resolve()
+        );
     }
 
     /**
@@ -172,25 +159,18 @@ class Express {
      * @param {string} name                     Config section name
      * @return {Promise}
      */
-    start(name) {
+    async start(name) {
         if (name !== this.name)
-            return Promise.reject(new Error(`Server ${name} was not properly initialized`));
+            throw new Error(`Server ${name} was not properly initialized`);
 
         if (this._config.get(`servers.${name}.enable`) === false)
-            return Promise.resolve();
+            return;
 
-        return Promise.resolve()
-            .then(() => {
-                this._logger.debug('express', `${this.name}: Starting the server`);
-                let port = this._normalizePort(this._config.get(`servers.${name}.port`));
-                let http = this.http || this.https;
-
-                try {
-                    http.listen(port, typeof port === 'string' ? undefined : this._config.get(`servers.${name}.host`));
-                } catch (error) {
-                    throw new NError(error, 'Express.start()');
-                }
-            });
+        this._logger.debug('express', `${this.name}: Starting the server`);
+        let port = this._normalizePort(this._config.get(`servers.${name}.port`));
+        let server = this.https || this.http;
+        if (server)
+            server.listen(port, typeof port === 'string' ? undefined : this._config.get(`servers.${name}.host`));
     }
 
     /**
@@ -198,41 +178,34 @@ class Express {
      * @param {string} name                     Config section name
      * @return {Promise}
      */
-    stop(name) {
+    async stop(name) {
         if (name !== this.name)
-            return Promise.reject(new Error(`Server ${name} was not properly initialized`));
+            throw new Error(`Server ${name} was not properly initialized`);
 
         if (this._config.get(`servers.${name}.enable`) === false)
-            return Promise.resolve();
+            return;
 
-        let http = this.http || this.https;
-        if (http) {
-            http.close();
+        let server = this.https || this.http;
+        if (server) {
+            server.close();
             this.http = null;
             this.https = null;
-            return new Promise((resolve, reject) => {
-                try {
-                    let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
-                    this._logger.info(
-                        this.name + ': Server is no longer listening on ' +
-                        (typeof port === 'string' ?
-                            port :
-                            this._config.get(`servers.${this.name}.host`) + ':' + port),
-                        () => { resolve(); });
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        }
 
-        return Promise.resolve();
+            let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
+            this._logger.info(
+                this.name + ': Server is no longer listening on ' +
+                (typeof port === 'string'
+                    ? port
+                    : this._config.get(`servers.${this.name}.host`) + ':' + port));
+        }
     }
 
     /**
      * Error handler
      * @param {object} error            The error
+     * @return {Promise}
      */
-    onError(error) {
+    async onError(error) {
         if (error.syscall !== 'listen')
             return this._logger.error(new NError(error, 'Express.onError()'));
 
@@ -252,16 +225,17 @@ class Express {
 
     /**
      * Listening event handler
+     * @return {Promise}
      */
-    onListening() {
+    async onListening() {
         let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
         this._logger.info(
             this.name + ': ' +
             (this._config.get(`servers.${this.name}.ssl.enable`) ? 'HTTPS' : 'HTTP') +
             ' server listening on ' +
-            (typeof port === 'string' ?
-                port :
-            this._config.get(`servers.${this.name}.host`) + ':' + port)
+            (typeof port === 'string'
+                ? port
+                : this._config.get(`servers.${this.name}.host`) + ':' + port)
         );
     }
 

@@ -31,7 +31,7 @@ const NError = require('nerror');
      * }
  * </code>
  */
-module.exports = function (options = {}, pg = undefined) {
+module.exports = async function (options = {}, pg = undefined) {
     let {
         table = this.constructor.table,
         fields = Object.keys(this.getModel()._serialize()),
@@ -42,67 +42,66 @@ module.exports = function (options = {}, pg = undefined) {
         pageNumber = 1
     } = options;
 
-    return Promise.resolve()
-        .then(() => {
-            if (typeof pg === 'object')
-                return pg;
+    let client;
 
-            return this._postgres.connect(pg);
-        })
-        .then(client => {
-            return client.query(
-                    `SELECT count(*)::int AS count 
-                       FROM ${table} 
-                     ${where.length ? `WHERE (${where.join(') AND (')})` : ''}`,
-                    params
-                )
-                .then(result => {
-                    let totalRows = result.rowCount ? result.rows[0].count : 0;
-                    let totalPages;
-                    if (totalRows === 0 || pageSize === 0) {
-                        totalPages = 1;
-                        pageNumber = 1;
-                    } else {
-                        totalPages = Math.floor(totalRows / pageSize) + (totalRows % pageSize ? 1 : 0);
-                        if (pageNumber > totalPages)
-                            pageNumber = totalPages;
-                    }
+    try {
+        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg);
+        let result = await client.query(
+            `SELECT count(*)::int AS count 
+               FROM ${table} 
+             ${where.length ? `WHERE (${where.join(') AND (')})` : ''}`,
+            params
+        );
 
-                    let offset = (pageNumber - 1) * pageSize;
-                    return client.query(
-                            `SELECT ${fields.join(', ')}
-                               FROM ${table} 
-                             ${where.length ? `WHERE (${where.join(') AND (')})` : ''},
-                             ${sort.length ? `ORDER BY ${sort.join(', ')}` : ''}
-                             ${offset > 0 ? `OFFSET ${offset}` : ''}
-                             ${pageSize > 0 ? `LIMIT ${pageSize}` : ''}`,
-                            params
-                        )
-                        .then(result => {
-                            return {
-                                totalRows: totalRows,
-                                totalPages: totalPages,
-                                pageSize: pageSize,
-                                pageNumber: pageNumber,
-                                sort: sort,
-                                data: result.rows,
-                            };
-                        });
-                })
-                .then(
-                    value => {
-                        if (typeof pg !== 'object')
-                            client.done();
-                        return value;
-                    },
-                    error => {
-                        if (typeof pg !== 'object')
-                            client.done();
-                        throw error;
-                    }
-                );
-        })
-        .catch(error => {
-            throw new NError(error, 'BaseRepository.search()');
-        });
+        let totalRows = result.rowCount ? result.rows[0].count : 0;
+        let totalPages;
+        if (totalRows === 0 || pageSize === 0) {
+            totalPages = 1;
+            pageNumber = 1;
+        } else {
+            totalPages = Math.floor(totalRows / pageSize) + (totalRows % pageSize ? 1 : 0);
+            if (pageNumber > totalPages)
+                pageNumber = totalPages;
+        }
+
+        let offset = (pageNumber - 1) * pageSize;
+        result = await client.query(
+            `SELECT ${fields.join(', ')}
+               FROM ${table} 
+             ${where.length ? `WHERE (${where.join(') AND (')})` : ''},
+             ${sort.length ? `ORDER BY ${sort.join(', ')}` : ''}
+             ${offset > 0 ? `OFFSET ${offset}` : ''}
+             ${pageSize > 0 ? `LIMIT ${pageSize}` : ''}`,
+            params
+        );
+
+        if (typeof pg !== 'object')
+            client.done();
+
+        return {
+            totalRows: totalRows,
+            totalPages: totalPages,
+            pageSize: pageSize,
+            pageNumber: pageNumber,
+            sort: sort,
+            data: result.rows,
+        };
+    } catch (error) {
+        if (client && typeof pg !== 'object')
+            client.done();
+
+        throw new NError(
+            error,
+            {
+                table,
+                fields,
+                where,
+                params,
+                sort,
+                pageSize: options.pageSize || 0,
+                pageNumber: options.pageNumber || 1,
+            },
+            'BaseRepository.search()'
+        );
+    }
 };

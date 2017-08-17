@@ -16,12 +16,6 @@ try {
  */
 class Util {
     /**
-     * Create the service
-     */
-    constructor() {
-    }
-
-    /**
      * Service name is 'util'
      * @type {string}
      */
@@ -105,7 +99,7 @@ class Util {
         if (special)
             chars += '~!@#$%^&*()_+-=/|?';
 
-        let string = "";
+        let string = '';
         for (let i = 0; i < length; i++)
             string += chars.charAt(Math.floor(Math.random() * chars.length));
 
@@ -154,7 +148,8 @@ class Util {
      * @return {string}                         Returns camel case variant
      */
     dashedToCamel(value, upperFirst = false) {
-        let result = '', foundDash = false;
+        let result = '';
+        let foundDash = false;
         for (let char of value) {
             if (char === '-') {
                 foundDash = true;
@@ -197,7 +192,8 @@ class Util {
      * @return {string}                         Returns camel case variant
      */
     snakeToCamel(value, upperFirst = false) {
-        let result = '', foundUnderscore = false;
+        let result = '';
+        let foundUnderscore = false;
         for (let char of value) {
             if (char === '_') {
                 foundUnderscore = true;

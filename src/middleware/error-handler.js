@@ -40,7 +40,7 @@ class ErrorHandler {
      * @param {Express} server          The server
      * @return {Promise}
      */
-    register(server) {
+    async register(server) {
         server.express.use((req, res, next) => {
             next(new NError({ httpStatus: 404 }, 'Not Found'));
         });
@@ -65,8 +65,6 @@ class ErrorHandler {
             res.status(status);
             res.render('error');
         });
-
-        return Promise.resolve();
     }
 }
 
