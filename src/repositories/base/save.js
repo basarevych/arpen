@@ -68,6 +68,6 @@ module.exports = async function (model, pg) {
         if (client && typeof pg !== 'object')
             client.done();
 
-        throw new NError(error, { model }, 'BaseRepository.delete()');
+        throw new NError(error, { model }, 'BaseRepository.save()');
     }
 };

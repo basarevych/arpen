@@ -335,17 +335,16 @@ class App {
         let config = this.get('config');
         let mapFile = `${config.project}.${config.instance}.map.json`;
 
-        if (process.env.DEBUG || this.options.disableServicesCache)
-            return null;
-
         let cache = null;
-        try {
-            let contents = await filer.lockRead(path.join('/var/tmp', mapFile));
-            cache = JSON.parse(contents.trim());
-            if (typeof cache !== 'object' || cache === null || cache.version !== config.version)
-                cache = null;
-        } catch (error) {
-            // do nothing
+        if (!process.env.DEBUG && !this.options.disableServicesCache) {
+            try {
+                let contents = await filer.lockRead(path.join('/var/tmp', mapFile));
+                cache = JSON.parse(contents.trim());
+                if (typeof cache !== 'object' || cache === null || cache.version !== config.version)
+                    cache = null;
+            } catch (error) {
+                // do nothing
+            }
         }
 
         if (cache) {
