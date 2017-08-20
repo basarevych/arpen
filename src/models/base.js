@@ -101,6 +101,8 @@ class BaseModel {
      */
     _unserialize(data) {
         for (let field of this._fields.keys()) {
+            this._fields.set(field, undefined);
+
             if (typeof data[field] === 'undefined')
                 continue;
 
