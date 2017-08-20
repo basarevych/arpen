@@ -28,7 +28,7 @@ const NError = require('nerror');
  *      pageSize: 0, // page size
  *      pageNumber: 1, // returned page number
  *      sort: [ ... ], // keys used to sort the result
- *      data: [ ... ], // resulting rows as array
+ *      data: [ ... ], // resulting raw SQL rows as an array of objects
  * }
  * </pre>
  */

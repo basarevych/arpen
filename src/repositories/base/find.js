@@ -23,7 +23,7 @@ module.exports = async function (id, pg) {
         if (this._enableCache) {
             let value = await this._cacher.get(key);
             if (value)
-                return value;
+                return this.getModel(value);
         }
 
         client = typeof pg === 'object' ? pg : await this._postgres.connect(pg);
@@ -38,17 +38,10 @@ module.exports = async function (id, pg) {
         if (this._enableCache)
             await this._cacher.set(key, rows);
 
-        let models = [];
-        for (let row of rows) {
-            let model = this.getModel();
-            model._unserialize(row);
-            models.push(model);
-        }
-
         if (typeof pg !== 'object')
             client.done();
 
-        return models;
+        return this.getModel(rows);
     } catch (error) {
         if (client && typeof pg !== 'object')
             client.done();

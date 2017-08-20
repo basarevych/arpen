@@ -71,13 +71,33 @@ class BaseRepository {
 
     /**
      * Get model
-     * @param {string} [name]                       Model name
-     * @return {Object}
+     * @param {string} [name]                       Model name, defaults to the model of this class
+     * @param {undefined|object|object[]} [data]    Data to to load
+     * @return {object|object[]}                    If data is an array returns array of models otherwise a single model
      */
-    getModel(name) {
+    getModel(name, data) {
+        if (name && !data && typeof name !== 'string') {
+            data = name;
+            name = undefined;
+        }
+
         if (!name)
             name = this.constructor.model;
-        return this._app.get(`models.${name}`);
+
+        if (Array.isArray(data)) {
+            let models = [];
+            for (let row of data) {
+                let model = this._app.get(`models.${name}`);
+                model._unserialize(row);
+                models.push(model);
+            }
+            return models;
+        }
+
+        let model = this._app.get(`models.${name}`);
+        if (typeof data !== 'undefined')
+            model._unserialize(data);
+        return model;
     }
 
     /**
