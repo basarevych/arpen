@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: Runner</title>
+	<title>Documentation Class: Daemon</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,20 +72,18 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Runner</h1>
+	<h1 class="page-title">Class: Daemon</h1>
 <section>
 
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-arpen_services_runner.html">arpen/services/runner</a>~</span>
+            <span class="ancestors"><a href="module-arpen_app_daemon.html">arpen/app/daemon</a>~</span>
         
-        Runner
+        Daemon
         </h2>
         
-            <div class="class-description">Command execution service
-<br><br>
-pty.js module is required</div>
+            <div class="class-description">Runs the servers</div>
         
     
 </header>
@@ -97,7 +95,7 @@ pty.js module is required</div>
         
 <hr>
 <dt>
-    <h4 class="name" id="Runner"><span class="type-signature"></span>new Runner()</h4>
+    <h4 class="name" id="Daemon"><span class="type-signature"></span>new Daemon(basepath, pidFile [, options])</h4>
     
     
 </dt>
@@ -105,7 +103,7 @@ pty.js module is required</div>
 
     
     <div class="description">
-        Create the service
+        Create daemon
     </div>
     
 
@@ -114,6 +112,282 @@ pty.js module is required</div>
     
 
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>basepath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Base directory of the project</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pidFile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">PID file absolute path and name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Options
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>restartPause</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1000
+                
+                </td>
+            
+
+            <td class="description last">Pause between restarting crashed app, ms</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxBufferLength</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    10000
+                
+                </td>
+            
+
+            <td class="description last">Lines of buffer of crashed app output</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fatalErrorCode</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    255
+                
+                </td>
+            
+
+            <td class="description last">Exit code with fatal error (no restart)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     
 
     
@@ -190,15 +464,157 @@ pty.js module is required</div>
         <dl>
             
 <hr>
-<dt class="name" id=".provides">
-    <h4 id=".provides"><span class="type-signature">&lt;static> </span>provides<span class="type-signature"> :string</span></h4>
+<dt class="name" id="runner">
+    <h4 id="runner"><span class="type-signature"></span>runner<span class="type-signature"> :Runner</span></h4>
 
     
 </dt>
 <dd>
     
     <div class="description">
-        Service name is 'runner'
+        Runner service getter
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Runner</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="emailer">
+    <h4 id="emailer"><span class="type-signature"></span>emailer<span class="type-signature"> :Emailer</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Emailer service getter
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Emailer</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="name">
+    <h4 id="name"><span class="type-signature"></span>name<span class="type-signature"> :string</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Full name of the application
     </div>
     
 
@@ -213,137 +629,6 @@ pty.js module is required</div>
 
             </li>
         </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".requires">
-    <h4 id=".requires"><span class="type-signature">&lt;static> </span>requires<span class="type-signature"> :Array.&lt;string></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        Dependencies as constructor arguments
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Array.&lt;string></span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".execTimeout">
-    <h4 id=".execTimeout"><span class="type-signature">&lt;static> </span>execTimeout<span class="type-signature"></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        Command execution time limit
-    </div>
-    
-
     
 
     
@@ -399,7 +684,7 @@ pty.js module is required</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="exec"><span class="type-signature">&lt;async> </span>exec(command [, params] [, options])</h4>
+    <h4 class="name" id="getConfig"><span class="type-signature"></span>getConfig(key)</h4>
     
     
 </dt>
@@ -407,7 +692,7 @@ pty.js module is required</div>
 
     
     <div class="description">
-        Execute a command
+        Lookup configuration key
     </div>
     
 
@@ -430,8 +715,6 @@ pty.js module is required</div>
         <th>Type</th>
 
         
-        <th>Argument</th>
-        
 
         
 
@@ -444,7 +727,7 @@ pty.js module is required</div>
 
         <tr>
             
-                <td class="name"><code>command</code></td>
+                <td class="name"><code>key</code></td>
             
 
             <td class="type">
@@ -458,149 +741,10 @@ pty.js module is required</div>
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Command name</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>params</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;string></span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Command arguments</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">execFile() options with the following addition
-                <h6 class="method-params-label method-subparams-label">Properties</h6>
-                
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>pipe</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The command's stdout, stderr will be piped to this process and stdin of this
-                                     process will be piped to the command</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last">Key separated by dots</td>
         </tr>
 
     
@@ -663,17 +807,154 @@ pty.js module is required</div>
     <h5>Returns:</h5>
     
             
-<div class="param-desc">
-    <pre>
-{
-  code: 0,
-  signal: null,
-  stdout: '',
-  stderr: '',
-}
-</pre>
-</div>
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="run"><span class="type-signature">&lt;async> </span>run(servers)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Run the app
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>servers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Server names</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
 
 
 <dl>
@@ -699,7 +980,7 @@ pty.js module is required</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="spawn"><span class="type-signature"></span>spawn(command [, params] [, options] [, expect])</h4>
+    <h4 class="name" id="_restart"><span class="type-signature">&lt;async> </span>_restart(servers)</h4>
     
     
 </dt>
@@ -707,7 +988,7 @@ pty.js module is required</div>
 
     
     <div class="description">
-        Spawn a command
+        Restart the app
     </div>
     
 
@@ -730,8 +1011,6 @@ pty.js module is required</div>
         <th>Type</th>
 
         
-        <th>Argument</th>
-        
 
         
 
@@ -744,39 +1023,7 @@ pty.js module is required</div>
 
         <tr>
             
-                <td class="name"><code>command</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Command name</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>params</code></td>
+                <td class="name"><code>servers</code></td>
             
 
             <td class="type">
@@ -790,88 +1037,10 @@ pty.js module is required</div>
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Command arguments</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Pty.js options</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>expect</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Map</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Expect-send map { /regexp/: 'send this' }</td>
+            <td class="description last">Server names</td>
         </tr>
 
     
@@ -942,7 +1111,7 @@ pty.js module is required</div>
     </dt>
     <dd>
         
-<span class="param-type">Subprocess</span>
+<span class="param-type">Promise</span>
 
 
 
@@ -951,6 +1120,146 @@ pty.js module is required</div>
 
 
         
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="_exit"><span class="type-signature"></span>_exit( [rc])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Terminate the process
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rc</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Exit code</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
     
 </dd>

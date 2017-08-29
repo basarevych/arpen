@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const Server = require('../src/app/server');
+
+let argv = process.argv.slice(2);
+if (!argv.length) {
+    console.error('Usage:\trun <server-name> [... <server-name>]');
+    process.exit(1);
+}
+
+const server = new Server(path.join(__dirname, '..'), argv);
+server
+    .run({}, ...argv)
+    .catch(error => {
+        console.error(error.stack || error.message || error);
+        process.exit(1);
+    });
