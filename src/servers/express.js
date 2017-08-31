@@ -220,7 +220,7 @@ class Express {
             default:
                 msg = error;
         }
-        this._logger.error(msg, () => { process.exit(255); });
+        return this._app.exit(this._app.constructor.fatalExitCode, msg, this._app.constructor.gracefulTimeout);
     }
 
     /**

@@ -6,6 +6,7 @@ const fs = require('fs-ext');
 const path = require('path');
 const merge = require('merge');
 const stripAnsi = require('strip-ansi');
+const App = require('../app/base');
 const Runner = require('../services/runner');
 const Emailer = require('../services/emailer');
 
@@ -20,7 +21,6 @@ class Daemon {
      * @param {object} [options]                        Options
      * @param {number} [options.restartPause=1000]      Pause between restarting crashed app, ms
      * @param {number} [options.maxBufferLength=10000]  Lines of buffer of crashed app output
-     * @param {number} [options.fatalErrorCode=255]     Exit code with fatal error (no restart)
      */
     constructor(basepath, pidFile, options = {}) {
         this._basepath = basepath;
@@ -32,7 +32,6 @@ class Daemon {
         this._emailer = null;
         this._restartPause = options.restartPause || 1000;
         this._maxBufferLength = options.maxBufferLength || 10000;
-        this._fatalErrorCode = options.fatalErrorCode || 255;
 
         try {
             let globalConf = require(path.join(basepath, 'config', 'global.js'));
@@ -191,8 +190,8 @@ class Daemon {
                 }
             }
 
-            if (result.code === this._fatalErrorCode)
-                return this._exit(this._fatalErrorCode);
+            if (result.code === App.fatalExitCode)
+                return this._exit(App.fatalExitCode);
 
             if (this.getConfig('email.crash.enable')) {
                 await this.emailer.send({

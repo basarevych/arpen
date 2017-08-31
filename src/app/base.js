@@ -33,6 +33,13 @@ class App {
     }
 
     /**
+     * Fatal error exit code
+     */
+    static get fatalExitCode() {
+        return 255;
+    }
+
+    /**
      * Graceful shutdown timeout
      * @type {number}
      */
@@ -162,7 +169,7 @@ class App {
             await this.start(...args);
         } catch (error) {
             await this.error('Error: ' + (error.fullStack || error.stack || error.message || error));
-            process.exit(1);
+            process.exit(this.constructor.fatalExitCode);
         }
     }
 
