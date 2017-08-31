@@ -169,8 +169,12 @@ class Express {
         this._logger.debug('express', `${this.name}: Starting the server`);
         let port = this._normalizePort(this._config.get(`servers.${name}.port`));
         let server = this.https || this.http;
-        if (server)
+        if (server) {
             server.listen(port, typeof port === 'string' ? undefined : this._config.get(`servers.${name}.host`));
+            return new Promise(resolve => {
+                server.once('listening', resolve);
+            });
+        }
     }
 
     /**
@@ -188,15 +192,21 @@ class Express {
         let server = this.https || this.http;
         if (server) {
             server.close();
-            this.http = null;
-            this.https = null;
+            return new Promise(resolve => {
+                server.once('close', () => {
+                    this.http = null;
+                    this.https = null;
 
-            let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
-            this._logger.info(
-                this.name + ': Server is no longer listening on ' +
-                (typeof port === 'string'
-                    ? port
-                    : this._config.get(`servers.${this.name}.host`) + ':' + port));
+                    let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
+                    this._logger.info(
+                        this.name + ': Server is no longer listening on ' +
+                        (typeof port === 'string'
+                            ? port
+                            : this._config.get(`servers.${this.name}.host`) + ':' + port)
+                    );
+                    resolve();
+                });
+            });
         }
     }
 

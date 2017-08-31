@@ -98,7 +98,7 @@ class Server extends App {
      * @return {Promise}
      */
     async stop(...names) {
-        if (!this._running)
+        if (this._running === null)
             throw new Error('Application has not been started');
 
         let servers = this.get('servers');
@@ -120,6 +120,8 @@ class Server extends App {
             },
             Promise.resolve()
         );
+
+        this._running = false;
 
         return super.stop(...names);
     }

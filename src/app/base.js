@@ -203,11 +203,14 @@ class App {
         };
 
         try {
-            if (shutdownTimeout)
-                setTimeout(finish, shutdownTimeout);
+            if (this._running !== null) {
+                if (shutdownTimeout)
+                    setTimeout(finish, shutdownTimeout);
 
-            let args = this._startArgs || [];
-            await this.stop(...args);
+                let args = this._startArgs || [];
+                await this.stop(...args);
+            }
+
             await finish();
         } catch (error) {
             await this.error('Error: ' + (error.fullStack || error.stack || error.message || error));
@@ -221,8 +224,8 @@ class App {
      * @return {Promise}
      */
     async init(...args) {
-        if (this._initialized)
-            return;
+        if (this._initialized !== null)
+            throw new Error('Application has already been initialized');
 
         debug('Initializing the app');
         let onSignal = async signal => {
@@ -238,9 +241,6 @@ class App {
         process.on('SIGTERM', async () => { await onSignal('SIGTERM'); });
         process.on('SIGHUP', async () => { await onSignal('SIGHUP'); });
 
-        if (this._initialized === false)
-            throw new Error('Application is in process of initialization');
-
         this._initialized = false;
         await this._initConfig();
         await this._initSources();
@@ -252,13 +252,13 @@ class App {
     /**
      * Start the app. Should be overridden.
      * <br><br>
-     * Descendant must set _running to true
+     * Descendant must call this (parent) method, prepare to start and then set _running to true
      * @param {...*} args                               Descendant class specific arguments
      * @return {Promise}
      */
     async start(...args) {
         if (this._running !== null)
-            throw new Error('Application is already started');
+            throw new Error('Application has already been started');
 
         this._running = false;
         this._startArgs = args;
@@ -267,13 +267,15 @@ class App {
     /**
      * Stop the app. Should be overridden.
      * <br><br>
-     * Descendant must set _running to false
+     * Descendant must prepare to stop, set _running to false and then call this (parent) method
      * @param {...*} args                               Descendant-specific arguments
      * @return {Promise}
      */
     async stop(...args) {
-        if (!this._running)
+        if (this._running === null)
             throw new Error('Application has not been started');
+        if (this._running !== false)
+            throw new Error('Application has not been stopped');
     }
 
     /**
