@@ -62,19 +62,23 @@ class Server extends App {
     async start(...names) {
         await super.start(...names);
 
+        this._startedServers = [];
         let servers = this.get('servers');
         await names.reduce(
             async (prev, name) => {
                 await prev;
 
                 let server = servers.get(name);
-                if (!server || typeof server.start !== 'function')
+                if (!server || typeof server.start !== 'function') {
+                    this._startedServers.push(name);
                     return;
+                }
 
                 let result = server.start(name);
                 if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                     throw new Error(`Server '${name}' start() did not return a Promise`);
-                return result;
+                await result;
+                this._startedServers.push(name);
             },
             Promise.resolve()
         );
@@ -94,10 +98,16 @@ class Server extends App {
      * @return {Promise}
      */
     async stop(...names) {
+        if (!this._running)
+            throw new Error('Application has not been started');
+
         let servers = this.get('servers');
         await names.reverse().reduce(
             async (prev, name) => {
                 await prev;
+
+                if (!this._startedServers.includes(name))
+                    return;
 
                 let server = servers.get(name);
                 if (!server || typeof server.stop !== 'function')
