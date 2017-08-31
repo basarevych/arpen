@@ -34,6 +34,7 @@ class App {
 
     /**
      * Fatal error exit code
+     * @type {number}
      */
     static get fatalExitCode() {
         return 255;
