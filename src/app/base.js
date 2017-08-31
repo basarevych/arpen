@@ -167,6 +167,47 @@ class App {
     }
 
     /**
+     * Terminate the app. Will call .stop() with start args
+     * @param {number} code=0                       Exit code, default is 0
+     * @param {string} [message]                    Exit log message
+     * @param {number} [shutdownTimeout=0]          Allowed timeout for clean shutdown, 0 - no timeout
+     * @return {Promise}
+     */
+    async exit(code, message, shutdownTimeout = 0) {
+        let finish = async () => {
+            return new Promise(resolve => {
+                try {
+                    let logger = this.get('logger');
+                    let func = (typeof code === 'undefined' || !code) ? logger.info : logger.error;
+                    func.call(
+                        logger,
+                        message || `Terminating with code ${code}`,
+                        () => {
+                            process.nextTick(() => { process.exit(code); });
+                            resolve();
+                        }
+                    );
+                } catch (error) {
+                    process.nextTick(() => { process.exit(code); });
+                    resolve();
+                }
+            });
+        };
+
+        try {
+            if (shutdownTimeout)
+                setTimeout(finish, shutdownTimeout);
+
+            let args = this._startArgs || [];
+            await this.stop(...args);
+            await finish();
+        } catch (error) {
+            await this.error('Error: ' + (error.fullStack || error.stack || error.message || error));
+            process.exit(code);
+        }
+    }
+
+    /**
      * Initialize the app
      * @param {...*} args                               Descendant class specific arguments
      * @return {Promise}
@@ -201,7 +242,7 @@ class App {
     }
 
     /**
-     * Start the app
+     * Start the app. Should be overridden.
      * <br><br>
      * Descendant must set _running to true
      * @param {...*} args                               Descendant class specific arguments
@@ -216,7 +257,7 @@ class App {
     }
 
     /**
-     * Stop the app. Gets called from default onSignal() handler
+     * Stop the app. Should be overridden.
      * <br><br>
      * Descendant must set _running to false
      * @param {...*} args                               Descendant-specific arguments
@@ -233,13 +274,7 @@ class App {
      * @return {Promise}
      */
     async onSignal(signal) {
-        setTimeout(() => { process.nextTick(() => { process.exit(0); }); }, this.constructor.gracefulTimeout);
-
-        let args = this._startArgs || [];
-        await this.stop(...args);
-        this.get('logger').info(`Terminating due to ${signal} signal`, () => {
-            process.nextTick(() => { process.exit(0); });
-        });
+        return this.exit(0, `Terminating due to ${signal} signal`, this.constructor.gracefulTimeout);
     }
 
     /**
