@@ -21,24 +21,19 @@ class Console extends App {
     async start(...args) {
         await super.start(...args);
 
-        if (!this.argv.length) {
-            await this.error('Command name required');
-            process.exit(1);
-        }
+        if (!this.argv.length)
+            return this.exit(this.constructor.fatalExitCode, 'Command name required');
 
         let util = this.get('util');
         let name = `commands.${util.dashedToCamel(this.argv[0])}`;
-        if (!this.has(name)) {
-            await this.error('Unknown command');
-            process.exit(1);
-        }
-
-        this._running = true;
+        if (!this.has(name))
+            return this.exit(this.constructor.fatalExitCode, 'Unknown command');
 
         let result = this.get(name).run(this.argv);
         if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
             throw new Error(`Command '${this.argv[0]}' run() did not return a Promise`);
-        return result;
+
+        return this.exit((await result) || 0);
     }
 }
 

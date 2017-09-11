@@ -22,24 +22,40 @@ class Logger {
      * Create the service
      * @param {App} app             The application
      * @param {object} config       Config service
+     * @param {object} [streams]    Stream container
      */
-    constructor(app, config) {
+    constructor(app, config, streams) {
         this._app = app;
         this._config = config;
+        this._streams = streams;
         this._emailer = this._config.get('email.log.enable') ? this._app.get('emailer') : null;
 
         this._log = null;
-        this._container = this._app.get('logger.streamContainer?');
-        if (!this._container) {
-            this._container = {
+        if (!this._streams) {
+            this._streams = {
                 default: null,
                 logs: new Map(),
             };
-            this._app.registerInstance(this._container, 'logger.streamContainer');
+            this._app.registerInstance(this._streams, 'logger.streams');
+
+            for (let log of Object.keys(config.logs || {})) {
+                let info = Object.assign({}, config.logs[log]);
+
+                let filename = info.name;
+                delete info.name;
+
+                let level = info.level || 'info';
+                delete info.level;
+
+                let isDefault = info.default || false;
+                delete info.default;
+
+                this.createLogStream(log, filename, level, isDefault, info);
+            }
         }
 
-        if (this._container.default)
-            this.setLogStream(this._container.default);
+        if (this._streams.default)
+            this.setLogStream(this._streams.default);
     }
 
     /**
@@ -55,7 +71,7 @@ class Logger {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'app', 'config' ];
+        return [ 'app', 'config', 'logger.streams?' ];
     }
 
     /**
@@ -95,7 +111,7 @@ class Logger {
      * @param {object} options              Stream options
      */
     createLogStream(name, filename, level, isDefault, options) {
-        let log = this._container.logs.get(name);
+        let log = this._streams.logs.get(name);
         if (log) {
             if (options) {
                 log.options = options;
@@ -114,11 +130,11 @@ class Logger {
                 failed: false,
                 buffer: [],
             };
-            this._container.logs.set(name, log);
+            this._streams.logs.set(name, log);
         }
 
         if (isDefault)
-            this._container.default = name;
+            this._streams.default = name;
 
         this._startLog(log);
     }
@@ -128,7 +144,7 @@ class Logger {
      * @param {string} name                 Stream name
      */
     setLogStream(name) {
-        if (this._container.logs.has(name))
+        if (this._streams.logs.has(name))
             this._log = name;
     }
 
@@ -205,9 +221,9 @@ class Logger {
         }
 
         let logInfo;
-        let logName = this._log || this._container.default;
+        let logName = this._log || this._streams.default;
         if (logName)
-            logInfo = this._container.logs.get(logName);
+            logInfo = this._streams.logs.get(logName);
 
         let logToStdOut = !!process.env.DEBUG;
         let logToFile = false;

@@ -25,10 +25,7 @@ class App {
         this.argv = argv;
         this.options = {};
 
-        this._initialized = null;
-        this._running = null;
         this._container = new Map();
-
         this.registerInstance(this, 'app');
     }
 
@@ -46,6 +43,14 @@ class App {
      */
     static get gracefulTimeout() {
         return 60 * 1000; // ms
+    }
+
+    /**
+     * Catched signals
+     * @type {string[]}
+     */
+    static get signals() {
+        return ['SIGINT', 'SIGTERM', 'SIGHUP'];
     }
 
     /**
@@ -169,7 +174,7 @@ class App {
             await this.init(...args);
             await this.start(...args);
         } catch (error) {
-            await this.error('Error: ' + (error.fullStack || error.stack || error.message || error));
+            await this.error('Fatal: ' + (error.fullStack || error.stack || error.message || error));
             process.exit(this.constructor.fatalExitCode);
         }
     }
@@ -178,44 +183,34 @@ class App {
      * Terminate the app. Will call .stop() with start args
      * @param {number} code=0                       Exit code, default is 0
      * @param {string} [message]                    Exit log message
-     * @param {number} [shutdownTimeout=0]          Allowed timeout for clean shutdown, 0 - no timeout
      * @return {Promise}
      */
-    async exit(code, message, shutdownTimeout = 0) {
+    async exit(code = 0, message) {
         let finish = async () => {
-            return new Promise(resolve => {
-                try {
-                    let logger = this.get('logger');
-                    let func = (typeof code === 'undefined' || !code) ? logger.info : logger.error;
-                    func.call(
-                        logger,
-                        message || `Terminating with code ${code}`,
-                        () => {
-                            process.nextTick(() => { process.exit(code); });
-                            resolve();
-                        }
-                    );
-                } catch (error) {
-                    process.nextTick(() => { process.exit(code); });
-                    resolve();
+            try {
+                if (message) {
+                    if (code)
+                        await this.error(message);
+                    else
+                        await this.info(message);
                 }
-            });
+            } catch (error) {
+                // do nothing
+            }
+            process.exit(code);
         };
 
+        if (this.constructor.gracefulTimeout)
+            setTimeout(finish, this.constructor.gracefulTimeout);
+
         try {
-            if (this._running !== null) {
-                if (shutdownTimeout)
-                    setTimeout(finish, shutdownTimeout);
-
-                let args = this._startArgs || [];
-                await this.stop(...args);
-            }
-
-            await finish();
+            let args = this._startArgs || [];
+            await this.stop(...args);
         } catch (error) {
-            await this.error('Error: ' + (error.fullStack || error.stack || error.message || error));
-            process.exit(code);
+            await this.error('Fatal: ' + (error.fullStack || error.stack || error.message || error));
         }
+
+        await finish();
     }
 
     /**
@@ -224,58 +219,44 @@ class App {
      * @return {Promise}
      */
     async init(...args) {
-        if (this._initialized !== null)
-            throw new Error('Application has already been initialized');
-
-        debug('Initializing the app');
         let onSignal = async signal => {
             try {
                 if (typeof this.onSignal === 'function')
                     await this.onSignal(signal);
             } catch (error) {
-                await this.error('App.onSignal() failed:\n' + (error.fullStack || error.stack));
-                process.exit(1);
+                await this.error('App.onSignal(): ' + (error.fullStack || error.stack || error.message || error));
+                process.exit(this.constructor.fatalExitCode);
             }
         };
-        process.on('SIGINT', async () => { await onSignal('SIGINT'); });
-        process.on('SIGTERM', async () => { await onSignal('SIGTERM'); });
-        process.on('SIGHUP', async () => { await onSignal('SIGHUP'); });
 
-        this._initialized = false;
+        for (let signal of this.constructor.signals)
+            process.on(signal, async () => { return onSignal(signal); });
+
+        debug('Initializing the app');
         await this._initConfig();
         await this._initSources();
-        await this._initLogger();
         await this._initModules();
-        this._initialized = true;
     }
 
     /**
      * Start the app. Should be overridden.
      * <br><br>
-     * Descendant must call this (parent) method, prepare to start and then set _running to true
+     * Descendant must call this (parent) method and start the app
      * @param {...*} args                               Descendant class specific arguments
      * @return {Promise}
      */
     async start(...args) {
-        if (this._running !== null)
-            throw new Error('Application has already been started');
-
-        this._running = false;
         this._startArgs = args;
     }
 
     /**
      * Stop the app. Should be overridden.
      * <br><br>
-     * Descendant must prepare to stop, set _running to false and then call this (parent) method
+     * Descendant must call this (parent) method and stop the app
      * @param {...*} args                               Descendant-specific arguments
      * @return {Promise}
      */
     async stop(...args) {
-        if (this._running === null)
-            throw new Error('Application has not been started');
-        if (this._running !== false)
-            throw new Error('Application has not been stopped');
     }
 
     /**
@@ -284,7 +265,7 @@ class App {
      * @return {Promise}
      */
     async onSignal(signal) {
-        return this.exit(0, `Terminating due to ${signal} signal`, this.constructor.gracefulTimeout);
+        return this.exit(0, `Terminating due to ${signal} signal`);
     }
 
     /**
@@ -483,33 +464,6 @@ class App {
 
         debug('Saving class map');
         return filer.lockWrite(path.join('/var/tmp', mapFile), JSON.stringify(map, undefined, 4) + '\n');
-    }
-
-    /**
-     * Create log streams
-     * @return {Promise}
-     */
-    async _initLogger() {
-        let logger = this.get('logger');
-        let config = this.get('config');
-        if (config.logs && !this.options.disableLogFiles) {
-            for (let log of Object.keys(config.logs)) {
-                let info = Object.assign({}, config.logs[log]);
-
-                let filename = info.name;
-                delete info.name;
-
-                let level = info.level || 'info';
-                delete info.level;
-
-                let isDefault = info.default || false;
-                delete info.default;
-
-                logger.createLogStream(log, filename, level, isDefault, info);
-            }
-        }
-
-        logger.info(`${config.name} v${config.version}`);
     }
 
     /**

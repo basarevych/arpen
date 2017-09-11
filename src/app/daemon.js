@@ -182,7 +182,7 @@ class Daemon {
                     } else {
                         fs.appendFileSync(
                             this._log,
-                            '=========================== PROGRAM TERMINATED ==============================\n'
+                            '=========================== PROGRAM TERMINATED ===========================\n'
                         );
                     }
                 } catch (error) {
@@ -209,7 +209,7 @@ class Daemon {
                     fs.appendFileSync(
                         this._log,
                         '============================= LAUNCH FAILURE =============================\n' +
-                        (error.stack || error.message || error) + '\n' +
+                        (error.fullStack || error.stack || error.message || error) + '\n' +
                         '==========================================================================\n'
                     );
                 } catch (error) {

@@ -23,6 +23,7 @@ class Server extends App {
 
         let servers = new Map();
         this.registerInstance(servers, 'servers');
+        this._startedServers = new Set();
 
         let config = this.get('config');
         for (let name of names) {
@@ -36,6 +37,11 @@ class Server extends App {
                 throw new Error(`Service ${params.class} not found when initializing server ${name}`);
             servers.set(name, server);
         }
+
+        let logger = this.get('logger');
+        await new Promise(resolve => {
+            logger.info(`${config.name} v${config.version}`, resolve);
+        });
 
         return names.reduce(
             async (prev, name) => {
@@ -62,7 +68,6 @@ class Server extends App {
     async start(...names) {
         await super.start(...names);
 
-        this._startedServers = [];
         let servers = this.get('servers');
         await names.reduce(
             async (prev, name) => {
@@ -70,7 +75,7 @@ class Server extends App {
 
                 let server = servers.get(name);
                 if (!server || typeof server.start !== 'function') {
-                    this._startedServers.push(name);
+                    this._startedServers.add(name);
                     return;
                 }
 
@@ -78,7 +83,7 @@ class Server extends App {
                 if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                     throw new Error(`Server '${name}' start() did not return a Promise`);
                 await result;
-                this._startedServers.push(name);
+                this._startedServers.add(name);
             },
             Promise.resolve()
         );
@@ -88,8 +93,6 @@ class Server extends App {
             process.setuid(config.get('user.uid'));
             process.setgid(config.get('user.gid'));
         }
-
-        this._running = true;
     }
 
     /**
@@ -98,32 +101,68 @@ class Server extends App {
      * @return {Promise}
      */
     async stop(...names) {
-        if (this._running === null)
-            throw new Error('Application has not been started');
+        await super.stop(...names);
 
         let servers = this.get('servers');
         await names.reverse().reduce(
             async (prev, name) => {
                 await prev;
 
-                if (!this._startedServers.includes(name))
+                if (!this._startedServers.has(name))
                     return;
 
                 let server = servers.get(name);
-                if (!server || typeof server.stop !== 'function')
+                if (!server || typeof server.stop !== 'function') {
+                    this._startedServers.delete(name);
                     return;
+                }
 
                 let result = server.stop(name);
                 if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                     throw new Error(`Server '${name}' stop() did not return a Promise`);
-                return result;
+                await result;
+                this._startedServers.delete(name);
             },
             Promise.resolve()
         );
+    }
 
-        this._running = false;
+    /**
+     * Terminate the app. Will call .stop() with start args
+     * @param {number} code=0                       Exit code, default is 0
+     * @param {string} [message]                    Exit log message
+     * @return {Promise}
+     */
+    async exit(code = 0, message) {
+        let finish = async () => {
+            return new Promise(() => {
+                try {
+                    let logger = this.get('logger');
+                    let func = (code ? logger.error : logger.info);
+                    func.call(
+                        logger,
+                        message || `Terminating with code ${code}`,
+                        () => {
+                            process.exit(code);
+                        }
+                    );
+                } catch (error) {
+                    process.exit(code);
+                }
+            });
+        };
 
-        return super.stop(...names);
+        if (this.constructor.gracefulTimeout)
+            setTimeout(finish, this.constructor.gracefulTimeout);
+
+        try {
+            let args = this._startArgs || [];
+            await this.stop(...args);
+        } catch (error) {
+            await this.error('Fatal: ' + (error.fullStack || error.stack || error.message || error));
+        }
+
+        await finish();
     }
 }
 

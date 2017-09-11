@@ -33,8 +33,8 @@ class Express {
 
         this.name = null;
         this.express = express();
-        this.http = null;
-        this.https = null;
+        this.server = null;
+        this.listening = false;
 
         this._app = app;
         this._config = config;
@@ -113,14 +113,13 @@ class Express {
             if (caVal)
                 options.ca = caVal;
 
-            this.https = https.createServer(options, this.express);
+            this.server = https.createServer(options, this.express);
         } else {
-            this.http = http.createServer(this.express);
+            this.server = http.createServer(this.express);
         }
 
-        let server = this.https || this.http;
-        server.on('error', this.onError.bind(this));
-        server.on('listening', this.onListening.bind(this));
+        this.server.on('error', this.onError.bind(this));
+        this.server.on('listening', this.onListening.bind(this));
 
         let middlewareConfig = this._config.get(`servers.${name}.middleware`);
         if (!Array.isArray(middlewareConfig))
@@ -168,11 +167,13 @@ class Express {
 
         this._logger.debug('express', `${this.name}: Starting the server`);
         let port = this._normalizePort(this._config.get(`servers.${name}.port`));
-        let server = this.https || this.http;
-        if (server) {
-            server.listen(port, typeof port === 'string' ? undefined : this._config.get(`servers.${name}.host`));
+        if (this.server) {
+            this.server.listen(port, typeof port === 'string' ? undefined : this._config.get(`servers.${name}.host`));
             return new Promise(resolve => {
-                server.once('listening', resolve);
+                this.server.once('listening', () => {
+                    this.listening = true;
+                    resolve();
+                });
             });
         }
     }
@@ -189,13 +190,12 @@ class Express {
         if (this._config.get(`servers.${name}.enable`) === false)
             return;
 
-        let server = this.https || this.http;
-        if (server) {
-            server.close();
+        if (this.server && this.listening) {
+            this.server.close();
             return new Promise(resolve => {
-                server.once('close', () => {
-                    this.http = null;
-                    this.https = null;
+                this.server.once('close', () => {
+                    this.server = null;
+                    this.listening = false;
 
                     let port = this._normalizePort(this._config.get(`servers.${this.name}.port`));
                     this._logger.info(
@@ -230,7 +230,7 @@ class Express {
             default:
                 msg = error;
         }
-        return this._app.exit(this._app.constructor.fatalExitCode, msg, this._app.constructor.gracefulTimeout);
+        return this._app.exit(this._app.constructor.fatalExitCode, msg);
     }
 
     /**
