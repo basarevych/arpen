@@ -43,7 +43,7 @@ class RequestLogger {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'app', 'config', 'logger.streamContainer' ];
+        return [ 'app', 'config', 'logger.streams' ];
     }
 
     /**
@@ -53,7 +53,10 @@ class RequestLogger {
      */
     async register(server) {
         server.express.use(morgan('dev'));
-        server.express.use(morgan('combined', { stream: this._logStreams.logs.get('access').stream }));
+
+        let stream = this._logStreams.logs.get('access');
+        if (stream)
+            server.express.use(morgan('combined', { stream: stream.stream }));
     }
 }
 
