@@ -162,13 +162,13 @@ class App {
 
     /**
      * Run the app. This method will simply call .init() and then .start().
-     * @param {object} options                          Arpen options
+     * @param {object} [options]                        Arpen options
      * @param {boolean} [options.disableServicesCache]  When true services cache will not be used
      * @param {...*} args                               Descendant class specific arguments
      * @return {Promise}
      */
     async run(options, ...args) {
-        this.options = options;
+        this.options = options || {};
         try {
             await this.init(...args);
             await this.start(...args);
