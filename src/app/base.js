@@ -164,7 +164,6 @@ class App {
      * Run the app. This method will simply call .init() and then .start().
      * @param {object} options                          Arpen options
      * @param {boolean} [options.disableServicesCache]  When true services cache will not be used
-     * @param {boolean} [options.disableLogFiles]       When true log files will not be used
      * @param {...*} args                               Descendant class specific arguments
      * @return {Promise}
      */
