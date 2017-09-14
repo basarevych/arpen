@@ -480,8 +480,12 @@ class App {
             async (prev, cur) => {
                 await prev;
 
+                let _module = modules.get(cur);
+                if (typeof _module.bootstrap !== 'function')
+                    return;
+
                 debug(`Bootstrapping module '${cur}'`);
-                let result = modules.get(cur).bootstrap();
+                let result = _module.bootstrap();
                 if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
                     throw new Error(`Module '${cur}' bootstrap() did not return a Promise`);
                 return result;
