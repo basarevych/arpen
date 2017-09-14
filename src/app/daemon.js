@@ -56,19 +56,19 @@ class Daemon {
                 try {
                     fs.accessSync(pidFile, fs.constants.R_OK | fs.constants.W_OK);
                 } catch (error) {
-                    console.error(`No read-write access to ${pidFile}`);
+                    process.stderr.write(`No read-write access to ${pidFile}\n`);
                     process.exit(1);
                 }
             } catch (error) {
                 try {
                     fs.closeSync(fs.openSync(pidFile, 'w'));
                 } catch (error) {
-                    console.error(`Could not create ${pidFile}`);
+                    process.stderr.write(`Could not create ${pidFile}\n`);
                     process.exit(1);
                 }
             }
         } catch (error) {
-            console.error(error.message);
+            process.stderr.write(error.message + '\n');
             process.exit(1);
         }
     }
@@ -123,7 +123,7 @@ class Daemon {
         try {
             this._pidFd = fs.openSync(this._pidFile, 'r+');
         } catch (error) {
-            console.error(error.message);
+            process.stderr.write(error.message + '\n');
             process.exit(1);
         }
 
