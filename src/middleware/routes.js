@@ -37,13 +37,8 @@ class Routes {
      * @return {Promise}
      */
     async register(server) {
-        for (let moduleInstance of this._modules.values()) {
-            if (typeof moduleInstance.routers !== 'function')
-                continue;
-
-            for (let router of moduleInstance.routers())
-                server.express.use('/', router);
-        }
+        for (let router of server.routes)
+            server.express.use('/', router);
     }
 }
 

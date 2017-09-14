@@ -26,6 +26,7 @@ class Server extends App {
         this._startedServers = new Set();
 
         let config = this.get('config');
+        let modules = this.get('modules');
         for (let name of names) {
             let params = config.get(`servers.${name}`);
             if (!params)
@@ -36,6 +37,21 @@ class Server extends App {
             if (!server)
                 throw new Error(`Service ${params.class} not found when initializing server ${name}`);
             servers.set(name, server);
+
+            await Array.from(modules).reduce(
+                async (prev, [name, _module]) => {
+                    await prev;
+
+                    if (typeof _module.register !== 'function')
+                        return;
+
+                    let result = _module.register(server);
+                    if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
+                        throw new Error(`Module '${name}' register() did not return a Promise`);
+                    return result;
+                },
+                Promise.resolve()
+            );
         }
 
         let logger = this.get('logger');

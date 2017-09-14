@@ -33,6 +33,7 @@ class Express {
 
         this.name = null;
         this.express = express();
+        this.routes = [];
         this.server = null;
         this.listening = false;
 
