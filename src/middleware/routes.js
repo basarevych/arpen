@@ -37,7 +37,7 @@ class Routes {
      * @return {Promise}
      */
     async register(server) {
-        for (let router of server.routes)
+        for (let router of server.routers)
             server.express.use('/', router);
     }
 }
