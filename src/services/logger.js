@@ -35,6 +35,7 @@ class Logger {
             this._streams = {
                 default: null,
                 logs: new Map(),
+                console: {},
             };
             this._app.registerInstance(this._streams, 'logger.streams');
 
@@ -133,8 +134,24 @@ class Logger {
             this._streams.logs.set(name, log);
         }
 
-        if (isDefault)
+        if (isDefault) {
             this._streams.default = name;
+            if (this._app.options.interceptConsole) {
+                let logger = this._streams.console.logger = new this.constructor(this._app, this._config, this._streams);
+                if (!this._streams.log) {
+                    this._streams.log = console.log;
+                    console.log = (...args) => { logger.info(...args) };
+                }
+                if (!this._streams.warn) {
+                    this._streams.warn = console.warn;
+                    console.warn = (...args) => { logger.warn(...args) };
+                }
+                if (!this._streams.error) {
+                    this._streams.error = console.error;
+                    console.error = (...args) => { logger.error(...args) };
+                }
+            }
+        }
 
         this._startLog(log);
     }
@@ -156,7 +173,8 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('error', messages, undefined, true, cb);
+        if (messages.length)
+            this.log('error', messages, undefined, true, cb);
     }
 
     /**
@@ -167,7 +185,8 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('info', messages, undefined, true, cb);
+        if (messages.length)
+            this.log('info', messages, undefined, true, cb);
     }
 
     /**
@@ -178,7 +197,8 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('warn', messages, undefined, true, cb);
+        if (messages.length)
+            this.log('warn', messages, undefined, true, cb);
     }
 
     /**
@@ -190,7 +210,8 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('debug', messages, issuer, true, cb);
+        if (messages.length)
+            this.log('debug', messages, issuer, true, cb);
     }
 
     /**
@@ -201,7 +222,8 @@ class Logger {
         let cb;
         if (messages.length && typeof messages[messages.length - 1] === 'function')
             cb = messages.pop();
-        this.log('info', messages, undefined, false, cb);
+        if (messages.length)
+            this.log('info', messages, undefined, false, cb);
     }
 
     /**
@@ -264,8 +286,12 @@ class Logger {
         if (logDate)
             logString = this.constructor.formatString(logString);
 
-        if (logToStdOut)
-            console[type === 'error' ? 'error' : 'log'](logString);
+        if (logToStdOut) {
+            if (type === 'error')
+                process.stderr.write(logString + '\n');
+            else
+                process.stdout.write(logString + '\n');
+        }
 
         if (logToFile) {
             if (logInfo.open) {
@@ -295,7 +321,7 @@ class Logger {
                     text: logString,
                 })
                 .catch(error => {
-                    console.error(this.constructor.formatString(`Could not email log message: ${error.messages || error.message}`));
+                    process.stderr.write(this.constructor.formatString(`Could not email log message: ${error.messages || error.message}\n`));
                 });
         }
     }
@@ -318,7 +344,7 @@ class Logger {
             log.open = false;
             if (!log.failed) {
                 log.failed = true;
-                console.error(this.constructor.formatString(`Log error (${log.name}): ${error.message}`));
+                process.stderr.write(this.constructor.formatString(`Log error (${log.name}): ${error.message}\n`));
             }
         });
         log.stream.on('open', () => {
