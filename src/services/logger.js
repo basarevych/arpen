@@ -145,9 +145,9 @@ class Logger {
                     this._streams.error = console.error;
 
                 let logger = this._streams.console.logger = new this.constructor(this._app, this._config, this._streams);
-                console.log = (...args) => { logger.info(...args) };
-                console.warn = (...args) => { logger.warn(...args) };
-                console.error = (...args) => { logger.error(...args) };
+                console.log = (...args) => { logger.info(...args); };
+                console.warn = (...args) => { logger.warn(...args); };
+                console.error = (...args) => { logger.error(...args); };
             }
         }
 
