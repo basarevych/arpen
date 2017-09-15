@@ -162,18 +162,18 @@ class App {
 
     /**
      * Run the app. This method will simply call .init() and then .start().
-     * @param {object} [options]                                Arpen options
-     * @param {boolean} [options.disableServicesCache=false]    When true services cache will not be used
-     * @param {boolean] [options.interceptConsole=true]         Redirect console.log(), etc. to default logger
-     * @param {...*} args                                       Descendant class specific arguments
+     * @param {object} [options]                            Arpen options
+     * @param {boolean} [options.cacheServices=true]        When true services cache will not be used
+     * @param {boolean] [options.interceptConsole=true]     Redirect console.log(), etc. to default logger
+     * @param {...*} args                                   Descendant class specific arguments
      * @return {Promise}
      */
     async run(options, ...args) {
         let {
-            disableServicesCache = false,
+            cacheServices = false,
             interceptConsole = true,
         } = options || {};
-        this.options = { disableServicesCache, interceptConsole };
+        this.options = { cacheServices, interceptConsole };
 
         try {
             await this.init(...args);
@@ -367,7 +367,7 @@ class App {
         let mapFile = `${config.project}.${config.instance}.map.json`;
 
         let cache = null;
-        if (!process.env.DEBUG && !this.options.disableServicesCache) {
+        if (!process.env.DEBUG && this.options.cacheServices) {
             try {
                 let contents = await filer.lockRead(path.join('/var/tmp', mapFile));
                 cache = JSON.parse(contents.trim());
