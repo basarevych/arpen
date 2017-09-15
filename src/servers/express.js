@@ -32,7 +32,7 @@ class Express {
             throw new Error('express module is required for Express server');
 
         this.name = null;
-        this.express = express();
+        this.express = null;
         this.routers = [];
         this.server = null;
         this.listening = false;
@@ -71,6 +71,7 @@ class Express {
             return;
 
         this._logger.debug('express', `${this.name}: Initializing express`);
+        this.express = express();
         this.express.set('env', this._config.get('env'));
         let options = this._config.get(`servers.${name}.express`);
         for (let option of Object.keys(options)) {
@@ -122,6 +123,8 @@ class Express {
         this.server.on('error', this.onError.bind(this));
         this.server.on('listening', this.onListening.bind(this));
 
+        this.listening = false;
+
         let middlewareConfig = this._config.get(`servers.${name}.middleware`);
         if (!Array.isArray(middlewareConfig))
             return;
@@ -148,7 +151,10 @@ class Express {
                 }
 
                 this._logger.debug('express', `${this.name}: Registering middleware ${cur}`);
-                return obj.register(this);
+                let result = obj.register(this);
+                if (result === null || typeof result !== 'object' || typeof result.then !== 'function')
+                    throw new Error(`Middleware '${cur}' register() did not return a Promise`);
+                return result;
             },
             Promise.resolve()
         );
@@ -168,7 +174,7 @@ class Express {
 
         this._logger.debug('express', `${this.name}: Starting the server`);
         let port = this._normalizePort(this._config.get(`servers.${name}.port`));
-        if (this.server) {
+        if (this.server && !this.listening) {
             this.server.listen(port, typeof port === 'string' ? undefined : this._config.get(`servers.${name}.host`));
             return new Promise(resolve => {
                 this.server.once('listening', () => {
