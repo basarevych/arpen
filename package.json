@@ -1,6 +1,6 @@
 {
   "name": "arpen",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "license": "MIT",
   "author": "Ross Basarevych <basarevych@gmail.com>",
   "description": "ARPEN",
@@ -11,6 +11,7 @@
   "dependencies": {
     "debug": "~3.0.1",
     "fs-ext": "~0.6.0",
+    "json-stringify-safe": "~5.0.1",
     "merge": "~1.2.0",
     "moment-timezone": "~0.5.13",
     "nerror": "~1.0.0",

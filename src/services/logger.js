@@ -4,6 +4,7 @@
  */
 const util = require('util');
 const RotatingFileStream = require('rotating-file-stream');
+const stringify = require('json-stringify-safe');
 
 /**
  * Logger service
@@ -264,11 +265,11 @@ class Logger {
         let parsed = [];
         for (let msg of messages) {
             if (msg.info && msg.fullStack)
-                parsed.push('Exception: ' + JSON.stringify(msg.info, undefined, 4) + '\n' + msg.fullStack);
+                parsed.push('Exception: ' + stringify(msg.info, undefined, 4) + '\n' + msg.fullStack);
             else if (msg.stack)
                 parsed.push(msg.stack);
             else if (typeof msg === 'object')
-                parsed.push(JSON.stringify(msg, undefined, 4));
+                parsed.push(stringify(msg, undefined, 4));
             else
                 parsed.push(msg);
         }
