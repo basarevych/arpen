@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: I18n</title>
+	<title>Documentation Class: MySQL</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,20 +72,20 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: I18n</h1>
+	<h1 class="page-title">Class: MySQL</h1>
 <section>
 
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-arpen_middleware_i18n.html">arpen/middleware/i18n</a>~</span>
+            <span class="ancestors"><a href="module-arpen_services_mysql.html">arpen/services/mysql</a>~</span>
         
-        I18n
+        MySQL
         </h2>
         
-            <div class="class-description">Internationalization
+            <div class="class-description">Mysql service
 <br><br>
-format-message module is required</div>
+mysql module is required</div>
         
     
 </header>
@@ -97,7 +97,7 @@ format-message module is required</div>
         
 <hr>
 <dt>
-    <h4 class="name" id="I18n"><span class="type-signature"></span>new I18n(config)</h4>
+    <h4 class="name" id="MySQL"><span class="type-signature"></span>new MySQL(config, logger, util)</h4>
     
     
 </dt>
@@ -157,7 +157,55 @@ format-message module is required</div>
 
             
 
-            <td class="description last">Configuration</td>
+            <td class="description last">Config service</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>logger</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Logger</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Logger service</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>util</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Util</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Util service</td>
         </tr>
 
     
@@ -248,7 +296,7 @@ format-message module is required</div>
 <dd>
     
     <div class="description">
-        Service name is 'middleware.i18n'
+        Service name is 'mysql'
     </div>
     
 
@@ -382,15 +430,86 @@ format-message module is required</div>
         
             
 <hr>
-<dt class="name" id=".defaultLocale">
-    <h4 id=".defaultLocale"><span class="type-signature">&lt;static> </span>defaultLocale<span class="type-signature"> :string</span></h4>
+<dt class="name" id=".lifecycle">
+    <h4 id=".lifecycle"><span class="type-signature">&lt;static> </span>lifecycle<span class="type-signature"> :string</span></h4>
 
     
 </dt>
 <dd>
     
     <div class="description">
-        Default locale
+        This service is a singleton
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">string</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".datetimeFormat">
+    <h4 id=".datetimeFormat"><span class="type-signature">&lt;static> </span>datetimeFormat<span class="type-signature"> :string</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Format of date/time string
     </div>
     
 
@@ -460,7 +579,7 @@ format-message module is required</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="register"><span class="type-signature">&lt;async> </span>register(server)</h4>
+    <h4 class="name" id="connect"><span class="type-signature">&lt;async> </span>connect(name)</h4>
     
     
 </dt>
@@ -468,7 +587,7 @@ format-message module is required</div>
 
     
     <div class="description">
-        Register middleware
+        Obtain MySQL client
     </div>
     
 
@@ -493,6 +612,8 @@ format-message module is required</div>
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -503,13 +624,13 @@ format-message module is required</div>
 
         <tr>
             
-                <td class="name"><code>server</code></td>
+                <td class="name"><code>name</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Express</span>
+<span class="param-type">string</span>
 
 
 
@@ -519,8 +640,14 @@ format-message module is required</div>
             
 
             
+                <td class="default">
+                
+                    'main'
+                
+                </td>
+            
 
-            <td class="description last">The server</td>
+            <td class="description last">Server name in config</td>
         </tr>
 
     
@@ -583,6 +710,10 @@ format-message module is required</div>
     <h5>Returns:</h5>
     
             
+<div class="param-desc">
+    Resolves to connected MySQLClient instance
+</div>
+
 
 
 <dl>
@@ -592,232 +723,6 @@ format-message module is required</div>
     <dd>
         
 <span class="param-type">Promise</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="translate"><span class="type-signature"></span>translate(id [, options] [, locale])</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Translate message
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>locale</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
 
 
 
@@ -880,7 +785,7 @@ format-message module is required</div>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a>
 	
-		on 2017-09-15T15:59:35+03:00
+		on 2017-09-15T15:59:36+03:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

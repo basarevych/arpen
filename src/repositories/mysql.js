@@ -1,6 +1,6 @@
 /**
- * Base class for repositories
- * @module arpen/repositories/base
+ * Base class for MySQL repositories
+ * @module arpen/repositories/mysql
  */
 const path = require('path');
 const fs = require('fs');
@@ -9,30 +9,28 @@ const NError = require('nerror');
 /**
  * Repository base class
  */
-class BaseRepository {
+class MySQLRepository {
     /**
      * Create repository
      * @param {App} app                             The application
-     * @param {Postgres} postgres                   Postgres service
-     * @param {Cacher} cacher                       Cacher service
+     * @param {MySQL} mysql                         MySQL service
      * @param {Util} util                           Util service
      */
-    constructor(app, postgres, cacher, util) {
+    constructor(app, mysql, util) {
         this._app = app;
-        this._postgres = postgres;
-        this._cacher = cacher;
+        this._mysql = mysql;
         this._util = util;
         this._enableCache = true;
 
-        this._loadMethods(path.join(__dirname, 'base'));
+        this._loadMethods(path.join(__dirname, 'mysql'));
     }
 
     /**
-     * Service name is 'repositories.base'
+     * Service name is 'repositories.mysql'
      * @type {string}
      */
     static get provides() {
-        return 'repositories.base';
+        return 'repositories.mysql';
     }
 
     /**
@@ -40,7 +38,7 @@ class BaseRepository {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'app', 'postgres', 'cacher', 'util' ];
+        return [ 'app', 'mysql', 'util' ];
     }
 
     /**
@@ -112,10 +110,10 @@ class BaseRepository {
             try {
                 this[methodName] = require(file).bind(this);
             } catch (error) {
-                throw new NError(error, `Repository._loadMethods() - processing: ${name}`);
+                throw new NError(error, `MySQLRepository._loadMethods() - processing: ${name}`);
             }
         }
     }
 }
 
-module.exports = BaseRepository;
+module.exports = MySQLRepository;

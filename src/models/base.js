@@ -11,13 +11,13 @@ const moment = require('moment-timezone');
 class BaseModel {
     /**
      * Create model
-     * @param {Postgres} postgres       Postgres service
+     * @param {Postgres|MySQL} db       Postgres or MySQL service
      * @param {Util} util               Util service
      */
-    constructor(postgres, util) {
+    constructor(db, util) {
         this._dirty = false;
         this._fields = new Map();
-        this._postgres = postgres;
+        this._db = db;
         this._util = util;
 
         this.id = undefined;
@@ -29,14 +29,6 @@ class BaseModel {
      */
     static get provides() {
         return 'models.base';
-    }
-
-    /**
-     * Dependencies as constructor arguments
-     * @type {string[]}
-     */
-    static get requires() {
-        return [ 'postgres', 'util' ];
     }
 
     /**
@@ -89,7 +81,7 @@ class BaseModel {
             let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
             let value = (desc && desc.get) ? desc.get.call(this) : this._getField(field);
             if (moment.isMoment(value))
-                value = value.tz('UTC').format(this._postgres.constructor.datetimeFormat);
+                value = value.tz('UTC').format(this._db.constructor.datetimeFormat);
             data[field] = value;
         }
         return data;
@@ -109,7 +101,7 @@ class BaseModel {
             let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
             let value = (desc && desc.set) ? desc.set.call(this, data[field]) : this._setField(field, data[field]);
             if (moment.isMoment(value)) {
-                value = moment.tz(value.format(this._postgres.constructor.datetimeFormat), 'UTC').local();
+                value = moment.tz(value.format(this._db.constructor.datetimeFormat), 'UTC').local();
                 if (desc && desc.set)
                     desc.set.call(this, value);
                 else

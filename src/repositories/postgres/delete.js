@@ -1,5 +1,5 @@
 /**
- * BaseRepository.delete()
+ * PostgresRepository.delete()
  */
 'use strict';
 
@@ -9,7 +9,7 @@ const NError = require('nerror');
  * Delete a model
  * @instance
  * @method delete
- * @memberOf module:arpen/repositories/base~BaseRepository
+ * @memberOf module:arpen/repositories/postgres~PostgresRepository
  * @param {BaseModel|number} model          Model or ID
  * @param {PostgresClient|string} [pg]      Will reuse the Postgres client provided, or if it is a string then will
  *                                          connect to this instance of Postgres.
@@ -34,6 +34,6 @@ module.exports = async function (model, pg) {
         if (client && typeof pg !== 'object')
             client.done();
 
-        throw new NError(error, { model }, 'BaseRepository.delete()');
+        throw new NError(error, { model }, 'PostgresRepository.delete()');
     }
 };

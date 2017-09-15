@@ -1,5 +1,5 @@
 /**
- * BaseRepository.search()
+ * MySQLRepository.search()
  */
 'use strict';
 
@@ -9,7 +9,7 @@ const NError = require('nerror');
  * Search repository
  * @instance
  * @method search
- * @memberOf module:arpen/repositories/base~BaseRepository
+ * @memberOf module:arpen/repositories/mysql~MySQLRepository
  * @param {object} [options]
  * @param {string} [options.table]               Table or view name
  * @param {string[]} [options.fields]            Fields to retrieve
@@ -18,8 +18,8 @@ const NError = require('nerror');
  * @param {string} [options.sort=['id asc']]     Used in ORDER BY if provided
  * @param {number} [options.pageSize=0]          Used in LIMIT, 0 = all records
  * @param {number} [options.pageNumber=1]        Used in OFFSET
- * @param {PostgresClient|string} [pg]          Will reuse the Postgres client provided, or if string then will
- *                                              connect to this instance of Postgres.
+ * @param {MySQLClient|string} [mysql]          Will reuse the MySQL client provided, or if string then will
+ *                                              connect to this instance of MySQL.
  * @return {Promise}                            Returns promise resolving to the following:
  * <pre>
  * {
@@ -32,7 +32,7 @@ const NError = require('nerror');
  * }
  * </pre>
  */
-module.exports = async function (options = {}, pg = undefined) {
+module.exports = async function (options = {}, mysql = undefined) {
     let {
         table = this.constructor.table,
         fields = Object.keys(this.getModel()._serialize()),
@@ -46,15 +46,15 @@ module.exports = async function (options = {}, pg = undefined) {
     let client;
 
     try {
-        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg);
+        client = typeof mysql === 'object' ? mysql : await this._mysql.connect(mysql);
         let result = await client.query(
-            `SELECT count(*)::int AS count 
+            `SELECT count(*) AS count 
                FROM ${table} 
              ${where.length ? `WHERE (${where.join(') AND (')})` : ''}`,
             params
         );
 
-        let totalRows = result.rowCount ? result.rows[0].count : 0;
+        let totalRows = result.length ? result[0].count : 0;
         let totalPages;
         if (totalRows === 0 || pageSize === 0) {
             totalPages = 1;
@@ -76,7 +76,7 @@ module.exports = async function (options = {}, pg = undefined) {
             params
         );
 
-        if (typeof pg !== 'object')
+        if (typeof mysql !== 'object')
             client.done();
 
         return {
@@ -85,10 +85,10 @@ module.exports = async function (options = {}, pg = undefined) {
             pageSize: pageSize,
             pageNumber: pageNumber,
             sort: sort,
-            data: result.rows,
+            data: result,
         };
     } catch (error) {
-        if (client && typeof pg !== 'object')
+        if (client && typeof mysql !== 'object')
             client.done();
 
         throw new NError(
@@ -102,7 +102,7 @@ module.exports = async function (options = {}, pg = undefined) {
                 pageSize: options.pageSize || 0,
                 pageNumber: options.pageNumber || 1,
             },
-            'BaseRepository.search()'
+            'MySQLRepository.search()'
         );
     }
 };

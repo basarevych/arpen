@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: BaseRepository</title>
+	<title>Documentation Class: MySQLRepository</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -33,14 +33,14 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-arpen_app_base.html">arpen/app/base</a></li><li><a href="module-arpen_app_console.html">arpen/app/console</a></li><li><a href="module-arpen_app_daemon.html">arpen/app/daemon</a></li><li><a href="module-arpen_app_server.html">arpen/app/server</a></li><li><a href="module-arpen_middleware_error.html">arpen/middleware/error</a></li><li><a href="module-arpen_middleware_favicon.html">arpen/middleware/favicon</a></li><li><a href="module-arpen_middleware_i18n.html">arpen/middleware/i18n</a></li><li><a href="module-arpen_middleware_request-logger.html">arpen/middleware/request-logger</a></li><li><a href="module-arpen_middleware_request-parser.html">arpen/middleware/request-parser</a></li><li><a href="module-arpen_middleware_routes.html">arpen/middleware/routes</a></li><li><a href="module-arpen_middleware_static-files.html">arpen/middleware/static-files</a></li><li><a href="module-arpen_models_base.html">arpen/models/base</a></li><li><a href="module-arpen_repositories_base.html">arpen/repositories/base</a></li><li><a href="module-arpen_servers_express.html">arpen/servers/express</a></li><li><a href="module-arpen_services_cacher.html">arpen/services/cacher</a></li><li><a href="module-arpen_services_emailer.html">arpen/services/emailer</a></li><li><a href="module-arpen_services_filer.html">arpen/services/filer</a></li><li><a href="module-arpen_services_ini.html">arpen/services/ini</a></li><li><a href="module-arpen_services_logger.html">arpen/services/logger</a></li><li><a href="module-arpen_services_postgres-pubsub.html">arpen/services/postgres-pubsub</a></li><li><a href="module-arpen_services_postgres.html">arpen/services/postgres</a></li><li><a href="module-arpen_services_pubsub.html">arpen/services/pubsub</a></li><li><a href="module-arpen_services_redis-pubsub.html">arpen/services/redis-pubsub</a></li><li><a href="module-arpen_services_redis.html">arpen/services/redis</a></li><li><a href="module-arpen_services_runner.html">arpen/services/runner</a></li><li><a href="module-arpen_services_util.html">arpen/services/util</a></li>
+					<li><a href="module-arpen_app_base.html">arpen/app/base</a></li><li><a href="module-arpen_app_console.html">arpen/app/console</a></li><li><a href="module-arpen_app_daemon.html">arpen/app/daemon</a></li><li><a href="module-arpen_app_server.html">arpen/app/server</a></li><li><a href="module-arpen_middleware_error.html">arpen/middleware/error</a></li><li><a href="module-arpen_middleware_favicon.html">arpen/middleware/favicon</a></li><li><a href="module-arpen_middleware_i18n.html">arpen/middleware/i18n</a></li><li><a href="module-arpen_middleware_request-logger.html">arpen/middleware/request-logger</a></li><li><a href="module-arpen_middleware_request-parser.html">arpen/middleware/request-parser</a></li><li><a href="module-arpen_middleware_routes.html">arpen/middleware/routes</a></li><li><a href="module-arpen_middleware_static-files.html">arpen/middleware/static-files</a></li><li><a href="module-arpen_models_base.html">arpen/models/base</a></li><li><a href="module-arpen_repositories_mysql.html">arpen/repositories/mysql</a></li><li><a href="module-arpen_repositories_postgres.html">arpen/repositories/postgres</a></li><li><a href="module-arpen_servers_express.html">arpen/servers/express</a></li><li><a href="module-arpen_services_cacher.html">arpen/services/cacher</a></li><li><a href="module-arpen_services_emailer.html">arpen/services/emailer</a></li><li><a href="module-arpen_services_filer.html">arpen/services/filer</a></li><li><a href="module-arpen_services_ini.html">arpen/services/ini</a></li><li><a href="module-arpen_services_logger.html">arpen/services/logger</a></li><li><a href="module-arpen_services_mysql.html">arpen/services/mysql</a></li><li><a href="module-arpen_services_postgres-pubsub.html">arpen/services/postgres-pubsub</a></li><li><a href="module-arpen_services_postgres.html">arpen/services/postgres</a></li><li><a href="module-arpen_services_pubsub.html">arpen/services/pubsub</a></li><li><a href="module-arpen_services_redis-pubsub.html">arpen/services/redis-pubsub</a></li><li><a href="module-arpen_services_redis.html">arpen/services/redis</a></li><li><a href="module-arpen_services_runner.html">arpen/services/runner</a></li><li><a href="module-arpen_services_util.html">arpen/services/util</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-arpen_app_base-App.html">arpen/app/base~App</a></li><li><a href="module-arpen_app_console-Console.html">arpen/app/console~Console</a></li><li><a href="module-arpen_app_daemon-Daemon.html">arpen/app/daemon~Daemon</a></li><li><a href="module-arpen_app_server-Server.html">arpen/app/server~Server</a></li><li><a href="module-arpen_middleware_error-ErrorHandler.html">arpen/middleware/error~ErrorHandler</a></li><li><a href="module-arpen_middleware_favicon-Favicon.html">arpen/middleware/favicon~Favicon</a></li><li><a href="module-arpen_middleware_i18n-I18n.html">arpen/middleware/i18n~I18n</a></li><li><a href="module-arpen_middleware_request-logger-RequestLogger.html">arpen/middleware/request-logger~RequestLogger</a></li><li><a href="module-arpen_middleware_request-parser-RequestParser.html">arpen/middleware/request-parser~RequestParser</a></li><li><a href="module-arpen_middleware_routes-Routes.html">arpen/middleware/routes~Routes</a></li><li><a href="module-arpen_middleware_static-files-StaticFiles.html">arpen/middleware/static-files~StaticFiles</a></li><li><a href="module-arpen_models_base-BaseModel.html">arpen/models/base~BaseModel</a></li><li><a href="module-arpen_repositories_base-BaseRepository.html">arpen/repositories/base~BaseRepository</a></li><li><a href="module-arpen_servers_express-Express.html">arpen/servers/express~Express</a></li><li><a href="module-arpen_services_cacher-Cacher.html">arpen/services/cacher~Cacher</a></li><li><a href="module-arpen_services_emailer-Emailer.html">arpen/services/emailer~Emailer</a></li><li><a href="module-arpen_services_filer-Filer.html">arpen/services/filer~Filer</a></li><li><a href="module-arpen_services_ini-Ini.html">arpen/services/ini~Ini</a></li><li><a href="module-arpen_services_logger-Logger.html">arpen/services/logger~Logger</a></li><li><a href="module-arpen_services_postgres-pubsub-PostgresPubSubClient.html">arpen/services/postgres-pubsub~PostgresPubSubClient</a></li><li><a href="module-arpen_services_postgres-pubsub-PostgresPubSub.html">arpen/services/postgres-pubsub~PostgresPubSub</a></li><li><a href="module-arpen_services_postgres-PostgresClient.html">arpen/services/postgres~PostgresClient</a></li><li><a href="module-arpen_services_postgres-Postgres.html">arpen/services/postgres~Postgres</a></li><li><a href="module-arpen_services_pubsub-PubSubClient.html">arpen/services/pubsub~PubSubClient</a></li><li><a href="module-arpen_services_pubsub-PubSub.html">arpen/services/pubsub~PubSub</a></li><li><a href="module-arpen_services_redis-pubsub-RedisPubSubClient.html">arpen/services/redis-pubsub~RedisPubSubClient</a></li><li><a href="module-arpen_services_redis-pubsub-RedisPubSub.html">arpen/services/redis-pubsub~RedisPubSub</a></li><li><a href="module-arpen_services_redis-RedisQueue.html">arpen/services/redis~RedisQueue</a></li><li><a href="module-arpen_services_redis-RedisClient.html">arpen/services/redis~RedisClient</a></li><li><a href="module-arpen_services_redis-Redis.html">arpen/services/redis~Redis</a></li><li><a href="module-arpen_services_runner-Subprocess.html">arpen/services/runner~Subprocess</a></li><li><a href="module-arpen_services_runner-Runner.html">arpen/services/runner~Runner</a></li><li><a href="module-arpen_services_util-Util.html">arpen/services/util~Util</a></li>
+					<li><a href="module-arpen_app_base-App.html">arpen/app/base~App</a></li><li><a href="module-arpen_app_console-Console.html">arpen/app/console~Console</a></li><li><a href="module-arpen_app_daemon-Daemon.html">arpen/app/daemon~Daemon</a></li><li><a href="module-arpen_app_server-Server.html">arpen/app/server~Server</a></li><li><a href="module-arpen_middleware_error-ErrorHandler.html">arpen/middleware/error~ErrorHandler</a></li><li><a href="module-arpen_middleware_favicon-Favicon.html">arpen/middleware/favicon~Favicon</a></li><li><a href="module-arpen_middleware_i18n-I18n.html">arpen/middleware/i18n~I18n</a></li><li><a href="module-arpen_middleware_request-logger-RequestLogger.html">arpen/middleware/request-logger~RequestLogger</a></li><li><a href="module-arpen_middleware_request-parser-RequestParser.html">arpen/middleware/request-parser~RequestParser</a></li><li><a href="module-arpen_middleware_routes-Routes.html">arpen/middleware/routes~Routes</a></li><li><a href="module-arpen_middleware_static-files-StaticFiles.html">arpen/middleware/static-files~StaticFiles</a></li><li><a href="module-arpen_models_base-BaseModel.html">arpen/models/base~BaseModel</a></li><li><a href="module-arpen_repositories_mysql-MySQLRepository.html">arpen/repositories/mysql~MySQLRepository</a></li><li><a href="module-arpen_repositories_postgres-PostgresRepository.html">arpen/repositories/postgres~PostgresRepository</a></li><li><a href="module-arpen_servers_express-Express.html">arpen/servers/express~Express</a></li><li><a href="module-arpen_services_cacher-Cacher.html">arpen/services/cacher~Cacher</a></li><li><a href="module-arpen_services_emailer-Emailer.html">arpen/services/emailer~Emailer</a></li><li><a href="module-arpen_services_filer-Filer.html">arpen/services/filer~Filer</a></li><li><a href="module-arpen_services_ini-Ini.html">arpen/services/ini~Ini</a></li><li><a href="module-arpen_services_logger-Logger.html">arpen/services/logger~Logger</a></li><li><a href="module-arpen_services_mysql-MySQLClient.html">arpen/services/mysql~MySQLClient</a></li><li><a href="module-arpen_services_mysql-MySQL.html">arpen/services/mysql~MySQL</a></li><li><a href="module-arpen_services_postgres-pubsub-PostgresPubSubClient.html">arpen/services/postgres-pubsub~PostgresPubSubClient</a></li><li><a href="module-arpen_services_postgres-pubsub-PostgresPubSub.html">arpen/services/postgres-pubsub~PostgresPubSub</a></li><li><a href="module-arpen_services_postgres-PostgresClient.html">arpen/services/postgres~PostgresClient</a></li><li><a href="module-arpen_services_postgres-Postgres.html">arpen/services/postgres~Postgres</a></li><li><a href="module-arpen_services_pubsub-PubSubClient.html">arpen/services/pubsub~PubSubClient</a></li><li><a href="module-arpen_services_pubsub-PubSub.html">arpen/services/pubsub~PubSub</a></li><li><a href="module-arpen_services_redis-pubsub-RedisPubSubClient.html">arpen/services/redis-pubsub~RedisPubSubClient</a></li><li><a href="module-arpen_services_redis-pubsub-RedisPubSub.html">arpen/services/redis-pubsub~RedisPubSub</a></li><li><a href="module-arpen_services_redis-RedisQueue.html">arpen/services/redis~RedisQueue</a></li><li><a href="module-arpen_services_redis-RedisClient.html">arpen/services/redis~RedisClient</a></li><li><a href="module-arpen_services_redis-Redis.html">arpen/services/redis~Redis</a></li><li><a href="module-arpen_services_runner-Subprocess.html">arpen/services/runner~Subprocess</a></li><li><a href="module-arpen_services_runner-Runner.html">arpen/services/runner~Runner</a></li><li><a href="module-arpen_services_util-Util.html">arpen/services/util~Util</a></li>
 				</ul>
 			</li>
 			
@@ -72,15 +72,15 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: BaseRepository</h1>
+	<h1 class="page-title">Class: MySQLRepository</h1>
 <section>
 
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-arpen_repositories_base.html">arpen/repositories/base</a>~</span>
+            <span class="ancestors"><a href="module-arpen_repositories_mysql.html">arpen/repositories/mysql</a>~</span>
         
-        BaseRepository
+        MySQLRepository
         </h2>
         
             <div class="class-description">Repository base class</div>
@@ -95,7 +95,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="BaseRepository"><span class="type-signature"></span>new BaseRepository(app, postgres, cacher, util)</h4>
+    <h4 class="name" id="MySQLRepository"><span class="type-signature"></span>new MySQLRepository(app, mysql, util)</h4>
     
     
 </dt>
@@ -162,13 +162,13 @@
 
         <tr>
             
-                <td class="name"><code>postgres</code></td>
+                <td class="name"><code>mysql</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Postgres</span>
+<span class="param-type">MySQL</span>
 
 
 
@@ -179,31 +179,7 @@
 
             
 
-            <td class="description last">Postgres service</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cacher</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Cacher</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Cacher service</td>
+            <td class="description last">MySQL service</td>
         </tr>
 
     
@@ -318,7 +294,7 @@
 <dd>
     
     <div class="description">
-        Service name is 'repositories.base'
+        Service name is 'repositories.mysql'
     </div>
     
 
@@ -601,7 +577,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="delete"><span class="type-signature"></span>delete(model [, pg])</h4>
+    <h4 class="name" id="delete"><span class="type-signature"></span>delete(model [, mysql])</h4>
     
     
 </dt>
@@ -681,13 +657,13 @@
 
         <tr>
             
-                <td class="name"><code>pg</code></td>
+                <td class="name"><code>mysql</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">PostgresClient</span>
+<span class="param-type">MySQLClient</span>
 |
 
 <span class="param-type">string</span>
@@ -711,8 +687,8 @@
 
             
 
-            <td class="description last">Will reuse the Postgres client provided, or if it is a string then will
-                                         connect to this instance of Postgres.</td>
+            <td class="description last">Will reuse the MySQL client provided, or if it is a string then will
+                                         connect to this instance of MySQL.</td>
         </tr>
 
     
@@ -804,7 +780,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="findAll"><span class="type-signature"></span>findAll( [pg])</h4>
+    <h4 class="name" id="findAll"><span class="type-signature"></span>findAll( [mysql])</h4>
     
     
 </dt>
@@ -849,13 +825,13 @@
 
         <tr>
             
-                <td class="name"><code>pg</code></td>
+                <td class="name"><code>mysql</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">PostgresClient</span>
+<span class="param-type">MySQLClient</span>
 |
 
 <span class="param-type">string</span>
@@ -879,8 +855,8 @@
 
             
 
-            <td class="description last">Will reuse the Postgres client provided, or if it is a string then will
-                                         connect to this instance of Postgres.</td>
+            <td class="description last">Will reuse the MySQL client provided, or if it is a string then will
+                                         connect to this instance of MySQL.</td>
         </tr>
 
     
@@ -972,7 +948,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="find"><span class="type-signature"></span>find(id [, pg])</h4>
+    <h4 class="name" id="find"><span class="type-signature"></span>find(id [, mysql])</h4>
     
     
 </dt>
@@ -1049,13 +1025,13 @@
 
         <tr>
             
-                <td class="name"><code>pg</code></td>
+                <td class="name"><code>mysql</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">PostgresClient</span>
+<span class="param-type">MySQLClient</span>
 |
 
 <span class="param-type">string</span>
@@ -1079,8 +1055,8 @@
 
             
 
-            <td class="description last">Will reuse the Postgres client provided, or if it is a string then will
-                                         connect to this instance of Postgres.</td>
+            <td class="description last">Will reuse the MySQL client provided, or if it is a string then will
+                                         connect to this instance of MySQL.</td>
         </tr>
 
     
@@ -1172,7 +1148,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="save"><span class="type-signature"></span>save(model [, pg])</h4>
+    <h4 class="name" id="save"><span class="type-signature"></span>save(model [, mysql])</h4>
     
     
 </dt>
@@ -1249,13 +1225,13 @@
 
         <tr>
             
-                <td class="name"><code>pg</code></td>
+                <td class="name"><code>mysql</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">PostgresClient</span>
+<span class="param-type">MySQLClient</span>
 |
 
 <span class="param-type">string</span>
@@ -1279,8 +1255,8 @@
 
             
 
-            <td class="description last">Will reuse the Postgres client provided, or if it is a string then will
-                                         connect to this instance of Postgres.</td>
+            <td class="description last">Will reuse the MySQL client provided, or if it is a string then will
+                                         connect to this instance of MySQL.</td>
         </tr>
 
     
@@ -1372,7 +1348,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="search"><span class="type-signature"></span>search( [options] [, pg])</h4>
+    <h4 class="name" id="search"><span class="type-signature"></span>search( [options] [, mysql])</h4>
     
     
 </dt>
@@ -1753,13 +1729,13 @@
 
         <tr>
             
-                <td class="name"><code>pg</code></td>
+                <td class="name"><code>mysql</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">PostgresClient</span>
+<span class="param-type">MySQLClient</span>
 |
 
 <span class="param-type">string</span>
@@ -1783,8 +1759,8 @@
 
             
 
-            <td class="description last">Will reuse the Postgres client provided, or if string then will
-                                             connect to this instance of Postgres.</td>
+            <td class="description last">Will reuse the MySQL client provided, or if string then will
+                                             connect to this instance of MySQL.</td>
         </tr>
 
     
@@ -2427,7 +2403,7 @@
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a>
 	
-		on 2017-09-15T07:56:45+03:00
+		on 2017-09-15T15:59:35+03:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

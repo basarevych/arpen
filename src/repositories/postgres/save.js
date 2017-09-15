@@ -1,5 +1,5 @@
 /**
- * BaseRepository.save()
+ * PostgresRepository.save()
  */
 'use strict';
 
@@ -9,7 +9,7 @@ const NError = require('nerror');
  * Save model
  * @instance
  * @method save
- * @memberOf module:arpen/repositories/base~BaseRepository
+ * @memberOf module:arpen/repositories/postgres~PostgresRepository
  * @param {BaseModel} model                 The model
  * @param {PostgresClient|string} [pg]      Will reuse the Postgres client provided, or if it is a string then will
  *                                          connect to this instance of Postgres.
@@ -68,6 +68,6 @@ module.exports = async function (model, pg) {
         if (client && typeof pg !== 'object')
             client.done();
 
-        throw new NError(error, { model }, 'BaseRepository.save()');
+        throw new NError(error, { model }, 'PostgresRepository.save()');
     }
 };

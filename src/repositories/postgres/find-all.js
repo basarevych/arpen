@@ -1,5 +1,5 @@
 /**
- * BaseRepository.findAll()
+ * PostgresRepository.findAll()
  */
 'use strict';
 
@@ -9,7 +9,7 @@ const NError = require('nerror');
  * Find all models
  * @instance
  * @method findAll
- * @memberOf module:arpen/repositories/base~BaseRepository
+ * @memberOf module:arpen/repositories/postgres~PostgresRepository
  * @param {PostgresClient|string} [pg]      Will reuse the Postgres client provided, or if it is a string then will
  *                                          connect to this instance of Postgres.
  * @return {Promise}                        Resolves to array of models
@@ -34,6 +34,6 @@ module.exports = async function (pg) {
         if (client && typeof pg !== 'object')
             client.done();
 
-        throw new NError(error, 'BaseRepository.findAll()');
+        throw new NError(error, 'PostgresRepository.findAll()');
     }
 };

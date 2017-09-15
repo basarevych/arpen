@@ -1,5 +1,5 @@
 /**
- * BaseRepository.find()
+ * PostgresRepository.find()
  */
 'use strict';
 
@@ -9,7 +9,7 @@ const NError = require('nerror');
  * Find a model by ID
  * @instance
  * @method find
- * @memberOf module:arpen/repositories/base~BaseRepository
+ * @memberOf module:arpen/repositories/postgres~PostgresRepository
  * @param {number} id                       ID to search by
  * @param {PostgresClient|string} [pg]      Will reuse the Postgres client provided, or if it is a string then will
  *                                          connect to this instance of Postgres.
@@ -46,6 +46,6 @@ module.exports = async function (id, pg) {
         if (client && typeof pg !== 'object')
             client.done();
 
-        throw new NError(error, { id }, 'BaseRepository.find()');
+        throw new NError(error, { id }, 'PostgresRepository.find()');
     }
 };

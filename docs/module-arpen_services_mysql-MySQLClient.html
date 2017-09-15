@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: I18n</title>
+	<title>Documentation Class: MySQLClient</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,20 +72,18 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: I18n</h1>
+	<h1 class="page-title">Class: MySQLClient</h1>
 <section>
 
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-arpen_middleware_i18n.html">arpen/middleware/i18n</a>~</span>
+            <span class="ancestors"><a href="module-arpen_services_mysql.html">arpen/services/mysql</a>~</span>
         
-        I18n
+        MySQLClient
         </h2>
         
-            <div class="class-description">Internationalization
-<br><br>
-format-message module is required</div>
+            <div class="class-description">MySQL client</div>
         
     
 </header>
@@ -97,7 +95,7 @@ format-message module is required</div>
         
 <hr>
 <dt>
-    <h4 class="name" id="I18n"><span class="type-signature"></span>new I18n(config)</h4>
+    <h4 class="name" id="MySQLClient"><span class="type-signature"></span>new MySQLClient(service, client)</h4>
     
     
 </dt>
@@ -105,7 +103,7 @@ format-message module is required</div>
 
     
     <div class="description">
-        Create the service
+        Create MySQL client
     </div>
     
 
@@ -140,7 +138,31 @@ format-message module is required</div>
 
         <tr>
             
-                <td class="name"><code>config</code></td>
+                <td class="name"><code>service</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">MySQL</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">MySQL service instance</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>client</code></td>
             
 
             <td class="type">
@@ -157,7 +179,7 @@ format-message module is required</div>
 
             
 
-            <td class="description last">Configuration</td>
+            <td class="description last">Connected PG client</td>
         </tr>
 
     
@@ -170,318 +192,11 @@ format-message module is required</div>
 <dl class="details">
     
 
-	
+    <h5 class="subsection-title">Properties:</h5>
 
-	
+    <dl>
 
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        <dl>
-            
-<hr>
-<dt class="name" id=".provides">
-    <h4 id=".provides"><span class="type-signature">&lt;static> </span>provides<span class="type-signature"> :string</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        Service name is 'middleware.i18n'
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">string</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".requires">
-    <h4 id=".requires"><span class="type-signature">&lt;static> </span>requires<span class="type-signature"> :Array.&lt;string></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        Dependencies as constructor arguments
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Array.&lt;string></span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".defaultLocale">
-    <h4 id=".defaultLocale"><span class="type-signature">&lt;static> </span>defaultLocale<span class="type-signature"> :string</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        Default locale
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">string</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="register"><span class="type-signature">&lt;async> </span>register(server)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Register middleware
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
+<table class="props table table-striped">
     <thead>
     <tr>
         
@@ -493,6 +208,8 @@ format-message module is required</div>
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -503,13 +220,13 @@ format-message module is required</div>
 
         <tr>
             
-                <td class="name"><code>server</code></td>
+                <td class="name"><code>client</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Express</span>
+<span class="param-type">object</span>
 
 
 
@@ -519,14 +236,201 @@ format-message module is required</div>
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
-            <td class="description last">The server</td>
+            <td class="description last">mysql client</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxTransactionRetries</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    59
+                
+                </td>
+            
+
+            <td class="description last">Max number of transaction retries on serialization failures</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minTransactionDelay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    100
+                
+                </td>
+            
+
+            <td class="description last">Minimum time to wait before retrying transaction</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxTransactionDelay</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    1000
+                
+                </td>
+            
+
+            <td class="description last">Maximum time to wait before retrying transaction</td>
         </tr>
 
     
     </tbody>
 </table>
+</dl>
 
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="done"><span class="type-signature"></span>done()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Client termination
+    </div>
+    
+
+    
+
+    
+
+    
     
 
     
@@ -580,26 +484,6 @@ format-message module is required</div>
     
 
     
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
 
     
 </dd>
@@ -608,7 +492,7 @@ format-message module is required</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="translate"><span class="type-signature"></span>translate(id [, options] [, locale])</h4>
+    <h4 class="name" id="query"><span class="type-signature">&lt;async> </span>query(sql [, params])</h4>
     
     
 </dt>
@@ -616,7 +500,8 @@ format-message module is required</div>
 
     
     <div class="description">
-        Translate message
+        Run MySQL query<br>
+Date/Moment params are converted to strings in UTC timezone.
     </div>
     
 
@@ -653,7 +538,7 @@ format-message module is required</div>
 
         <tr>
             
-                <td class="name"><code>id</code></td>
+                <td class="name"><code>sql</code></td>
             
 
             <td class="type">
@@ -678,20 +563,20 @@ format-message module is required</div>
 
             
 
-            <td class="description last"></td>
+            <td class="description last">SQL query string</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>options</code></td>
+                <td class="name"><code>params</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Array</span>
 
 
 
@@ -712,41 +597,7 @@ format-message module is required</div>
 
             
 
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>locale</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"></td>
+            <td class="description last">Query parameters</td>
         </tr>
 
     
@@ -809,6 +660,10 @@ format-message module is required</div>
     <h5>Returns:</h5>
     
             
+<div class="param-desc">
+    Resolves to query result
+</div>
+
 
 
 <dl>
@@ -817,7 +672,265 @@ format-message module is required</div>
     </dt>
     <dd>
         
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="transaction"><span class="type-signature">&lt;async> </span>transaction( [params], cb)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Run a transaction
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <h6 class="method-params-label method-subparams-label">Properties</h6>
+                
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
 <span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Transaction name for debugging</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cb</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">PostgresTransaction</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The transaction</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Resolves to transaction result
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
 
 
 
@@ -880,7 +993,7 @@ format-message module is required</div>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a>
 	
-		on 2017-09-15T15:59:35+03:00
+		on 2017-09-15T15:59:36+03:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

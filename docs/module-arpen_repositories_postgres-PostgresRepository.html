@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: Util</title>
+	<title>Documentation Class: PostgresRepository</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,20 +72,18 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Util</h1>
+	<h1 class="page-title">Class: PostgresRepository</h1>
 <section>
 
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-arpen_services_util.html">arpen/services/util</a>~</span>
+            <span class="ancestors"><a href="module-arpen_repositories_postgres.html">arpen/repositories/postgres</a>~</span>
         
-        Util
+        PostgresRepository
         </h2>
         
-            <div class="class-description">Util helper
-<br><br>
-bcrypt module is required for password methods</div>
+            <div class="class-description">Repository base class</div>
         
     
 </header>
@@ -97,19 +95,145 @@ bcrypt module is required for password methods</div>
         
 <hr>
 <dt>
-    <h4 class="name" id="Util"><span class="type-signature"></span>new Util()</h4>
+    <h4 class="name" id="PostgresRepository"><span class="type-signature"></span>new PostgresRepository(app, postgres, cacher, util)</h4>
     
     
 </dt>
 <dd>
 
     
-
+    <div class="description">
+        Create repository
+    </div>
     
 
     
 
     
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>app</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">App</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The application</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>postgres</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Postgres</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Postgres service</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cacher</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Cacher</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Cacher service</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>util</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Util</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Util service</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     
 
     
@@ -194,7 +318,7 @@ bcrypt module is required for password methods</div>
 <dd>
     
     <div class="description">
-        Service name is 'util'
+        Service name is 'repositories.postgres'
     </div>
     
 
@@ -325,6 +449,148 @@ bcrypt module is required for password methods</div>
     
 </dd>
 
+        
+            
+<hr>
+<dt class="name" id=".table">
+    <h4 id=".table"><span class="type-signature">&lt;static> </span>table<span class="type-signature"> :string</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        DB table name - override it
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">string</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id=".model">
+    <h4 id=".model"><span class="type-signature">&lt;static> </span>model<span class="type-signature"> :string</span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Model name - override it
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">string</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
         </dl>
     
 
@@ -335,7 +601,7 @@ bcrypt module is required for password methods</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="isUuid"><span class="type-signature"></span>isUuid(value)</h4>
+    <h4 class="name" id="delete"><span class="type-signature"></span>delete(model [, pg])</h4>
     
     
 </dt>
@@ -343,491 +609,7 @@ bcrypt module is required for password methods</div>
 
     
     <div class="description">
-        Check if given string is UUID
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>value</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The string to check</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Returns null for all zeroes otherwise boolean
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">boolean</span>
-|
-
-<span class="param-type">null</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="trim"><span class="type-signature"></span>trim(value)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Convert value to a trimmed string<br>
-Accepts string or number and returns empty string for anything else
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>value</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">*</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The value</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Returns trimmed string
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="getRandomInt"><span class="type-signature"></span>getRandomInt(min, max)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Returns a random integer between min (inclusive) and max (inclusive)
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>min</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Minimum</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>max</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Maximum</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Returns random in range
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">number</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="getRandomString"><span class="type-signature"></span>getRandomString(length [, params])</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Get random string
+        Delete a model
     </div>
     
 
@@ -864,7 +646,378 @@ Accepts string or number and returns empty string for anything else
 
         <tr>
             
-                <td class="name"><code>length</code></td>
+                <td class="name"><code>model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BaseModel</span>
+|
+
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Model or ID</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">PostgresClient</span>
+|
+
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Will reuse the Postgres client provided, or if it is a string then will
+                                         connect to this instance of Postgres.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Resolves to number of deleted records
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="findAll"><span class="type-signature"></span>findAll( [pg])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Find all models
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">PostgresClient</span>
+|
+
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Will reuse the Postgres client provided, or if it is a string then will
+                                         connect to this instance of Postgres.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Resolves to array of models
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="find"><span class="type-signature"></span>find(id [, pg])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Find a model by ID
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
             
 
             <td class="type">
@@ -889,14 +1042,382 @@ Accepts string or number and returns empty string for anything else
 
             
 
-            <td class="description last">The length of a password</td>
+            <td class="description last">ID to search by</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>params</code></td>
+                <td class="name"><code>pg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">PostgresClient</span>
+|
+
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Will reuse the Postgres client provided, or if it is a string then will
+                                         connect to this instance of Postgres.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Resolves to array of models
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="save"><span class="type-signature"></span>save(model [, pg])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Save model
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BaseModel</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The model</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">PostgresClient</span>
+|
+
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Will reuse the Postgres client provided, or if it is a string then will
+                                         connect to this instance of Postgres.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Resolves to record ID
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="search"><span class="type-signature"></span>search( [options] [, pg])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Search repository
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
@@ -923,7 +1444,7 @@ Accepts string or number and returns empty string for anything else
 
             
 
-            <td class="description last">Parameters object
+            <td class="description last">
                 <h6 class="method-params-label method-subparams-label">Properties</h6>
                 
 
@@ -953,13 +1474,13 @@ Accepts string or number and returns empty string for anything else
 
         <tr>
             
-                <td class="name"><code>lower</code></td>
+                <td class="name"><code>table</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">string</span>
 
 
 
@@ -981,25 +1502,23 @@ Accepts string or number and returns empty string for anything else
             
                 <td class="default">
                 
-                    true
-                
                 </td>
             
 
-            <td class="description last">Include lower latin letters</td>
+            <td class="description last">Table or view name</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>upper</code></td>
+                <td class="name"><code>fields</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">Array.&lt;string></span>
 
 
 
@@ -1021,25 +1540,23 @@ Accepts string or number and returns empty string for anything else
             
                 <td class="default">
                 
-                    true
-                
                 </td>
             
 
-            <td class="description last">Include upper latin letters</td>
+            <td class="description last">Fields to retrieve</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>digits</code></td>
+                <td class="name"><code>where</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">Array.&lt;string></span>
 
 
 
@@ -1061,25 +1578,23 @@ Accepts string or number and returns empty string for anything else
             
                 <td class="default">
                 
-                    true
-                
                 </td>
             
 
-            <td class="description last">Include digits</td>
+            <td class="description last">SQL WHERE clause: will be joined with 'AND'</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>special</code></td>
+                <td class="name"><code>params</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">Array</span>
 
 
 
@@ -1101,12 +1616,130 @@ Accepts string or number and returns empty string for anything else
             
                 <td class="default">
                 
-                    false
+                </td>
+            
+
+            <td class="description last">Bound parameters of WHERE (referenced as $1, $2, ... in SQL)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sort</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
                 
                 </td>
             
 
-            <td class="description last">Include some special characters</td>
+            
+                <td class="default">
+                
+                    ['id asc']
+                
+                </td>
+            
+
+            <td class="description last">Used in ORDER BY if provided</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">Used in LIMIT, 0 = all records</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last">Used in OFFSET</td>
         </tr>
 
     
@@ -1117,245 +1750,18 @@ Accepts string or number and returns empty string for anything else
         </tr>
 
     
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Returns the string
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="generatePassword"><span class="type-signature"></span>generatePassword()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Generate a password
-    </div>
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Returns the password
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="encryptPassword"><span class="type-signature"></span>encryptPassword(password)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Create hash of a password. Requires 'bcrypt' module.
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
 
         <tr>
             
-                <td class="name"><code>password</code></td>
+                <td class="name"><code>pg</code></td>
             
 
             <td class="type">
             
                 
+<span class="param-type">PostgresClient</span>
+|
+
 <span class="param-type">string</span>
 
 
@@ -1364,10 +1770,21 @@ Accepts string or number and returns empty string for anything else
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">The password</td>
+            <td class="description last">Will reuse the Postgres client provided, or if string then will
+                                             connect to this instance of Postgres.</td>
         </tr>
 
     
@@ -1431,7 +1848,17 @@ Accepts string or number and returns empty string for anything else
     
             
 <div class="param-desc">
-    Returns the hash
+    Returns promise resolving to the following:
+<pre>
+{
+     totalRows: 1, // total rows in result
+     totalPages: 1, // total number of pages
+     pageSize: 0, // page size
+     pageNumber: 1, // returned page number
+     sort: [ ... ], // keys used to sort the result
+     data: [ ... ], // resulting raw SQL rows as an array of objects
+}
+</pre>
 </div>
 
 
@@ -1442,7 +1869,7 @@ Accepts string or number and returns empty string for anything else
     </dt>
     <dd>
         
-<span class="param-type">string</span>
+<span class="param-type">Promise</span>
 
 
 
@@ -1459,7 +1886,7 @@ Accepts string or number and returns empty string for anything else
             
 <hr>
 <dt>
-    <h4 class="name" id="checkPassword"><span class="type-signature"></span>checkPassword(password, hash)</h4>
+    <h4 class="name" id="getRepository"><span class="type-signature"></span>getRepository( [name])</h4>
     
     
 </dt>
@@ -1467,180 +1894,7 @@ Accepts string or number and returns empty string for anything else
 
     
     <div class="description">
-        Check if password matches the hash. Requires 'bcrypt' module.
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>password</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Password to check</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>hash</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Hash of the password</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">boolean</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="dashedToCamel"><span class="type-signature"></span>dashedToCamel(value [, upperFirst])</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Convert dashed name to camel case<br>
-example-name → exampleName
+        Get repository
     </div>
     
 
@@ -1667,8 +1921,6 @@ example-name → exampleName
         
 
         
-        <th>Default</th>
-        
 
         <th class="last">Description</th>
     </tr>
@@ -1679,49 +1931,13 @@ example-name → exampleName
 
         <tr>
             
-                <td class="name"><code>value</code></td>
+                <td class="name"><code>name</code></td>
             
 
             <td class="type">
             
                 
 <span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Dashed name</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>upperFirst</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
 
 
 
@@ -1741,14 +1957,8 @@ example-name → exampleName
             
 
             
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
 
-            <td class="description last">First letter is upper case</td>
+            <td class="description last">Repository name</td>
         </tr>
 
     
@@ -1811,10 +2021,6 @@ example-name → exampleName
     <h5>Returns:</h5>
     
             
-<div class="param-desc">
-    Returns camel case variant
-</div>
-
 
 
 <dl>
@@ -1823,7 +2029,7 @@ example-name → exampleName
     </dt>
     <dd>
         
-<span class="param-type">string</span>
+<span class="param-type">object</span>
 
 
 
@@ -1840,7 +2046,7 @@ example-name → exampleName
             
 <hr>
 <dt>
-    <h4 class="name" id="camelToDashed"><span class="type-signature"></span>camelToDashed(value)</h4>
+    <h4 class="name" id="getModel"><span class="type-signature"></span>getModel( [name] [, data])</h4>
     
     
 </dt>
@@ -1848,161 +2054,7 @@ example-name → exampleName
 
     
     <div class="description">
-        Convert camel case name to dashed<br>
-exampleName → example-name
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>value</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Camel case name</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Returns dashed variant
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="snakeToCamel"><span class="type-signature"></span>snakeToCamel(value [, upperFirst])</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Convert snake case name to camel case<br>
-example_name → exampleName
+        Get model
     </div>
     
 
@@ -2029,8 +2081,6 @@ example_name → exampleName
         
 
         
-        <th>Default</th>
-        
 
         <th class="last">Description</th>
     </tr>
@@ -2041,49 +2091,13 @@ example_name → exampleName
 
         <tr>
             
-                <td class="name"><code>value</code></td>
+                <td class="name"><code>name</code></td>
             
 
             <td class="type">
             
                 
 <span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">Snake case name</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>upperFirst</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
 
 
 
@@ -2103,14 +2117,48 @@ example_name → exampleName
             
 
             
-                <td class="default">
+
+            <td class="description last">Model name, defaults to the model of this class</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
                 
-                    false
+<span class="param-type">undefined</span>
+|
+
+<span class="param-type">object</span>
+|
+
+<span class="param-type">Array.&lt;object></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
                 
                 </td>
             
 
-            <td class="description last">First letter is upper case</td>
+            
+
+            <td class="description last">Data to to load</td>
         </tr>
 
     
@@ -2174,7 +2222,7 @@ example_name → exampleName
     
             
 <div class="param-desc">
-    Returns camel case variant
+    If data is an array returns array of models otherwise a single model
 </div>
 
 
@@ -2185,7 +2233,10 @@ example_name → exampleName
     </dt>
     <dd>
         
-<span class="param-type">string</span>
+<span class="param-type">object</span>
+|
+
+<span class="param-type">Array.&lt;object></span>
 
 
 
@@ -2202,7 +2253,7 @@ example_name → exampleName
             
 <hr>
 <dt>
-    <h4 class="name" id="camelToSnake"><span class="type-signature"></span>camelToSnake(value)</h4>
+    <h4 class="name" id="_loadMethods"><span class="type-signature"></span>_loadMethods(dir)</h4>
     
     
 </dt>
@@ -2210,8 +2261,7 @@ example_name → exampleName
 
     
     <div class="description">
-        Convert camel case name to snake case<br>
-exampleName → example_name
+        Load methods from given directory
     </div>
     
 
@@ -2246,7 +2296,7 @@ exampleName → example_name
 
         <tr>
             
-                <td class="name"><code>value</code></td>
+                <td class="name"><code>dir</code></td>
             
 
             <td class="type">
@@ -2263,7 +2313,7 @@ exampleName → example_name
 
             
 
-            <td class="description last">Camel case name</td>
+            <td class="description last">Directory full path</td>
         </tr>
 
     
@@ -2323,30 +2373,6 @@ exampleName → example_name
     
 
     
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Returns snake case variant
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
 
     
 </dd>
@@ -2401,7 +2427,7 @@ exampleName → example_name
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a>
 	
-		on 2017-09-15T15:59:37+03:00
+		on 2017-09-15T15:59:36+03:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
