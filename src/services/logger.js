@@ -137,19 +137,17 @@ class Logger {
         if (isDefault) {
             this._streams.default = name;
             if (this._app.options.interceptConsole) {
-                let logger = this._streams.console.logger = new this.constructor(this._app, this._config, this._streams);
-                if (!this._streams.log) {
+                if (!this._streams.log)
                     this._streams.log = console.log;
-                    console.log = (...args) => { logger.info(...args) };
-                }
-                if (!this._streams.warn) {
+                if (!this._streams.warn)
                     this._streams.warn = console.warn;
-                    console.warn = (...args) => { logger.warn(...args) };
-                }
-                if (!this._streams.error) {
+                if (!this._streams.error)
                     this._streams.error = console.error;
-                    console.error = (...args) => { logger.error(...args) };
-                }
+
+                let logger = this._streams.console.logger = new this.constructor(this._app, this._config, this._streams);
+                console.log = (...args) => { logger.info(...args) };
+                console.warn = (...args) => { logger.warn(...args) };
+                console.error = (...args) => { logger.error(...args) };
             }
         }
 
