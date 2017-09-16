@@ -23,11 +23,13 @@ class Logger {
      * Create the service
      * @param {App} app             The application
      * @param {object} config       Config service
+     * @param {Util} util           Util service
      * @param {object} [streams]    Stream container
      */
-    constructor(app, config, streams) {
+    constructor(app, config, util, streams) {
         this._app = app;
         this._config = config;
+        this._util = util;
         this._streams = streams;
         this._emailer = this._config.get('email.log.enable') ? this._app.get('emailer') : null;
 
@@ -52,6 +54,12 @@ class Logger {
                 let isDefault = info.default || false;
                 delete info.default;
 
+                for (let key of Object.keys(info)) {
+                    let value = info[key];
+                    delete info[key];
+                    info[this._util.snakeToCamel(key)] = value;
+                }
+
                 this.createLogStream(log, filename, level, isDefault, info);
             }
         }
@@ -73,7 +81,7 @@ class Logger {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'app', 'config', 'logger.streams?' ];
+        return [ 'app', 'config', 'util', 'logger.streams?' ];
     }
 
     /**
@@ -145,7 +153,7 @@ class Logger {
                 if (!this._streams.error)
                     this._streams.error = console.error;
 
-                let logger = this._streams.console.logger = new this.constructor(this._app, this._config, this._streams);
+                let logger = this._streams.console.logger = new this.constructor(this._app, this._config, this._util, this._streams);
                 console.log = (...args) => { logger.info(...args); };
                 console.warn = (...args) => { logger.warn(...args); };
                 console.error = (...args) => { logger.error(...args); };
