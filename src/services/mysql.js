@@ -334,6 +334,8 @@ class MySQL {
                         password: this._config.mysql[name].password,
                         database: this._config.mysql[name].db_name,
                         connectionLimit: this._config.mysql[name].max_pool,
+                        connectTimeout: this._config.mysql[name].connect_timeout,
+                        acquireTimeout: this._config.mysql[name].acquire_timeout,
                     });
                     this._pool.set(name, pool);
                 }
