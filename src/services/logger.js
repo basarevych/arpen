@@ -272,7 +272,9 @@ class Logger {
 
         let parsed = [];
         for (let msg of messages) {
-            if (msg.info && msg.fullStack)
+            if (msg === null || typeof msg === 'undefined')
+                parsed.push(msg);
+            else if (msg.info && msg.fullStack)
                 parsed.push('Exception: ' + stringify(msg.info, undefined, 4) + '\n' + msg.fullStack);
             else if (msg.stack)
                 parsed.push(msg.stack);
