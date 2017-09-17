@@ -25,7 +25,8 @@ const NError = require('nerror');
  * Callback for processing a file
  * @callback ProcessFileCallback
  * @param {string} filename     Path of the file
- * @return {Promise}            Should return a Promise
+ * @return {Promise}            Should return a Promise, if resolves to false processing
+ *                              is terminated
  */
 
 /**
@@ -650,7 +651,7 @@ class Filer {
      * directory recursively.<br>
      * Execution is chained, if any of the callback invocations rejects then the entire process is rejected.
      * @param {string} filename                 Absolute path to the file or directory
-     * @param {ProcessFileCallback} [cbFile]    The file callback
+     * @param {ProcessFileCallback} [cbFile]    The file callback. If resolves to false processing is terminated
      * @param {ProcessDirCallback} [cbDir]      The directory callback. Should resolve to true if this subdirectory
      *                                          needs processing
      * @return {Promise}                        Resolves to true on success if filename exists or to false if it does not
@@ -691,8 +692,12 @@ class Filer {
             });
 
             names.sort();
+            let terminated = false;
             await names.reduce(
                 async (prev, cur) => {
+                    if (terminated)
+                        return;
+
                     await prev;
 
                     let name = path.join(filename, cur);
@@ -709,7 +714,8 @@ class Filer {
                         if (cbDir ? await cbDir(name) : true)
                             return this.process(name, cbFile, cbDir);
                     } else if (cbFile) {
-                        return cbFile(name);
+                        if (!await cbFile(name))
+                            terminated = true;
                     }
                 },
                 Promise.resolve()
