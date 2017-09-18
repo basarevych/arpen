@@ -12,5 +12,5 @@ if [ ! -x "$basepath/node_modules/.bin/eslint" ]; then
     exit 1
 fi
 
-find "$basepath/src" -name "*.js" | \
+find "$basepath/src" -name "*.js" -a -not -name "*.config.js" | \
     xargs "$basepath/node_modules/.bin/eslint"

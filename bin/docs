@@ -13,8 +13,8 @@ if [ ! -x "$basepath/node_modules/.bin/jsdoc" ]; then
 fi
 
 rm -rf "$basepath/docs"
-"$basepath/node_modules/.bin/jsdoc" \
+find "$basepath/src" -type d -mindepth 1 | \
+    xargs "$basepath/node_modules/.bin/jsdoc" \
     -c "$basepath/jsdoc.json" \
     -t "$basepath/node_modules/ink-docstrap/template" \
-    -R README.md -d "$basepath/docs" -r \
-    "$basepath/src"
+    -R README.md -d "$basepath/docs" -r

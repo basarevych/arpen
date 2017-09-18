@@ -9,7 +9,7 @@ try {
     // do nothing
 }
 
-const debug = require('debug')('arpen:postgres');
+const debug = require('debug')('arpen:mysql');
 const moment = require('moment-timezone');
 const NError = require('nerror');
 
@@ -33,14 +33,15 @@ class MySQLClient {
      * Create MySQL client
      * @param {MySQL} service                       MySQL service instance
      * @param {object} client                       Connected PG client
+     * @param {function} done                       Client termination function
      */
-    constructor(service, client) {
+    constructor(service, client, done) {
         this.client = client;
         this.maxTransactionRetries = 59;
         this.minTransactionDelay = 100;
         this.maxTransactionDelay = 1000;
 
-        this._done = client.release;
+        this._done = done;
         this._mysql = service;
         this._transactionLevel = 0;
     }
@@ -49,8 +50,13 @@ class MySQLClient {
      * Client termination
      */
     done() {
+        if (!this.client)
+            return;
+
+        debug('Disconnecting...');
         let res = this._done();
         this.client = null;
+        this._done = null;
         return res;
     }
 
@@ -340,11 +346,12 @@ class MySQL {
                     this._pool.set(name, pool);
                 }
 
+                debug('Connecting...');
                 pool.getConnection((error, client) => {
                     if (error)
                         return reject(new NError(error, `MySQL: Error connecting to ${name}`));
 
-                    resolve(new MySQLClient(this, client));
+                    resolve(new MySQLClient(this, client, () => { pool.releaseConnection(client); }));
                 });
             });
     }

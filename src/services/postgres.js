@@ -50,8 +50,13 @@ class PostgresClient {
      * Client termination
      */
     done() {
+        if (!this.client)
+            return;
+
+        debug('Disconnecting...');
         let res = this._done();
         this.client = null;
+        this._done = null;
         return res;
     }
 
@@ -346,6 +351,7 @@ class Postgres {
                     });
                 }
 
+                debug('Connecting...');
                 pool.connect((error, client, done) => {
                     if (error)
                         return reject(new NError(error, `Postgres: Error connecting to ${name}`));

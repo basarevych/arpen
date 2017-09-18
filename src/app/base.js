@@ -315,22 +315,24 @@ class App {
                 await prev;
 
                 debug(`Loading module ${cur} configuration`);
+                let basePath = cur;
+                if (cur[0] === '!')
+                    basePath = path.join(this.basePath, 'node_modules', cur.slice(1));
+                else if (cur[0] !== '/')
+                    basePath = path.join(this.basePath, 'modules', cur);
+
                 let [globalConf, localConf] = await Promise.all([
-                    this.constructor._require(
-                        path.join(this.basePath, 'modules', cur, 'config', 'global.js'),
-                        {}
-                    ),
-                    this.constructor._require(
-                        path.join(this.basePath, 'modules', cur, 'config', 'local.js'),
-                        {}
-                    )
+                    this.constructor._require(path.join(basePath, 'config', 'global.js'), {}),
+                    this.constructor._require(path.join(basePath, 'config', 'local.js'), {})
                 ]);
+
                 if (typeof globalConf !== 'object')
                     throw new Error(`Global config is not an object (module: ${cur})`);
                 if (typeof localConf !== 'object')
                     throw new Error(`Local config is not an object (module: ${cur})`);
 
                 let moduleConfig = merge.recursive(true, globalConf, localConf);
+                moduleConfig.base_path = basePath;
 
                 if (!moduleConfig.autoload)
                     moduleConfig.autoload = [];
@@ -429,9 +431,9 @@ class App {
 
                         let file = curLoad;
                         if (curLoad[0] === '!')
-                            file = path.join(this.basePath, 'modules', curModule, 'node_modules', curLoad.slice(1));
+                            file = path.join(curConfig.base_path, 'node_modules', curLoad.slice(1));
                         else if (curLoad[0] !== '/')
-                            file = path.join(this.basePath, 'modules', curModule, curLoad);
+                            file = path.join(curConfig.base_path, curLoad);
 
                         await filer.process(
                             file,

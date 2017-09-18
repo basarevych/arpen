@@ -1,6 +1,6 @@
 {
   "name": "arpen",
-  "version": "0.1.17",
+  "version": "0.2.0",
   "license": "MIT",
   "author": "Ross Basarevych <basarevych@gmail.com>",
   "description": "ARPEN",
@@ -27,14 +27,7 @@
     "pg-pubsub": "~0.3.0",
     "mysql": "~2.14.1",
     "redis": "~2.8.0",
-    "ini": "~1.3.4",
-    "pug": "~2.0.0-rc.4",
-    "express": "~4.15.4",
-    "serve-favicon": "~2.4.4",
-    "format-message": "~5.2.0",
-    "morgan": "~1.8.2",
-    "body-parser": "~1.18.1",
-    "cookie-parser": "~1.4.3"
+    "ini": "~1.3.4"
   },
   "devDependencies": {
     "eslint": "~4.6.1",
