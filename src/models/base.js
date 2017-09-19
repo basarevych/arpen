@@ -69,19 +69,29 @@ class BaseModel {
 
     /**
      * Convert to object. Dates are converted to strings in UTC timezone
-     * @param {string[]} [fields]       Fields to save
-     * @return {object}                 Returns serialized object
+     * @param {string[]} [fields]                       Fields to save
+     * @param {object} [options]                        Options
+     * @param {string|null} [options.timeZone='UTC']    DB time zone
+     * @return {object}                                 Returns serialized object
      */
-    _serialize(fields) {
+    _serialize(fields, options = {}) {
+        if (fields && !Array.isArray(fields)) {
+            options = fields;
+            fields = undefined;
+        }
         if (!fields)
             fields = Array.from(this._fields.keys());
+        let { timeZone = 'UTC' } = options;
 
         let data = {};
         for (let field of fields) {
             let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
             let value = (desc && desc.get) ? desc.get.call(this) : this._getField(field);
-            if (moment.isMoment(value))
-                value = value.tz('UTC').format(this._db.constructor.datetimeFormat);
+            if (moment.isMoment(value)) {
+                if (timeZone)
+                    value = value.tz(timeZone);
+                value = value.format(this._db.constructor.datetimeFormat);
+            }
             data[field] = value;
         }
         return data;
@@ -89,9 +99,13 @@ class BaseModel {
 
     /**
      * Load data. Dates are expected to be in UTC and are converted into local timezone
-     * @param {object} data             Raw DB data object
+     * @param {object} data                             Raw DB data object
+     * @param {object} [options]                        Options
+     * @param {string|null} [options.timeZone='UTC']    DB time zone
      */
-    _unserialize(data) {
+    _unserialize(data, options = {}) {
+        let { timeZone = 'UTC' } = options;
+
         for (let field of this._fields.keys()) {
             this._fields.set(field, undefined);
 
@@ -101,7 +115,8 @@ class BaseModel {
             let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
             let value = (desc && desc.set) ? desc.set.call(this, data[field]) : this._setField(field, data[field]);
             if (moment.isMoment(value)) {
-                value = moment.tz(value.format(this._db.constructor.datetimeFormat), 'UTC').local();
+                if (timeZone)
+                    value = moment.tz(value.format(this._db.constructor.datetimeFormat), timeZone).local();
                 if (desc && desc.set)
                     desc.set.call(this, value);
                 else

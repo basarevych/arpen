@@ -58,6 +58,14 @@ class MySQLRepository {
     }
 
     /**
+     * Table time zone - override it
+     * @type {string|null}
+     */
+    static get timeZone() {
+        return 'UTC';
+    }
+
+    /**
      * Get repository
      * @param {string} [name]                       Repository name
      * @return {object}
@@ -86,7 +94,7 @@ class MySQLRepository {
             let models = [];
             for (let row of data) {
                 let model = this._app.get(`models.${name}`);
-                model._unserialize(row);
+                model._unserialize(row, { timeZone: this.constructor.timeZone });
                 models.push(model);
             }
             return models;
@@ -94,7 +102,7 @@ class MySQLRepository {
 
         let model = this._app.get(`models.${name}`);
         if (typeof data !== 'undefined')
-            model._unserialize(data);
+            model._unserialize(data, { timeZone: this.constructor.timeZone });
         return model;
     }
 

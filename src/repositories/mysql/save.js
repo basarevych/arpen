@@ -21,7 +21,7 @@ module.exports = async function (model, mysql) {
     try {
         client = typeof mysql === 'object' ? mysql : await this._mysql.connect(mysql);
 
-        let data = model._serialize();
+        let data = model._serialize({ timeZone: this.constructor.timeZone });
         let fields = Object.keys(data)
             .filter(field => {
                 return field !== 'id';
