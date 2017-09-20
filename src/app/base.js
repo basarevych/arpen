@@ -103,16 +103,22 @@ class App {
 
     /**
      * Get instance of a service
-     * @param {string} name                 Service name
+     * @param {string|RegExp} name          Service name or RegExp of names
      * @param {...*} extra                  Optional extra arguments to the constructor
-     * @return {object}                     Returns instance
+     * @return {object|Map}                 Returns instance or Map of instances in case of RegExp
      */
     get(name, ...extra) {
         if (!name)
             throw new Error('No service name provided');
 
         debug(`Retrieving service '${name}'`);
-        return this._resolveService(name, extra, new Map());
+        if (typeof name === 'string')
+            return this._resolveService(name, extra, new Map());
+
+        let result = new Map();
+        let request = new Map();
+        this.search(name).map(item => result.set(item, this._resolveService(item, extra, request)));
+        return result;
     }
 
     /**
