@@ -115,8 +115,10 @@ class BaseModel {
             let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
             let value = (desc && desc.set) ? desc.set.call(this, data[field]) : this._setField(field, data[field]);
             if (moment.isMoment(value)) {
-                if (timeZone)
+                if (timeZone) {
                     value = moment.tz(value.format(this._db.constructor.datetimeFormat), timeZone).local();
+                    value = moment(value.format(this._db.constructor.datetimeFormat));
+                }
                 if (desc && desc.set)
                     desc.set.call(this, value);
                 else

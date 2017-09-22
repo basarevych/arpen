@@ -342,6 +342,7 @@ class MySQL {
                         connectionLimit: this._config.mysql[name].max_pool,
                         connectTimeout: this._config.mysql[name].connect_timeout,
                         acquireTimeout: this._config.mysql[name].acquire_timeout,
+                        dateStrings: true,
                     });
                     this._pool.set(name, pool);
                 }
