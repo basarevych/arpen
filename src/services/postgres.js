@@ -331,34 +331,27 @@ class Postgres {
      */
     async connect(name = 'main') {
         return new Promise((resolve, reject) => {
-                if (!this._config.postgres[name])
-                    return reject(new Error(`Undefined Postgres server name: ${name}`));
+            let options = this._config.get(`postgres.${name}`);
+            if (!options)
+                return reject(new Error(`Undefined Postgres server name: ${name}`));
 
-                let pool = this._pool.get(name);
-                if (!pool) {
-                    pool = new pg.Pool({
-                        host: this._config.postgres[name].host,
-                        port: this._config.postgres[name].port,
-                        user: this._config.postgres[name].user,
-                        password: this._config.postgres[name].password,
-                        database: this._config.postgres[name].db_name,
-                        min: this._config.postgres[name].min_pool,
-                        max: this._config.postgres[name].max_pool,
-                    });
-                    this._pool.set(name, pool);
-                    pool.on('error', (error, client) => {
-                        this._logger.warn(`Postgres idle client error on ${name}: ${error.message}`);
-                    });
-                }
-
-                debug('Connecting...');
-                pool.connect((error, client, done) => {
-                    if (error)
-                        return reject(new NError(error, `Postgres: Error connecting to ${name}`));
-
-                    resolve(new PostgresClient(this, client, done));
+            let pool = this._pool.get(name);
+            if (!pool) {
+                pool = new pg.Pool(options);
+                this._pool.set(name, pool);
+                pool.on('error', (error, client) => {
+                    this._logger.warn(`Postgres idle client error on ${name}: ${error.message}`);
                 });
+            }
+
+            debug('Connecting...');
+            pool.connect((error, client, done) => {
+                if (error)
+                    return reject(new NError(error, `Postgres: Error connecting to ${name}`));
+
+                resolve(new PostgresClient(this, client, done));
             });
+        });
     }
 }
 

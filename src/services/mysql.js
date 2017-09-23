@@ -327,34 +327,27 @@ class MySQL {
      */
     async connect(name = 'main') {
         return new Promise((resolve, reject) => {
-                if (!this._config.mysql[name])
-                    return reject(new Error(`Undefined MySQL server name: ${name}`));
+            let options = this._config.get(`mysql.${name}`);
+            if (!options)
+                return reject(new Error(`Undefined MySQL server name: ${name}`));
+            if (typeof options.dateStrings === 'undefined')
+                options.dateStrings = true;
 
-                let pool = this._pool.get(name);
-                if (!pool) {
-                    let Pool = mysql.createPool; // make eslint happy: uppercase first letter of the constructor name
-                    pool = new Pool({
-                        host: this._config.mysql[name].host,
-                        port: this._config.mysql[name].port,
-                        user: this._config.mysql[name].user,
-                        password: this._config.mysql[name].password,
-                        database: this._config.mysql[name].db_name,
-                        connectionLimit: this._config.mysql[name].max_pool,
-                        connectTimeout: this._config.mysql[name].connect_timeout,
-                        acquireTimeout: this._config.mysql[name].acquire_timeout,
-                        dateStrings: true,
-                    });
-                    this._pool.set(name, pool);
-                }
+            let pool = this._pool.get(name);
+            if (!pool) {
+                let Pool = mysql.createPool; // make eslint happy: uppercase first letter of the constructor name
+                pool = new Pool(options);
+                this._pool.set(name, pool);
+            }
 
-                debug('Connecting...');
-                pool.getConnection((error, client) => {
-                    if (error)
-                        return reject(new NError(error, `MySQL: Error connecting to ${name}`));
+            debug('Connecting...');
+            pool.getConnection((error, client) => {
+                if (error)
+                    return reject(new NError(error, `MySQL: Error connecting to ${name}`));
 
-                    resolve(new MySQLClient(this, client, () => { pool.releaseConnection(client); }));
-                });
+                resolve(new MySQLClient(this, client, () => { pool.releaseConnection(client); }));
             });
+        });
     }
 }
 

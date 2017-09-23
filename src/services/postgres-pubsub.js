@@ -172,7 +172,7 @@ class PostgresPubSub extends Pubsub {
             throw new Error(`Undefined server name: ${fullName}`);
 
         try {
-            let connString = `postgresql://${config.user}:${config.password}@${config.host}:${config.port}/${config.db_name}`;
+            let connString = `postgresql://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`;
             let sub = new PGPubSub(connString, {
                 log: (...args) => {
                     if (args.length && subscriberName)
