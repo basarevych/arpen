@@ -413,13 +413,14 @@ class App {
                     async filename => {
                         let obj = await this.constructor._require(filename);
                         if (!obj.provides)
-                            return;
+                            return true;
 
                         try {
                             this.registerClass(obj, filename);
                         } catch (error) {
                             throw new NError(error, `Registering ${filename}`);
                         }
+                        return true;
                     }
                 );
             },
@@ -445,12 +446,15 @@ class App {
                             file,
                             async filename => {
                                 let obj = await this.constructor._require(filename);
+                                if (!obj.provides)
+                                    return true;
 
                                 try {
                                     this.registerClass(obj, filename);
                                 } catch (error) {
                                     throw new NError(error, `Registering ${filename}`);
                                 }
+                                return true;
                             }
                         );
                     },
