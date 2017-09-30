@@ -1,6 +1,6 @@
 /**
- * Base class for MySQL repositories
- * @module arpen/repositories/mysql
+ * Base class for Mongo repositories
+ * @module arpen/repositories/mongo
  */
 const path = require('path');
 const BaseRepository = require('./base');
@@ -8,26 +8,26 @@ const BaseRepository = require('./base');
 /**
  * Repository base class
  */
-class MySQLRepository extends BaseRepository {
+class MongoRepository extends BaseRepository {
     /**
      * Create repository
      * @param {App} app                             The application
-     * @param {MySQL} mysql                         MySQL service
+     * @param {Mongo} mongo                         Mongo service
      * @param {Util} util                           Util service
      */
-    constructor(app, mysql, util) {
+    constructor(app, mongo, util) {
         super(app, util);
-        this._mysql = mysql;
+        this._mongo = mongo;
 
-        this._loadMethods(path.join(__dirname, 'mysql'));
+        this._loadMethods(path.join(__dirname, 'mongo'));
     }
 
     /**
-     * Service name is 'repositories.mysql'
+     * Service name is 'repositories.mongo'
      * @type {string}
      */
     static get provides() {
-        return 'repositories.mysql';
+        return 'repositories.mongo';
     }
 
     /**
@@ -35,8 +35,8 @@ class MySQLRepository extends BaseRepository {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'app', 'mysql', 'util' ];
+        return [ 'app', 'mongo', 'util' ];
     }
 }
 
-module.exports = MySQLRepository;
+module.exports = MongoRepository;

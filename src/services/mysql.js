@@ -327,11 +327,15 @@ class MySQL {
      */
     async connect(name = 'main') {
         return new Promise((resolve, reject) => {
-            let options = this._config.get(`mysql.${name}`);
-            if (!options)
+            let rawOptions = this._config.get(`mysql.${name}`);
+            if (!rawOptions)
                 return reject(new Error(`Undefined MySQL server name: ${name}`));
-            if (typeof options.dateStrings === 'undefined')
+
+            let options = {};
+            if (typeof rawOptions.dateStrings === 'undefined')
                 options.dateStrings = true;
+            for (let key of Object.keys(rawOptions))
+                options[this._util.snakeToCamel(key)] = rawOptions[key];
 
             let pool = this._pool.get(name);
             if (!pool) {

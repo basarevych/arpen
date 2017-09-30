@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: PostgresPubSub</title>
+	<title>Documentation Class: MongoRepository</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,20 +72,18 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: PostgresPubSub</h1>
+	<h1 class="page-title">Class: MongoRepository</h1>
 <section>
 
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-arpen_services_postgres-pubsub.html">arpen/services/postgres-pubsub</a>~</span>
+            <span class="ancestors"><a href="module-arpen_repositories_mongo.html">arpen/repositories/mongo</a>~</span>
         
-        PostgresPubSub
+        MongoRepository
         </h2>
         
-            <div class="class-description">Postgres PubSub service
-<br><br>
-pg-pubsub module is required</div>
+            <div class="class-description">Repository base class</div>
         
     
 </header>
@@ -97,7 +95,7 @@ pg-pubsub module is required</div>
         
 <hr>
 <dt>
-    <h4 class="name" id="PostgresPubSub"><span class="type-signature"></span>new PostgresPubSub(config, postgres, logger)</h4>
+    <h4 class="name" id="MongoRepository"><span class="type-signature"></span>new MongoRepository(app, mongo, util)</h4>
     
     
 </dt>
@@ -105,7 +103,7 @@ pg-pubsub module is required</div>
 
     
     <div class="description">
-        Create the service
+        Create repository
     </div>
     
 
@@ -140,13 +138,13 @@ pg-pubsub module is required</div>
 
         <tr>
             
-                <td class="name"><code>config</code></td>
+                <td class="name"><code>app</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">App</span>
 
 
 
@@ -157,20 +155,20 @@ pg-pubsub module is required</div>
 
             
 
-            <td class="description last">Config service</td>
+            <td class="description last">The application</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>postgres</code></td>
+                <td class="name"><code>mongo</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Postgres</span>
+<span class="param-type">Mongo</span>
 
 
 
@@ -181,20 +179,20 @@ pg-pubsub module is required</div>
 
             
 
-            <td class="description last">Postgres service</td>
+            <td class="description last">Mongo service</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>logger</code></td>
+                <td class="name"><code>util</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Logger</span>
+<span class="param-type">Util</span>
 
 
 
@@ -205,7 +203,7 @@ pg-pubsub module is required</div>
 
             
 
-            <td class="description last">Logger service</td>
+            <td class="description last">Util service</td>
         </tr>
 
     
@@ -296,7 +294,7 @@ pg-pubsub module is required</div>
 <dd>
     
     <div class="description">
-        Service name is 'postgresPubSub'
+        Service name is 'repositories.mongo'
     </div>
     
 
@@ -427,137 +425,6 @@ pg-pubsub module is required</div>
     
 </dd>
 
-        
-            
-<hr>
-<dt class="name" id=".lifecycle">
-    <h4 id=".lifecycle"><span class="type-signature">&lt;static> </span>lifecycle<span class="type-signature"> :string</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        This service is a singleton
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">string</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".client">
-    <h4 id=".client"><span class="type-signature">&lt;static> </span>client<span class="type-signature"></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        PUBSUB client class
-    </div>
-    
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
         </dl>
     
 
@@ -568,7 +435,7 @@ pg-pubsub module is required</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="_createClient"><span class="type-signature">&lt;async> </span>_createClient(serverName [, subscriberName])</h4>
+    <h4 class="name" id="delete"><span class="type-signature"></span>delete(model [, mongo])</h4>
     
     
 </dt>
@@ -576,7 +443,7 @@ pg-pubsub module is required</div>
 
     
     <div class="description">
-        Create actual PUBSUB client
+        Delete a model
     </div>
     
 
@@ -613,13 +480,16 @@ pg-pubsub module is required</div>
 
         <tr>
             
-                <td class="name"><code>serverName</code></td>
+                <td class="name"><code>model</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">BaseModel</span>
+|
+
+<span class="param-type">number</span>
 
 
 
@@ -638,19 +508,22 @@ pg-pubsub module is required</div>
 
             
 
-            <td class="description last">Server name as in config</td>
+            <td class="description last">Model or ID</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>subscriberName</code></td>
+                <td class="name"><code>mongo</code></td>
             
 
             <td class="type">
             
                 
+<span class="param-type">MongoClient</span>
+|
+
 <span class="param-type">string</span>
 
 
@@ -672,7 +545,8 @@ pg-pubsub module is required</div>
 
             
 
-            <td class="description last">Client name</td>
+            <td class="description last">Will reuse the Mongo client provided, or if it is a string then will
+                                         connect to this instance of Mongo.</td>
         </tr>
 
     
@@ -735,6 +609,578 @@ pg-pubsub module is required</div>
     <h5>Returns:</h5>
     
             
+<div class="param-desc">
+    Resolves to number of deleted records
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="findAll"><span class="type-signature"></span>findAll( [mongo])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Find all models
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>mongo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">MongoClient</span>
+|
+
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Will reuse the Mongo client provided, or if it is a string then will
+                                         connect to this instance of Mongo.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Resolves to array of models
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="find"><span class="type-signature"></span>find(id [, mongo])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Find a model by ID
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">ID to search by</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mongo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">MongoClient</span>
+|
+
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Will reuse the Mongo client provided, or if it is a string then will
+                                         connect to this instance of Mongo.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Resolves to array of models
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="save"><span class="type-signature"></span>save(model [, mongo])</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Save model
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BaseModel</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The model</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mongo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">MongoClient</span>
+|
+
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Will reuse the Mongo client provided, or if it is a string then will
+                                         connect to this instance of Mongo.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Resolves to record ID
+</div>
+
 
 
 <dl>

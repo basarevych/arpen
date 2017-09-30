@@ -331,9 +331,13 @@ class Postgres {
      */
     async connect(name = 'main') {
         return new Promise((resolve, reject) => {
-            let options = this._config.get(`postgres.${name}`);
-            if (!options)
+            let rawOptions = this._config.get(`postgres.${name}`);
+            if (!rawOptions)
                 return reject(new Error(`Undefined Postgres server name: ${name}`));
+
+            let options = {};
+            for (let key of Object.keys(rawOptions))
+                options[this._util.snakeToCamel(key)] = rawOptions[key];
 
             let pool = this._pool.get(name);
             if (!pool) {

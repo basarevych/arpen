@@ -26,7 +26,7 @@ module.exports = async function (model, pg) {
             [ typeof model === 'object' ? model.id : model ]
         );
 
-        if (client && typeof pg !== 'object')
+        if (typeof pg !== 'object')
             client.done();
 
         return result.rowCount;

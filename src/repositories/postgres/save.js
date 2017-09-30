@@ -19,6 +19,9 @@ module.exports = async function (model, pg) {
     let client;
 
     try {
+        if (model.id && !model._dirty)
+            return model.id;
+
         client = typeof pg === 'object' ? pg : await this._postgres.connect(pg);
 
         let data = model._serialize();
@@ -56,9 +59,10 @@ module.exports = async function (model, pg) {
         if (result.rowCount !== 1)
             throw new Error('Failed to ' + (model.id ? 'UPDATE' : 'INSERT') + ' row');
 
-        model._dirty = false;
         if (!model.id)
             model.id = result.rows[0].id;
+
+        model._dirty = false;
 
         if (typeof pg !== 'object')
             client.done();

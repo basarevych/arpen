@@ -26,7 +26,7 @@ module.exports = async function (model, mysql) {
             [ typeof model === 'object' ? model.id : model ]
         );
 
-        if (client && typeof mysql !== 'object')
+        if (typeof mysql !== 'object')
             client.done();
 
         return result.affectedRows;

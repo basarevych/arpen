@@ -19,6 +19,9 @@ module.exports = async function (model, mysql) {
     let client;
 
     try {
+        if (model.id && !model._dirty)
+            return model.id;
+
         client = typeof mysql === 'object' ? mysql : await this._mysql.connect(mysql);
 
         let data = model._serialize({ timeZone: this.constructor.timeZone });
@@ -56,9 +59,10 @@ module.exports = async function (model, mysql) {
         if (result.affectedRows !== 1)
             throw new Error('Failed to ' + (model.id ? 'UPDATE' : 'INSERT') + ' row');
 
-        model._dirty = false;
         if (!model.id)
             model.id = result.insertId;
+
+        model._dirty = false;
 
         if (typeof mysql !== 'object')
             client.done();

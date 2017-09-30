@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: PostgresPubSub</title>
+	<title>Documentation Class: Mongo</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,20 +72,20 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: PostgresPubSub</h1>
+	<h1 class="page-title">Class: Mongo</h1>
 <section>
 
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-arpen_services_postgres-pubsub.html">arpen/services/postgres-pubsub</a>~</span>
+            <span class="ancestors"><a href="module-arpen_services_mongo.html">arpen/services/mongo</a>~</span>
         
-        PostgresPubSub
+        Mongo
         </h2>
         
-            <div class="class-description">Postgres PubSub service
+            <div class="class-description">Mongo service
 <br><br>
-pg-pubsub module is required</div>
+mongodb module is required</div>
         
     
 </header>
@@ -97,7 +97,7 @@ pg-pubsub module is required</div>
         
 <hr>
 <dt>
-    <h4 class="name" id="PostgresPubSub"><span class="type-signature"></span>new PostgresPubSub(config, postgres, logger)</h4>
+    <h4 class="name" id="Mongo"><span class="type-signature"></span>new Mongo(config, logger, util)</h4>
     
     
 </dt>
@@ -164,30 +164,6 @@ pg-pubsub module is required</div>
 
         <tr>
             
-                <td class="name"><code>postgres</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Postgres</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Postgres service</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>logger</code></td>
             
 
@@ -206,6 +182,30 @@ pg-pubsub module is required</div>
             
 
             <td class="description last">Logger service</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>util</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Util</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Util service</td>
         </tr>
 
     
@@ -296,7 +296,7 @@ pg-pubsub module is required</div>
 <dd>
     
     <div class="description">
-        Service name is 'postgresPubSub'
+        Service name is 'mongo'
     </div>
     
 
@@ -501,18 +501,29 @@ pg-pubsub module is required</div>
         
             
 <hr>
-<dt class="name" id=".client">
-    <h4 id=".client"><span class="type-signature">&lt;static> </span>client<span class="type-signature"></span></h4>
+<dt class="name" id=".datetimeFormat">
+    <h4 id=".datetimeFormat"><span class="type-signature">&lt;static> </span>datetimeFormat<span class="type-signature"> :string</span></h4>
 
     
 </dt>
 <dd>
     
     <div class="description">
-        PUBSUB client class
+        Format of date/time string
     </div>
     
 
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">string</span>
+
+
+
+            </li>
+        </ul>
     
 
     
@@ -568,7 +579,7 @@ pg-pubsub module is required</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="_createClient"><span class="type-signature">&lt;async> </span>_createClient(serverName [, subscriberName])</h4>
+    <h4 class="name" id="connect"><span class="type-signature">&lt;async> </span>connect(name)</h4>
     
     
 </dt>
@@ -576,7 +587,7 @@ pg-pubsub module is required</div>
 
     
     <div class="description">
-        Create actual PUBSUB client
+        Obtain Mongo client
     </div>
     
 
@@ -599,9 +610,9 @@ pg-pubsub module is required</div>
         <th>Type</th>
 
         
-        <th>Argument</th>
-        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -613,7 +624,7 @@ pg-pubsub module is required</div>
 
         <tr>
             
-                <td class="name"><code>serverName</code></td>
+                <td class="name"><code>name</code></td>
             
 
             <td class="type">
@@ -627,52 +638,16 @@ pg-pubsub module is required</div>
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
-
-            <td class="description last">Server name as in config</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>subscriberName</code></td>
-            
-
-            <td class="type">
-            
+                <td class="default">
                 
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
+                    'main'
                 
                 </td>
             
 
-            
-
-            <td class="description last">Client name</td>
+            <td class="description last">Server name in config</td>
         </tr>
 
     
@@ -735,6 +710,10 @@ pg-pubsub module is required</div>
     <h5>Returns:</h5>
     
             
+<div class="param-desc">
+    Resolves to connected MongoClient instance
+</div>
+
 
 
 <dl>
