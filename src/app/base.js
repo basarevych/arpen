@@ -320,7 +320,10 @@ class App {
             async (prev, cur) => {
                 await prev;
 
-                debug(`Loading module ${cur} configuration`);
+                let name = (cur[0] === '!') ? cur.slice(1) : cur;
+                name = name.split('/')[0];
+                debug(`Loading module ${name} configuration`);
+
                 let basePath = cur;
                 if (cur[0] === '!')
                     basePath = path.join(this.basePath, 'node_modules', cur.slice(1));
@@ -333,9 +336,9 @@ class App {
                 ]);
 
                 if (typeof globalConf !== 'object')
-                    throw new Error(`Global config is not an object (module: ${cur})`);
+                    throw new Error(`Global config is not an object (module: ${name})`);
                 if (typeof localConf !== 'object')
-                    throw new Error(`Local config is not an object (module: ${cur})`);
+                    throw new Error(`Local config is not an object (module: ${name})`);
 
                 let moduleConfig = merge.recursive(true, globalConf, localConf);
                 moduleConfig.base_path = basePath;
@@ -343,9 +346,9 @@ class App {
                 if (!moduleConfig.autoload)
                     moduleConfig.autoload = [];
                 else if (!Array.isArray(moduleConfig.autoload))
-                    throw new Error(`Config.autoload is not an array (module: ${cur})`);
+                    throw new Error(`Config.autoload is not an array (module: ${name})`);
 
-                modules.set(cur, moduleConfig);
+                modules.set(name, moduleConfig);
             },
             Promise.resolve()
         );
