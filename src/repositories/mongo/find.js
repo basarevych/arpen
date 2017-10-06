@@ -3,6 +3,7 @@
  */
 'use strict';
 
+const { ObjectId } = require('mongodb');
 const NError = require('nerror');
 
 /**
@@ -20,30 +21,17 @@ module.exports = async function (id, mongo) {
 
     try {
         client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo);
-        let rows = await new Promise((resolve, reject) => {
-            client.collection(this.constructor.table).find(
-                { _id: id },
-                (error, result) => {
-                    if (error)
-                        return reject(error);
-
-                    result.toArray((error, rows) => {
-                        if (error)
-                            return reject(error);
-
-                        resolve(rows);
-                    });
-                }
-            );
-        });
+        let coll = client.collection(this.constructor.table);
+        let data = coll.find({ _id: new ObjectId(id) });
+        let rows = await data.toArray();
 
         if (typeof mongo !== 'object')
-            client.close();
+            client.done();
 
-        return rows ? this.getModel(rows) : [];
+        return rows.length ? this.getModel(rows) : [];
     } catch (error) {
         if (client && typeof mongo !== 'object')
-            client.close();
+            client.done();
 
         throw new NError(error, { id }, 'MongoRepository.find()');
     }

@@ -13,6 +13,64 @@ const debug = require('debug')('arpen:mongo');
 const NError = require('nerror');
 
 /**
+ * Mongo client
+ * @property {object} client                        Mongo client
+ */
+class MongoClient {
+    /**
+     * Create Mongo client
+     * @param {Mongo} service                       Mongo service instance
+     * @param {object} client                       Mongo client instance
+     */
+    constructor(service, client) {
+        this.client = client;
+
+        this._mongo = service;
+    }
+
+    /**
+     * Client termination
+     */
+    done() {
+        if (!this.client)
+            return;
+
+        debug('Disconecting...');
+        let res = this.client.close();
+        this.client = null;
+        return res;
+    }
+
+    /**
+     * Get Mongo collection
+     * @param {string} name                         Collection name
+     * @return {object}
+     */
+    collection(name) {
+        debug(`collection ${name}`);
+
+        if (!this.client)
+            throw new Error('Collection on terminated client');
+
+        let coll = this.client.collection(name);
+        if (!coll)
+            return coll;
+
+        function loggingMethod(log, func, ...args) {
+            debug(log);
+            return func.apply(this, args);
+        }
+
+        for (let key in coll) {
+            if (typeof coll[key] === 'function')
+                coll[key] = loggingMethod.bind(coll, `Query: ${name}.${key}`, coll[key]);
+        }
+
+        return coll;
+    }
+}
+
+/**
  * Mongo service
  * <br><br>
  * mongodb module is required
@@ -71,8 +129,6 @@ class Mongo {
      * @return {Promise}                        Resolves to connected MongoClient instance
      */
     async connect(name = 'main') {
-        const { MongoClient } = mongo;
-
         return new Promise((resolve, reject) => {
             let options = this._config.get(`mongo.${name}`);
             if (!options)
@@ -101,14 +157,14 @@ class Mongo {
             const connString = `mongodb://${user}${options.host}:${options.port}/${options.database}${optString}`;
 
             debug('Connecting...');
-            MongoClient.connect(connString, (error, client) => {
+            mongo.MongoClient.connect(connString, (error, client) => {
                 if (error) {
                     if (client)
                         client.close();
                     return reject(new NError(error, 'Mongo.connect()'));
                 }
 
-                resolve(client);
+                resolve(new MongoClient(this, client));
             });
         });
     }

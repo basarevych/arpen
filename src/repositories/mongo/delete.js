@@ -19,25 +19,16 @@ module.exports = async function (model, mongo) {
     let client;
     try {
         client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo);
-        let result = await new Promise((resolve, reject) => {
-            client.collection(this.constructor.table).deleteOne(
-                { _id: typeof model === 'object' ? model.id : model },
-                (error, result) => {
-                    if (error)
-                        return reject(error);
-
-                    resolve(result);
-                }
-            );
-        });
+        let coll = client.collection(this.constructor.table);
+        let result = await coll.deleteOne({ _id: typeof model === 'object' ? model.id : model });
 
         if (typeof mongo !== 'object')
-            client.close();
+            client.done();
 
         return result.deletedCount;
     } catch (error) {
         if (client && typeof mongo !== 'object')
-            client.close();
+            client.done();
 
         throw new NError(error, { model }, 'MongoRepository.delete()');
     }

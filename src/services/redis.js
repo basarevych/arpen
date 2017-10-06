@@ -86,6 +86,10 @@ class RedisClient {
      * Client termination
      */
     done() {
+        if (!this.client)
+            return;
+
+        debug('Disconecting...');
         let res = this.client.quit();
         this.client = null;
         return res;

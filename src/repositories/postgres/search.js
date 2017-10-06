@@ -29,7 +29,7 @@ const NError = require('nerror');
  *      pageSize: 0, // page size
  *      pageNumber: 1, // returned page number
  *      sort: [ ... ], // keys used to sort the result
- *      data: [ ... ], // resulting raw SQL rows as an array of objects
+ *      data: [ ... ], // resulting raw SQL rows as an array of models
  * }
  * </pre>
  */
@@ -78,6 +78,8 @@ module.exports = async function (options = {}, pg = undefined) {
                         ${pageSize > 0 ? `LIMIT ${pageSize}` : ''}`,
                 params
             );
+            if (result.rows.length)
+                result = this.getModel(result.rows);
         }
 
         if (typeof pg !== 'object')
@@ -89,7 +91,7 @@ module.exports = async function (options = {}, pg = undefined) {
             pageSize: pageSize,
             pageNumber: pageNumber,
             sort: sort,
-            data: infoOnly ? [] : result.rows,
+            data: infoOnly ? [] : result,
         };
     } catch (error) {
         if (client && typeof pg !== 'object')

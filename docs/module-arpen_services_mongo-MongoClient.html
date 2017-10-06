@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: Cacher</title>
+	<title>Documentation Class: MongoClient</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,22 +72,18 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Cacher</h1>
+	<h1 class="page-title">Class: MongoClient</h1>
 <section>
 
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-arpen_services_cacher.html">arpen/services/cacher</a>~</span>
+            <span class="ancestors"><a href="module-arpen_services_mongo.html">arpen/services/mongo</a>~</span>
         
-        Cacher
+        MongoClient
         </h2>
         
-            <div class="class-description">Cacher
-<br><br>
-Will temporarily cache object in Redis if cache is enabled or instantly return undefined if it isn't
-<br><br>
-redis module is required</div>
+            <div class="class-description">Mongo client</div>
         
     
 </header>
@@ -99,7 +95,7 @@ redis module is required</div>
         
 <hr>
 <dt>
-    <h4 class="name" id="Cacher"><span class="type-signature"></span>new Cacher(config, redis, logger, util)</h4>
+    <h4 class="name" id="MongoClient"><span class="type-signature"></span>new MongoClient(service, client)</h4>
     
     
 </dt>
@@ -107,7 +103,7 @@ redis module is required</div>
 
     
     <div class="description">
-        Create the service
+        Create Mongo client
     </div>
     
 
@@ -142,7 +138,31 @@ redis module is required</div>
 
         <tr>
             
-                <td class="name"><code>config</code></td>
+                <td class="name"><code>service</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Mongo</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Mongo service instance</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>client</code></td>
             
 
             <td class="type">
@@ -159,79 +179,7 @@ redis module is required</div>
 
             
 
-            <td class="description last">Configuration</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>redis</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Redis</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Redis service</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>logger</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Logger</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Logger service</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>util</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Util</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Util service</td>
+            <td class="description last">Mongo client instance</td>
         </tr>
 
     
@@ -244,234 +192,57 @@ redis module is required</div>
 <dl class="details">
     
 
-	
+    <h5 class="subsection-title">Properties:</h5>
 
-	
+    <dl>
 
-	
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
 
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        <dl>
-            
-<hr>
-<dt class="name" id=".provides">
-    <h4 id=".provides"><span class="type-signature">&lt;static> </span>provides<span class="type-signature"> :string</span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        Service name is 'cacher'
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">string</span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
+        <th>Type</th>
 
         
-            
-<hr>
-<dt class="name" id=".requires">
-    <h4 id=".requires"><span class="type-signature">&lt;static> </span>requires<span class="type-signature"> :Array.&lt;string></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        Dependencies as constructor arguments
-    </div>
-    
-
-    
-        <h5>Type:</h5>
-        <ul>
-            <li>
-                
-<span class="param-type">Array.&lt;string></span>
-
-
-
-            </li>
-        </ul>
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
 
         
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
             
-<hr>
-<dt class="name" id=".lifecycle">
-    <h4 id=".lifecycle"><span class="type-signature">&lt;static> </span>lifecycle<span class="type-signature"></span></h4>
+                <td class="name"><code>client</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Mongo client</td>
+        </tr>
 
     
-</dt>
-<dd>
-    
-    <div class="description">
-        This service is a singleton
-    </div>
-    
+    </tbody>
+</table>
+</dl>
 
-    
-
-    
-<dl class="details">
     
 
 	
@@ -511,9 +282,33 @@ redis module is required</div>
 
 
     
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 </dd>
 
-        </dl>
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
     
 
     
@@ -523,7 +318,7 @@ redis module is required</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="set"><span class="type-signature">&lt;async> </span>set(name, value [, ttl])</h4>
+    <h4 class="name" id="done"><span class="type-signature"></span>done()</h4>
     
     
 </dt>
@@ -531,7 +326,7 @@ redis module is required</div>
 
     
     <div class="description">
-        Set variable to a new value
+        Client termination
     </div>
     
 
@@ -540,133 +335,6 @@ redis module is required</div>
     
 
     
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Argument</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The name</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>value</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">*</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The value</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>ttl</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">Time before expiration is seconds, use 0 to store forever.
-                                         If undefined then default (random) value will be used</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
     
 
     
@@ -720,30 +388,6 @@ redis module is required</div>
     
 
     
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Resolves on success
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
 
     
 </dd>
@@ -752,7 +396,7 @@ redis module is required</div>
             
 <hr>
 <dt>
-    <h4 class="name" id="get"><span class="type-signature">&lt;async> </span>get(name)</h4>
+    <h4 class="name" id="collection"><span class="type-signature"></span>collection(name)</h4>
     
     
 </dt>
@@ -760,7 +404,7 @@ redis module is required</div>
 
     
     <div class="description">
-        Get variable value refreshing its lifetime
+        Get Mongo collection
     </div>
     
 
@@ -812,7 +456,7 @@ redis module is required</div>
 
             
 
-            <td class="description last">The name</td>
+            <td class="description last">Collection name</td>
         </tr>
 
     
@@ -875,10 +519,6 @@ redis module is required</div>
     <h5>Returns:</h5>
     
             
-<div class="param-desc">
-    Resolves to variable value or undefined
-</div>
-
 
 
 <dl>
@@ -887,311 +527,7 @@ redis module is required</div>
     </dt>
     <dd>
         
-<span class="param-type">Promise</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="unset"><span class="type-signature">&lt;async> </span>unset(name)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Remove variable
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The name</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Resolves on success
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="_getKey"><span class="type-signature"></span>_getKey(name)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        Convert variable name to Redis key
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Cache variable name</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    Returns corresponding Redis key
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
+<span class="param-type">object</span>
 
 
 
@@ -1254,7 +590,7 @@ redis module is required</div>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
 	
-		on 2017-10-06T13:29:11+03:00
+		on 2017-10-06T13:29:12+03:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

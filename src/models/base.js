@@ -11,8 +11,8 @@ const moment = require('moment-timezone');
 class BaseModel {
     /**
      * Create model
-     * @param {Postgres|MySQL} db       Postgres or MySQL service
-     * @param {Util} util               Util service
+     * @param {Postgres|MySQL|Mongo} db     Database service
+     * @param {Util} util                   Util service
      */
     constructor(db, util) {
         this._dirty = false;

@@ -23,46 +23,25 @@ module.exports = async function (model, mongo) {
             return model.id;
 
         client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo);
+        let coll = client.collection(this.constructor.table);
 
         let data = model._serialize({ timeZone: this.constructor.timeZone });
         let id = typeof model === 'object' ? model.id : model;
-        if (id) {
-            await new Promise((resolve, reject) => {
-                client.collection(this.constructor.table).findOneAndReplace(
-                    { _id: id },
-                    { $set: data },
-                    (error, result) => {
-                        if (error)
-                            return reject(error);
-
-                        resolve();
-                    }
-                );
-            });
-        } else {
-            model.id = await new Promise((resolve, reject) => {
-                delete data._id;
-                client.collection(this.constructor.table).insertOne(
-                    data,
-                    (error, result) => {
-                        if (error)
-                            return reject(error);
-
-                        resolve(result.insertedId);
-                    }
-                );
-            });
-        }
+        if (id)
+            await coll.findOneAndReplace({ _id: id }, { $set: data });
+        else
+            model.id = (await coll.insertOne(data)).insertedId;
 
         model._dirty = false;
 
         if (typeof mongo !== 'object')
-            client.close();
+            client.done();
 
         return model.id;
     } catch (error) {
+        console.log(client);
         if (client && typeof mongo !== 'object')
-            client.close();
+            client.done();
 
         throw new NError(error, { model }, 'MongoRepository.save()');
     }

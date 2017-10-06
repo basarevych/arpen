@@ -29,7 +29,7 @@ const NError = require('nerror');
  *      pageSize: 0, // page size
  *      pageNumber: 1, // returned page number
  *      sort: [ ... ], // keys used to sort the result
- *      data: [ ... ], // resulting raw SQL rows as an array of objects
+ *      data: [ ... ], // resulting raw SQL rows as an array of models
  * }
  * </pre>
  */
@@ -78,6 +78,8 @@ module.exports = async function (options = {}, mysql = undefined) {
                         ${offset > 0 ? `OFFSET ${offset}` : ''}`,
                 params
             );
+            if (result.length)
+                result = this.getModel(result);
         }
 
         if (typeof mysql !== 'object')
