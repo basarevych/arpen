@@ -3,6 +3,12 @@
  */
 'use strict';
 
+let mongo;
+try {
+    mongo = require('mongodb');
+} catch (error) {
+    // do nothing
+}
 const NError = require('nerror');
 
 /**
@@ -16,6 +22,10 @@ const NError = require('nerror');
  * @return {Promise}                        Resolves to record ID
  */
 module.exports = async function (model, mongo) {
+    if (!mongo)
+        throw new Error('mongodb module is required for Mongo service');
+    const { ObjectId } = mongo;
+
     let client;
 
     try {
@@ -28,7 +38,7 @@ module.exports = async function (model, mongo) {
         let data = model._serialize({ timeZone: this.constructor.timeZone });
         let id = typeof model === 'object' ? model.id : model;
         if (id)
-            await coll.findOneAndReplace({ _id: id }, { $set: data });
+            await coll.findOneAndReplace({ _id: new ObjectId(id) }, { $set: data });
         else
             model.id = (await coll.insertOne(data)).insertedId;
 
