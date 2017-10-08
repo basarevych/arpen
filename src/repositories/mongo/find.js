@@ -3,9 +3,9 @@
  */
 'use strict';
 
-let mongo;
+let mongodb;
 try {
-    mongo = require('mongodb');
+    mongodb = require('mongodb');
 } catch (error) {
     // do nothing
 }
@@ -22,9 +22,9 @@ const NError = require('nerror');
  * @return {Promise}                        Resolves to array of models
  */
 module.exports = async function (id, mongo) {
-    if (!mongo)
+    if (!mongodb)
         throw new Error('mongodb module is required for Mongo service');
-    const { ObjectId } = mongo;
+    const { ObjectId } = mongodb;
 
     let client;
 
