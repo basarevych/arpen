@@ -320,12 +320,12 @@ class App {
             async (prev, cur) => {
                 await prev;
 
-                let name = (cur[0] === '!') ? cur.slice(1) : cur;
+                let name = (cur[0] === '~') ? cur.slice(1) : cur;
                 name = name.split('/')[0];
                 debug(`Loading module ${name} configuration`);
 
                 let basePath = cur;
-                if (cur[0] === '!')
+                if (cur[0] === '~')
                     basePath = path.join(this.basePath, 'node_modules', cur.slice(1));
                 else if (cur[0] !== '/')
                     basePath = path.join(this.basePath, 'modules', cur);
