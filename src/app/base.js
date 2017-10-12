@@ -401,68 +401,14 @@ class App {
             return;
         }
 
-        await config.autoload.reduce(
-            async (prev, cur) => {
-                await prev;
-
-                let file = cur;
-                if (cur[0] === '!')
-                    file = path.join(this.basePath, 'node_modules', cur.slice(1));
-                else if (cur[0] !== '/')
-                    file = path.join(this.basePath, cur);
-
-                await filer.process(
-                    file,
-                    async filename => {
-                        let obj = await this.constructor._require(filename);
-                        if (!obj.provides)
-                            return true;
-
-                        try {
-                            this.registerClass(obj, filename);
-                        } catch (error) {
-                            throw new NError(error, `Registering ${filename}`);
-                        }
-                        return true;
-                    }
-                );
-            },
-            Promise.resolve()
-        );
+        await this._autoload(this.basePath, config.autoload);
 
         await Array.from(config.modules).reduce(
             async (prevModule, [ curModule, curConfig ]) => {
                 await prevModule;
 
                 debug(`Loading module ${curModule} sources`);
-                await curConfig.autoload.reduce(
-                    async (prevLoad, curLoad) => {
-                        await prevLoad;
-
-                        let file = curLoad;
-                        if (curLoad[0] === '!')
-                            file = path.join(curConfig.base_path, 'node_modules', curLoad.slice(1));
-                        else if (curLoad[0] !== '/')
-                            file = path.join(curConfig.base_path, curLoad);
-
-                        await filer.process(
-                            file,
-                            async filename => {
-                                let obj = await this.constructor._require(filename);
-                                if (!obj.provides)
-                                    return true;
-
-                                try {
-                                    this.registerClass(obj, filename);
-                                } catch (error) {
-                                    throw new NError(error, `Registering ${filename}`);
-                                }
-                                return true;
-                            }
-                        );
-                    },
-                    Promise.resolve()
-                );
+                await this._autoload(curConfig.base_path, curConfig.autoload);
             },
             Promise.resolve()
         );
@@ -647,6 +593,66 @@ class App {
                 resolve();
             });
         });
+    }
+
+    /**
+     * Load given directories
+     * @param {string} basePath             Base path
+     * @param {string[]} dirs               Directories
+     * @return {Promise}
+     */
+    async _autoload(basePath, dirs) {
+        let filer = new Filer();
+        let loadFiles = new Map();
+        let ignoreFiles = new Set();
+
+        await dirs.reduce(
+            async (prev, cur) => {
+                await prev;
+
+                let ignore = false;
+                if (cur[0] === '!') {
+                    ignore = true;
+                    cur = cur.slice(1);
+                }
+
+                let file = cur;
+                if (cur[0] === '~')
+                    file = path.join(basePath, 'node_modules', cur.slice(1));
+                else if (cur[0] !== '/')
+                    file = path.join(basePath, cur);
+
+                await filer.process(
+                    file,
+                    async filename => {
+                        let obj = await this.constructor._require(filename);
+                        if (!obj.provides)
+                            return true;
+
+                        if (ignore)
+                            ignoreFiles.add(filename);
+                        else if (!ignoreFiles.has(filename))
+                            loadFiles.set(filename, obj);
+
+                        return true;
+                    }
+                );
+            },
+            Promise.resolve()
+        );
+
+        return Array.from(loadFiles).reduce(
+            async (prev, [curName, curObj]) => {
+                await prev;
+
+                try {
+                    this.registerClass(curObj, curName);
+                } catch (error) {
+                    throw new NError(error, `Registering ${curName}`);
+                }
+            },
+            Promise.resolve()
+        );
     }
 
     /**
