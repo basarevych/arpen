@@ -14,6 +14,21 @@ const App = require('./base');
  */
 class Console extends App {
     /**
+     * Run the app. This method will simply call .init() and then .start().
+     * @param {object} [options]                            All the parent class options
+     * @param {boolean] [options.interceptConsole=false]    Redirect console.log(), etc. to default logger
+     * @param {...*} args                                   Descendant class specific arguments
+     * @return {Promise}
+     */
+    async run(options, ...args) {
+        if (!options)
+            options = {};
+        if (typeof options.interceptConsole === 'undefined')
+            options.interceptConsole = false;
+        return super.run(options, ...args);
+    }
+
+    /**
      * Start the app
      * @param {...*} args                               Parent arguments
      * @return {Promise}
