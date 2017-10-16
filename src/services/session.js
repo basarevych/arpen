@@ -120,12 +120,16 @@ class Session {
         if (!bridge || !bridge.instance.find)
             throw new Error(`Invalid bridge: ${name}`);
 
-        if (bridge.cache.has(token))
-            return bridge.cache.get(token).session;
-
-        let session = await bridge.instance.find(token);
-        if (session)
-            this._cacheAdd(bridge, session, info);
+        let session;
+        let cache = bridge.cache.get(token);
+        if (cache) {
+            session = cache.session;
+            cache.info = info;
+        } else {
+            session = await bridge.instance.find(token);
+            if (session)
+                this._cacheAdd(bridge, session, info);
+        }
 
         return session;
     }
@@ -239,9 +243,10 @@ class Session {
      * Decode JWT
      * @param {string} name                     Bridge name
      * @param {string} token                    JWT string
-     * @return {Promise}                        Resolves to [session, payload]
+     * @param {*} [info]                        Extra information for the bridge
+     * @return {Promise}                        Resolves to { session, payload }
      */
-    async decodeJwt(name, token) {
+    async decodeJwt(name, token, info) {
         let bridge = this.bridges.get(name);
         if (!bridge || !bridge.instance.secret)
             throw new Error(`Invalid bridge: ${name}`);
@@ -261,7 +266,10 @@ class Session {
             });
         });
 
-        return [payload && await this.load(name, payload._token), payload];
+        return {
+            session: payload && await this.load(name, payload._token, info),
+            payload: payload,
+        };
     }
 
     /**
