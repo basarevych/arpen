@@ -18,7 +18,7 @@ module.exports = async function (mongo) {
     let client;
 
     try {
-        client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo);
+        client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo || this.constructor.instance);
         let coll = client.collection(this.constructor.table);
         let data = coll.find();
         let rows = await data.toArray();

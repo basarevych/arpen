@@ -18,7 +18,7 @@ const NError = require('nerror');
 module.exports = async function (model, mongo) {
     let client;
     try {
-        client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo);
+        client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo || this.constructor.instance);
         let coll = client.collection(this.constructor.table);
         let result = await coll.deleteOne({ _id: typeof model === 'object' ? model.id : model });
 

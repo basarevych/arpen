@@ -37,6 +37,14 @@ class BaseRepository {
     }
 
     /**
+     * DB instance
+     * @type {string}
+     */
+    static get instance() {
+        return 'main';
+    }
+
+    /**
      * DB table name - override it
      * @type {string}
      */

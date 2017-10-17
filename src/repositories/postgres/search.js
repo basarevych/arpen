@@ -48,7 +48,7 @@ module.exports = async function (options = {}, pg = undefined) {
     let client;
 
     try {
-        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg);
+        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg || this.constructor.instance);
         let result = await client.query(
             `SELECT count(*)::int AS count 
                FROM ${table} 

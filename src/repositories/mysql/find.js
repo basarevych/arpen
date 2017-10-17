@@ -19,7 +19,7 @@ module.exports = async function (id, mysql) {
     let client;
 
     try {
-        client = typeof mysql === 'object' ? mysql : await this._mysql.connect(mysql);
+        client = typeof mysql === 'object' ? mysql : await this._mysql.connect(mysql || this.constructor.instance);
         let rows = await client.query(
             `SELECT * 
                FROM ${this.constructor.table} 

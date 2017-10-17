@@ -22,7 +22,7 @@ module.exports = async function (model, pg) {
         if (model.id && !model._dirty)
             return model.id;
 
-        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg);
+        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg || this.constructor.instance);
 
         let data = model._serialize();
         let fields = Object.keys(data)

@@ -52,19 +52,33 @@ class Session {
     }
 
     /**
+     * Check expired sessions interval
+     * @type {number}
+     */
+    get expireScanInterval() {
+        return 60 * 60 * 1000;
+    }
+
+    /**
      * Add new bridge
      * @param {string} name                     Bridge name
      * @param {object} instance                 Bridge instance
      * @return {Promise}
      */
     async addBridge(name, instance) {
-        this.bridges.set(
-            name,
-            {
-                instance: instance,
-                cache: new Map(),
-            }
-        );
+        if (this.bridges.has(name))
+            return;
+
+        let bridge = {
+            instance: instance,
+            cache: new Map(),
+            timer: null,
+        };
+
+        if (instance.expirationTimeout)
+            bridge.timer = setInterval(this.onTimer.bind(this, name), Math.min(this.expireScanInterval, instance.expirationTimeout * 1000));
+
+        this.bridges.set(name, bridge);
     }
 
     /**
@@ -76,6 +90,9 @@ class Session {
         let bridge = this.bridges.get(name);
         if (!bridge)
             throw new Error(`Bridge not found: ${name}`);
+
+        if (bridge.timer)
+            clearInterval(bridge.timer);
 
         for (let cache of bridge.cache.values()) {
             if (cache.timer)
@@ -273,6 +290,24 @@ class Session {
     }
 
     /**
+     * Delete expired sessions
+     * @param {string} name                     Bridge name
+     */
+    async onTimer(name) {
+        let bridge = this.bridges.get(name);
+        if (!bridge || !bridge.instance.expire)
+            throw new Error(`Invalid bridge: ${name}`);
+
+        let expired = moment().subtract(bridge.instance.expirationTimeout, 'seconds');
+        for (let cache of bridge.cache.values()) {
+            if (cache.session.updatedAt.isBefore(expired))
+                await this.destroy(name, cache.session);
+        }
+
+        await bridge.instance.expire();
+    }
+
+    /**
      * Add session to the cache
      * @param {object} bridge                   Bridge object
      * @param {SessionModel} session            Session model
@@ -327,6 +362,7 @@ class Session {
                 await bridge.instance.save(session, info);
             }
         } catch (error) {
+            this._logger.error(error);
             this._cacheDel(bridge, session);
         }
     }

@@ -45,7 +45,7 @@ module.exports = async function (options = {}, mongo = undefined) {
     let client;
 
     try {
-        client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo);
+        client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo || this.constructor.instance);
         let coll = client.collection(collection);
         let totalRows = await coll.count(search);
         let totalPages;

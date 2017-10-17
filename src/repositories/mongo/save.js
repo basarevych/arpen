@@ -32,7 +32,7 @@ module.exports = async function (model, mongo) {
         if (model.id && !model._dirty)
             return model.id;
 
-        client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo);
+        client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo || this.constructor.instance);
         let coll = client.collection(this.constructor.table);
 
         let data = model._serialize({ timeZone: this.constructor.timeZone });

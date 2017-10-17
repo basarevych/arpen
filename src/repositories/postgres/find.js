@@ -26,7 +26,7 @@ module.exports = async function (id, pg) {
                 return this.getModel(value);
         }
 
-        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg);
+        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg || this.constructor.instance);
         let result = await client.query(
             `SELECT * 
                FROM ${this.constructor.table} 

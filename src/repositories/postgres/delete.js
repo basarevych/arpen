@@ -18,7 +18,7 @@ const NError = require('nerror');
 module.exports = async function (model, pg) {
     let client;
     try {
-        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg);
+        client = typeof pg === 'object' ? pg : await this._postgres.connect(pg || this.constructor.instance);
         let result = await client.query(
             `DELETE 
                FROM ${this.constructor.table}

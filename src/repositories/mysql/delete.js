@@ -18,7 +18,7 @@ const NError = require('nerror');
 module.exports = async function (model, mysql) {
     let client;
     try {
-        client = typeof mysql === 'object' ? mysql : await this._mysql.connect(mysql);
+        client = typeof mysql === 'object' ? mysql : await this._mysql.connect(mysql || this.constructor.instance);
         let result = await client.query(
             `DELETE 
                FROM ${this.constructor.table}
