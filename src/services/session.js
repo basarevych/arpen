@@ -215,6 +215,16 @@ class Session {
     }
 
     /**
+     * Destroy session of a user in all the bridges
+     * @param {SessionModel} session            Session model
+     * @return {Promise}
+     */
+    async destroyAll(session) {
+        for (let name of this.bridges.keys())
+            this.destroy(name, session);
+    }
+
+    /**
      * Is session valid?
      * @param {string} name                     Bridge name
      * @param {SessionModel} session            Session model
