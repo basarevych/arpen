@@ -133,15 +133,18 @@ class MySQLClient {
      * Run a transaction
      * @param {object} [params]
      * @param {string} [params.name]                        Transaction name for debugging
-     * @param {PostgresTransaction} cb                      The transaction
+     * @param {string} [params.isolation='serializable']    Isolation level
+     * @param {MySQLTransaction} cb                         The transaction
      * @return {Promise}                                    Resolves to transaction result
      */
     async transaction() {
-        let params = {};
+        let params = { isolation: 'serializable' };
         let cb;
         if (arguments.length >= 2) {
             if (arguments[0].name)
                 params.name = arguments[0].name;
+            if (arguments[0].isolation)
+                params.isolation = arguments[0].isolation;
             cb = arguments[1];
         } else if (arguments.length === 1) {
             cb = arguments[0];
@@ -154,6 +157,8 @@ class MySQLClient {
                 'on terminated client'
             ));
         }
+
+        debug(`Transaction ${params.name}`);
 
         class RollbackError extends Error {
         }
@@ -205,7 +210,8 @@ class MySQLClient {
                 let tryAgain = async () => {
                     let transactionStarted = false;
                     try {
-                        await this.query('BEGIN TRANSACTION');
+                        await this.query('SET TRANSACTION ISOLATION LEVEL ' + params.isolation.toUpperCase());
+                        await this.query('BEGIN');
                         transactionStarted = true;
 
                         let result = cb(rollback(null));
@@ -218,11 +224,11 @@ class MySQLClient {
                         }
 
                         let value = await result;
-                        await this.query('COMMIT TRANSACTION');
+                        await this.query('COMMIT');
                         resolve(value);
                     } catch (error) {
                         if (transactionStarted)
-                            await this.query('ROLLBACK TRANSACTION');
+                            await this.query('ROLLBACK');
 
                         if (error instanceof RollbackError)
                             return resolve(error.result);

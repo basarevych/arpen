@@ -157,6 +157,8 @@ class RedisClient {
             );
         }
 
+        debug(`Transaction ${params.name}`);
+
         if (++this._transactionLevel !== 1) {
             this._transactionLevel--;
             throw new Error(

@@ -119,6 +119,7 @@ class BaseRepository {
             let methodName = this._util.dashedToCamel(name.replace(/\.js$/, ''));
             let file = path.join(dir, name);
             try {
+                this[`_${methodName}`] = this[methodName];
                 this[methodName] = require(file).bind(this);
             } catch (error) {
                 throw new NError(error, `BaseRepository._loadMethods() - processing: ${name}`);

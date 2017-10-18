@@ -159,6 +159,8 @@ class PostgresClient {
             ));
         }
 
+        debug(`Transaction ${params.name}`);
+
         class RollbackError extends Error {
         }
 
