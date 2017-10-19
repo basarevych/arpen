@@ -173,7 +173,7 @@ class Session {
 
         let cache = bridge.cache.get(session.token);
         if (!cache)
-            return;
+            return false;
 
         session.updatedAt = moment();
         cache.session = session;
@@ -200,6 +200,7 @@ class Session {
                 schedule
             );
         }
+        return !this.isEmpty(session);
     }
 
     /**
