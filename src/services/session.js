@@ -52,14 +52,6 @@ class Session {
     }
 
     /**
-     * Check expired sessions interval
-     * @type {number}
-     */
-    get expireScanInterval() {
-        return 60 * 60 * 1000;
-    }
-
-    /**
      * Add new bridge
      * @param {string} name                     Bridge name
      * @param {object} instance                 Bridge instance
@@ -75,8 +67,8 @@ class Session {
             timer: null,
         };
 
-        if (instance.expirationTimeout)
-            bridge.timer = setInterval(this.onTimer.bind(this, name), Math.min(this.expireScanInterval, instance.expirationTimeout * 1000));
+        if (instance.expirationTimeout && instance.expirationInterval)
+            bridge.timer = setInterval(this.onTimer.bind(this, name), instance.expirationInterval * 1000);
 
         this.bridges.set(name, bridge);
     }
@@ -130,7 +122,7 @@ class Session {
      * @param {string} name                     Bridge name
      * @param {*} token                         User token
      * @param {*} [info]                        Extra information for the bridge
-     * @return {Promise}                        Resolves to session model
+     * @return {Promise}                        Resolves to session model or null
      */
     async load(name, token, info) {
         let bridge = this.bridges.get(name);
@@ -152,11 +144,27 @@ class Session {
     }
 
     /**
+     * Load session of a user
+     * @param {*} token                         User token
+     * @param {*} [info]                        Extra information for the bridge
+     * @return {Promise}                        Resolves to session model or null
+     */
+    async loadAll(token, info) {
+        for (let name of this.bridges.keys()) {
+            let session = await this.load(name, token, info);
+            if (session)
+                return session;
+        }
+
+        return null;
+    }
+
+    /**
      * Update session of a user
      * @param {string} name                     Bridge name
      * @param {SessionModel} session            Session model
      * @param {*} [info]                        Extra information for the bridge
-     * @return {Promise}
+     * @return {Promise}                        Resolves to true if updated
      */
     async update(name, session, info) {
         let bridge = this.bridges.get(name);
@@ -195,6 +203,49 @@ class Session {
     }
 
     /**
+     * Update session of a user
+     * @param {SessionModel} session            Session model
+     * @param {*} [info]                        Extra information for the bridge
+     * @return {Promise}                        Resolves to true if updated
+     */
+    async updateAll(session, info) {
+        for (let name of this.bridges.keys()) {
+            if (await this.update(name, session, info))
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Remove session of a user
+     * @param {string} name                     Bridge name
+     * @param {SessionModel} session            Session model
+     * @return {Promise}                        Resolves to true if removed
+     */
+    async remove(name, session) {
+        let bridge = this.bridges.get(name);
+        if (!bridge || !bridge.instance.destroy)
+            throw new Error(`Invalid bridge: ${name}`);
+
+        return this._cacheDel(bridge, session);
+    }
+
+    /**
+     * Remove session of a user
+     * @param {SessionModel} session            Session model
+     * @return {Promise}                        Resolves to true if removed
+     */
+    async removeAll(session) {
+        for (let name of this.bridges.keys()) {
+            if (await this.remove(name, session))
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Destroy session of a user
      * @param {string} name                     Bridge name
      * @param {SessionModel} session            Session model
@@ -206,12 +257,13 @@ class Session {
             throw new Error(`Invalid bridge: ${name}`);
 
         try {
-            if (this.isValid(name, session) && session.id)
+            if (session.id)
                 await bridge.instance.destroy(session);
         } catch (error) {
             // do nothing
         }
-        this._cacheDel(bridge, session);
+
+        await this.remove(name, session);
     }
 
     /**
@@ -221,21 +273,7 @@ class Session {
      */
     async destroyAll(session) {
         for (let name of this.bridges.keys())
-            this.destroy(name, session);
-    }
-
-    /**
-     * Is session valid?
-     * @param {string} name                     Bridge name
-     * @param {SessionModel} session            Session model
-     * @return {boolean}
-     */
-    isValid(name, session) {
-        let bridge = this.bridges.get(name);
-        if (!bridge)
-            throw new Error(`Invalid bridge: ${name}`);
-
-        return bridge.cache.has(session.token);
+            await this.destroy(name, session);
     }
 
     /**
@@ -304,17 +342,21 @@ class Session {
      * @param {string} name                     Bridge name
      */
     async onTimer(name) {
-        let bridge = this.bridges.get(name);
-        if (!bridge || !bridge.instance.expire)
-            throw new Error(`Invalid bridge: ${name}`);
+        try {
+            let bridge = this.bridges.get(name);
+            if (!bridge || !bridge.instance.expire)
+                throw new Error(`Invalid bridge: ${name}`);
 
-        let expired = moment().subtract(bridge.instance.expirationTimeout, 'seconds');
-        for (let cache of bridge.cache.values()) {
-            if (cache.session.updatedAt.isBefore(expired))
-                await this.destroy(name, cache.session);
+            let expired = moment().subtract(bridge.instance.expirationTimeout, 'seconds');
+            for (let cache of bridge.cache.values()) {
+                if (cache.session.updatedAt.isBefore(expired))
+                    await this.destroy(name, cache.session);
+            }
+
+            await bridge.instance.expire();
+        } catch (error) {
+            this._logger.error(error, `Session.onTimer(${name})`);
         }
-
-        await bridge.instance.expire();
     }
 
     /**
@@ -322,10 +364,11 @@ class Session {
      * @param {object} bridge                   Bridge object
      * @param {SessionModel} session            Session model
      * @param {*} [info]                        Extra information for the bridge
+     * @return {boolean}                        Success or not
      */
     _cacheAdd(bridge, session, info) {
         if (bridge.cache.has(session.token))
-            return;
+            return false;
 
         bridge.cache.set(
             session.token,
@@ -335,17 +378,19 @@ class Session {
                 info: info,
             }
         );
+        return true;
     }
 
     /**
      * Remove session from the cache
      * @param {object} bridge                   Bridge object
      * @param {SessionModel} session            Session model
+     * @return {boolean}                        Success or not
      */
     _cacheDel(bridge, session) {
         let cache = bridge.cache.get(session.token);
         if (!cache)
-            return;
+            return false;
 
         if (cache.timer) {
             clearTimeout(cache.timer);
@@ -353,6 +398,7 @@ class Session {
         }
 
         bridge.cache.delete(session.token);
+        return true;
     }
 
     /**
