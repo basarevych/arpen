@@ -15,21 +15,30 @@ const NError = require('nerror');
 class Cacher {
     /**
      * Create the service
+     * @param {App} app                         The application
      * @param {object} config                   Configuration
      * @param {Redis} redis                     Redis service
      * @param {Logger} logger                   Logger service
      * @param {Util} util                       Util service
      */
-    constructor(config, redis, logger, util) {
+    constructor(app, config, redis, logger, util) {
+        this._app = app;
         this._config = config;
         this._redis = redis;
         this._logger = logger;
         this._util = util;
 
-        this._clientPromise = new Promise((resolve, reject) => {
+        this._clientPromise = new Promise(async (resolve, reject) => {
             if (!this._config.get('cache.enable')) {
                 this._logger.info(`[Cache] Cache disabled`);
                 return resolve(null);
+            }
+
+            let postgres = this._config.get('cache.postgres');
+            if (postgres) {
+                this._pubsub = this._app.get('postgresPubSub');
+                let client = await this._pubsub.connect(postgres, 'InvalidateCache');
+                await client.subscribe('invalidate_cache', this.onInvalidateMessage.bind(this));
             }
 
             this._redis.connect(this._config.get('cache.redis'))
@@ -59,7 +68,7 @@ class Cacher {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'config', 'redis', 'logger', 'util' ];
+        return [ 'app', 'config', 'redis', 'logger', 'util' ];
     }
 
     /**
@@ -148,6 +157,22 @@ class Cacher {
             await client.query('DEL', [ this._getKey(name) ]);
         } catch (error) {
             this._logger.error(new NError(error, { name }, 'Cacher.get()'));
+        }
+    }
+
+    /**
+     * PUBSUB message handler
+     * @param {*} message                       Body of the message
+     * @return {Promise}
+     */
+    async onInvalidateMessage(message) {
+        if (typeof message !== 'object' || typeof message.key !== 'string')
+            this._logger.error('Received invalid cache invalidation message', message);
+
+        try {
+            await this.unset(message.key);
+        } catch (error) {
+            this._logger.error(new NError(error, 'Invalidation of the cache failed'));
         }
     }
 
