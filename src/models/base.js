@@ -90,7 +90,10 @@ class BaseModel {
             if (value && moment.isMoment(value)) {
                 if (timeZone)
                     value = value.tz(timeZone);
-                value = value.format(this._db.constructor.datetimeFormat);
+                if (this._db.constructor.datetimeFormat)
+                    value = value.format(this._db.constructor.datetimeFormat);
+                else
+                    value = value.toDate();
             }
             data[field] = value;
         }
@@ -115,8 +118,8 @@ class BaseModel {
             let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
             let value = (desc && desc.set) ? desc.set.call(this, data[field]) : this._setField(field, data[field]);
             if (value && moment.isMoment(value) && timeZone) {
-                value = moment.tz(value.format(this._db.constructor.datetimeFormat), timeZone).local();
-                value = moment(value.format(this._db.constructor.datetimeFormat));
+                value = moment.tz(value.format('YYYY-MM-DD HH:mm:ss.SSS'), timeZone).local();
+                value = moment(value.format('YYYY-MM-DD HH:mm:ss.SSS'));
                 if (desc && desc.set)
                     desc.set.call(this, value);
                 else

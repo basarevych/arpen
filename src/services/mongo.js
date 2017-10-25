@@ -120,7 +120,7 @@ class Mongo {
      * @type {string}
      */
     static get datetimeFormat() {
-        return 'YYYY-MM-DD HH:mm:ss.SSS';
+        return null; // return JS Date object
     }
 
     /**

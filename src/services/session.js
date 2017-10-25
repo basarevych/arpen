@@ -108,7 +108,7 @@ class Session {
         if (!bridge || !bridge.instance.create || !bridge.instance.save)
             throw new Error(`Invalid bridge: ${name}`);
 
-        let session = await bridge.instance.create(user);
+        let session = await bridge.instance.create(user, info);
         session.payload = {};
         session.createdAt = moment();
         session.updatedAt = session.createdAt;
@@ -135,7 +135,7 @@ class Session {
             session = cache.session;
             cache.info = info;
         } else {
-            session = await bridge.instance.find(token);
+            session = await bridge.instance.find(token, info);
             if (session)
                 this._cacheAdd(bridge, session, info);
         }
