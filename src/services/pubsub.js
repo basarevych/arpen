@@ -18,13 +18,9 @@
  */
 class PubSubClient {
     /**
-     * Create the client
-     * @param {object} pubConnector                 PUB client connector
-     * @param {object} subClient                    SUB client
+     * Constructor
      */
-    constructor(pubConnector, subClient) {
-        this.pubConnector = pubConnector;
-        this.subClient = subClient;
+    constructor() {
         this.channels = new Map();
     }
 
@@ -72,8 +68,10 @@ class PubSubClient {
 class PubSub {
     /**
      * Create the service
+     * @param {App} app                             The application
      */
-    constructor() {
+    constructor(app) {
+        this._app = app;
         this._cache = new Map();
     }
 
@@ -90,7 +88,7 @@ class PubSub {
      * @type {string[]}
      */
     static get requires() {
-        return [];
+        return ['app'];
     }
 
     /**
@@ -111,29 +109,20 @@ class PubSub {
 
     /**
      * Get pubsub client
-     * @param {string} [serverName='main']          Server name as in config, default is 'main'
+     * @param {string} [serverName='redis.main']    Server name as in config, default is 'redis.main'
      * @param {string|null} [subscriberName]        This subscriber name
      * @param {string|null} [cacheName=null]        Store and later reuse this pubsub client under this name
      * @return {Promise}                            Resolves to pubsub client instance
      */
-    async connect(serverName = 'main', subscriberName = null, cacheName = null) {
+    async connect(serverName = 'redis.main', subscriberName = null, cacheName = null) {
         if (cacheName && this._cache.has(cacheName))
             return this._cache.get(cacheName);
 
-        let pubsub = await this._createClient(serverName, subscriberName);
+        let [type, name] = serverName.split('.');
+        let pubsub = this._app.get(`${type}PubSub`, name, subscriberName);
         if (cacheName)
             this._cache.set(cacheName, pubsub);
         return pubsub;
-    }
-
-    /**
-     * Create actual PUBSUB client
-     * @param {string} serverName                   Server name as in config
-     * @param {string} [subscriberName]             Client name
-     * @return {Promise}
-     */
-    async _createClient(serverName, subscriberName) {
-        throw new Error('Not implemented');
     }
 }
 

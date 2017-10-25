@@ -34,11 +34,15 @@ class Cacher {
                 return resolve(null);
             }
 
-            let postgres = this._config.get('cache.postgres');
-            if (postgres) {
-                this._pubsub = this._app.get('postgresPubSub');
-                let client = await this._pubsub.connect(postgres, 'InvalidateCache');
-                await client.subscribe('invalidate_cache', this.onInvalidateMessage.bind(this));
+            let subscribe = this._config.get('cache.subscribe');
+            if (subscribe) {
+                this._pubsub = this._app.get('pubsub');
+                for (let item of subscribe) {
+                    if (item.postgres) {
+                        let client = await this._pubsub.connect(`postgres.${item.postgres}`, 'InvalidateCache');
+                        await client.subscribe('invalidate_cache', this.onInvalidateMessage.bind(this));
+                    }
+                }
             }
 
             this._redis.connect(this._config.get('cache.redis'))

@@ -7,23 +7,45 @@ const NError = require('nerror');
 const Pubsub = require('./pubsub');
 
 /**
- * Redis PUBSUB client
- * @property {object} pubConnector                  PUB client connector (RedisClient)
- * @property {object} subClient                     SUB client (RedisClient)
- * @property {Map} channels                         Registered channels (name → Set of handlers)
+ * PubSub service
+ * <br><br>
+ * redis module is required
  */
-class RedisPubSubClient extends Pubsub.client {
+class RedisPubSub extends Pubsub.client {
     /**
-     * Create the client
-     * @param {object} pubConnector                 PUB client connector
-     * @param {object} subClient                    SUB client
+     * Create the service
+     * @param {object} config               Config service
+     * @param {Redis} redis                 Redis service
+     * @param {Logger} logger               Logger service
+     * @param {string} serverName           Name of the instance
+     * @param {string} [subscriberName]     Name of this pubsub
      */
-    constructor(pubConnector, subClient) {
-        super(pubConnector, subClient);
+    constructor(config, redis, logger, serverName, subscriberName) {
+        super();
+
+        this._config = config;
+        this._redis = redis;
+        this._logger = logger;
+        this._serverName = serverName;
+        this._subscriberName = subscriberName;
 
         this._subscriptions = new Map();
-        this.subClient.client.on('subscribe', this.onSubscribe.bind(this));
-        this.subClient.client.on('message', this.onMessage.bind(this));
+    }
+
+    /**
+     * Service name is 'redisPubSub'
+     * @type {string}
+     */
+    static get provides() {
+        return 'redisPubSub';
+    }
+
+    /**
+     * Dependencies as constructor arguments
+     * @type {string[]}
+     */
+    static get requires() {
+        return [ 'config', 'redis', 'logger' ];
     }
 
     /**
@@ -31,10 +53,16 @@ class RedisPubSubClient extends Pubsub.client {
      */
     done() {
         for (let channel of this.channels.keys()) {
-            this.subClient.client.unsubscribe(channel);
+            if (this._sub) {
+                this._sub.client.unsubscribe(channel)
+                    .catch(error => {
+                        this._logger.error(new NError(error, 'RedisPubsub.done()'));
+                    });
+            }
             this.channels.delete(channel);
         }
-        this.subClient.done();
+        if (this._sub)
+            this._sub.done();
     }
 
     /**
@@ -65,7 +93,8 @@ class RedisPubSubClient extends Pubsub.client {
                     return resolve();
 
                 this._subscriptions.set(channel, resolve);
-                await this.subClient.client.subscribe(channel);
+                let sub = await this._getSub();
+                await sub.client.subscribe(channel);
             } catch (error) {
                 reject(new NError(error, `Subscribe attempt failed (${channel})`));
             }
@@ -88,7 +117,8 @@ class RedisPubSubClient extends Pubsub.client {
 
             handlers.delete(handler);
             if (!handlers.size) {
-                await this.subClient.client.unsubscribe(channel);
+                if (this._sub)
+                    await this._sub.client.unsubscribe(channel);
                 this.channels.delete(channel);
             }
         } catch (error) {
@@ -105,7 +135,7 @@ class RedisPubSubClient extends Pubsub.client {
     async publish(channel, message) {
         let pub;
         try {
-            pub = await this.pubConnector();
+            pub = await this._getPub();
             await pub.query('PUBLISH', [ channel, JSON.stringify(message) ]);
             pub.done();
         } catch (error) {
@@ -140,91 +170,38 @@ class RedisPubSubClient extends Pubsub.client {
             // do nothing
         }
 
-        for (let thisChannel of this.channels.keys()) {
-            if (thisChannel === channel) {
-                for (let handler of this.channels.get(thisChannel))
-                    handler(message);
-                break;
-            }
-        }
-    }
-}
-
-/**
- * PubSub service
- */
-class RedisPubSub extends Pubsub {
-    /**
-     * Create the service
-     * @param {object} config       Config service
-     * @param {Redis} redis         Redis service
-     * @param {Logger} logger       Logger service
-     */
-    constructor(config, redis, logger) {
-        super();
-        this._config = config;
-        this._redis = redis;
-        this._logger = logger;
+        for (let handler of this.channels.get(channel) || [])
+            handler(message);
     }
 
     /**
-     * Service name is 'redisPubSub'
-     * @type {string}
-     */
-    static get provides() {
-        return 'redisPubSub';
-    }
-
-    /**
-     * Dependencies as constructor arguments
-     * @type {string[]}
-     */
-    static get requires() {
-        return [ 'config', 'redis', 'logger' ];
-    }
-
-    /**
-     * This service is a singleton
-     * @type {string}
-     */
-    static get lifecycle() {
-        return 'singleton';
-    }
-
-    /**
-     * PUBSUB client class
-     * @return {RedisPubSubClient}
-     */
-    static get client() {
-        return RedisPubSubClient;
-    }
-
-    /**
-     * Create actual PUBSUB client
-     * @param {string} serverName                   Server name as in config
-     * @param {string} [subscriberName]             Client name
+     * Get PUB client
      * @return {Promise}
      */
-    async _createClient(serverName, subscriberName) {
-        let fullName = `redis.${serverName}`;
-        try {
-            let config = this._config.get(fullName);
-            if (!config)
-                throw new Error(`Undefined server name: ${fullName}`);
+    async _getPub() {
+        return this._redis.connect(this._serverName);
+    }
 
-            let sub = await this._redis.connect(serverName);
-            if (subscriberName) {
-                sub.client.on('reconnecting', () => {
-                    this._logger.info(`[${subscriberName}] Connection lost. Reconnecting...`);
-                });
-                sub.client.on('subscribe', () => {
-                    this._logger.info(`[${subscriberName}] Subscribed successfully`);
-                });
-            }
-            return new RedisPubSubClient(async () => { return this._redis.connect(serverName); }, sub);
-        } catch (error) {
-            throw new NError(error, `Error creating pubsub instance to ${fullName}`);
+    /**
+     * Get SUB client
+     * @return {Promise}
+     */
+    async _getSub() {
+        if (this._sub)
+            return this._sub;
+
+        this._sub = await this._redis.connect(this._serverName);
+        if (this._subscriberName) {
+            this._sub.client.on('reconnecting', () => {
+                this._logger.info(`[${this._subscriberName}] Connection lost. Reconnecting...`);
+            });
+            this._sub.client.on('subscribe', () => {
+                this._logger.info(`[${this._subscriberName}] Subscribed successfully`);
+            });
         }
+        this._sub.client.on('subscribe', this.onSubscribe.bind(this));
+        this._sub.client.on('message', this.onMessage.bind(this));
+        return this._sub;
     }
 }
 
