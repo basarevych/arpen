@@ -17,10 +17,10 @@ class BaseModel {
     constructor(db, util) {
         this._dirty = false;
         this._fields = new Map();
+        this._fieldToProp = new Map();
+        this._propToField = new Map();
         this._db = db;
         this._util = util;
-
-        this.id = undefined;
     }
 
     /**
@@ -32,19 +32,25 @@ class BaseModel {
     }
 
     /**
-     * ID setter
-     * @type {undefined|number}
+     * Add a field
+     * @param {string} field            DB field name
+     * @param {string} property         Model property name
      */
-    set id(id) {
-        return this._setField('id', id);
+    _addField(field, property) {
+        this._fields.set(field, undefined);
+        this._fieldToProp.set(field, property);
+        this._propToField.set(property, field);
     }
 
     /**
-     * ID getter
-     * @type {undefined|number}
+     * Remove a field
+     * @param {string} field            DB field name
+     * @param {string} property         Model property name
      */
-    get id() {
-        return this._getField('id');
+    _removeField(field, property) {
+        this._fields.delete(field);
+        this._fieldToProp.delete(field);
+        this._propToField.delete(property);
     }
 
     /**
@@ -85,7 +91,10 @@ class BaseModel {
 
         let data = {};
         for (let field of fields) {
-            let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
+            let prop = this._fieldToProp.get(field);
+            if (!prop)
+                prop = this._util.snakeToCamel(field);
+            let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), prop);
             let value = (desc && desc.get) ? desc.get.call(this) : this._getField(field);
             if (value && moment.isMoment(value)) {
                 if (timeZone)
@@ -115,7 +124,10 @@ class BaseModel {
             if (typeof data[field] === 'undefined')
                 continue;
 
-            let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), this._util.snakeToCamel(field));
+            let prop = this._fieldToProp.get(field);
+            if (!prop)
+                prop = this._util.snakeToCamel(field);
+            let desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), prop);
             let value = (desc && desc.set) ? desc.set.call(this, data[field]) : this._setField(field, data[field]);
             if (value && moment.isMoment(value) && timeZone) {
                 value = moment.tz(value.format('YYYY-MM-DD HH:mm:ss.SSS'), timeZone).local();

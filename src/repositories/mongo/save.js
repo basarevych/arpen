@@ -27,6 +27,7 @@ module.exports = async function (model, mongo) {
     const { ObjectId } = mongodb;
 
     let client;
+    let sample = this.getModel();
 
     try {
         if (model.id && !model._dirty)
@@ -38,7 +39,7 @@ module.exports = async function (model, mongo) {
         let data = model._serialize({ timeZone: this.constructor.timeZone });
         let id = typeof model === 'object' ? model.id : model;
         if (id)
-            await coll.findOneAndReplace({ _id: new ObjectId(id) }, { $set: data });
+            await coll.findOneAndReplace({ [sample._propToField.get('id')]: new ObjectId(id) }, { $set: data });
         else
             model.id = (await coll.insertOne(data)).insertedId;
 

@@ -17,6 +17,7 @@ const NError = require('nerror');
  */
 module.exports = async function (model, mysql) {
     let client;
+    let sample = this.getModel();
 
     try {
         if (model.id && !model._dirty)
@@ -27,7 +28,7 @@ module.exports = async function (model, mysql) {
         let data = model._serialize({ timeZone: this.constructor.timeZone });
         let fields = Object.keys(data)
             .filter(field => {
-                return field !== 'id';
+                return field !== sample._propToField.get('id');
             });
 
         let query;
@@ -41,7 +42,7 @@ module.exports = async function (model, mysql) {
                 })
                 .join(', ');
             params.push(data.id);
-            query += ` WHERE id = ?`;
+            query += ` WHERE ${sample._propToField.get('id')} = ?`;
         } else {
             query = `INSERT INTO ${this.constructor.table} (`;
             query += fields.join(', ');

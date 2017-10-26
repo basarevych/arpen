@@ -18,6 +18,7 @@ const NError = require('nerror');
 module.exports = async function (id, pg) {
     let key = `sql:${this.constructor.table}-by-id:${id}`;
     let client;
+    let sample = this.getModel();
 
     try {
         if (this._enableCache) {
@@ -30,7 +31,7 @@ module.exports = async function (id, pg) {
         let result = await client.query(
             `SELECT * 
                FROM ${this.constructor.table} 
-              WHERE id = $1`,
+              WHERE ${sample._propToField.get('id')} = $1`,
             [id]
         );
         let rows = result.rowCount ? result.rows : [];

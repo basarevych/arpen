@@ -37,6 +37,14 @@ class MongoRepository extends BaseRepository {
     static get requires() {
         return [ 'app', 'mongo', 'util' ];
     }
+
+    /**
+     * Table time zone - mongo always uses UTC and converts to local
+     * @type {string|null}
+     */
+    static get timeZone() {
+        return null; // no convert
+    }
 }
 
 module.exports = MongoRepository;

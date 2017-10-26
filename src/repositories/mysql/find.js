@@ -17,13 +17,14 @@ const NError = require('nerror');
  */
 module.exports = async function (id, mysql) {
     let client;
+    let sample = this.getModel();
 
     try {
         client = typeof mysql === 'object' ? mysql : await this._mysql.connect(mysql || this.constructor.instance);
         let rows = await client.query(
             `SELECT * 
                FROM ${this.constructor.table} 
-              WHERE id = ?`,
+              WHERE ${sample._propToField.get('id')} = ?`,
             [id]
         );
 

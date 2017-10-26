@@ -17,6 +17,7 @@ const NError = require('nerror');
  */
 module.exports = async function (model, pg) {
     let client;
+    let sample = this.getModel();
 
     try {
         if (model.id && !model._dirty)
@@ -27,7 +28,7 @@ module.exports = async function (model, pg) {
         let data = model._serialize();
         let fields = Object.keys(data)
             .filter(field => {
-                return field !== 'id';
+                return field !== sample._propToField.get('id');
             });
 
         let query;
@@ -41,7 +42,7 @@ module.exports = async function (model, pg) {
                 })
                 .join(', ');
             params.push(data.id);
-            query += ` WHERE id = $${params.length}`;
+            query += ` WHERE ${sample._propToField.get('id')} = $${params.length}`;
         } else {
             query = `INSERT INTO ${this.constructor.table} (`;
             query += fields.join(', ');
@@ -52,7 +53,7 @@ module.exports = async function (model, pg) {
                     return `$${params.length}`;
                 })
                 .join(', ');
-            query += ') RETURNING id';
+            query += `) RETURNING ${sample._propToField.get('id')}`;
         }
 
         let result = await client.query(query, params);

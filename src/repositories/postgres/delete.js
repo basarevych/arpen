@@ -17,12 +17,13 @@ const NError = require('nerror');
  */
 module.exports = async function (model, pg) {
     let client;
+    let sample = this.getModel();
     try {
         client = typeof pg === 'object' ? pg : await this._postgres.connect(pg || this.constructor.instance);
         let result = await client.query(
             `DELETE 
                FROM ${this.constructor.table}
-              WHERE id = $1`,
+              WHERE ${sample._propToField.get('id')} = $1`,
             [ typeof model === 'object' ? model.id : model ]
         );
 

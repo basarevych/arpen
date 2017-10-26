@@ -27,11 +27,12 @@ module.exports = async function (id, mongo) {
     const { ObjectId } = mongodb;
 
     let client;
+    let sample = this.getModel();
 
     try {
         client = typeof mongo === 'object' ? mongo : await this._mongo.connect(mongo || this.constructor.instance);
         let coll = client.collection(this.constructor.table);
-        let data = coll.find({ _id: new ObjectId(id) });
+        let data = coll.find({ [sample._propToField.get('id')]: new ObjectId(id) });
         let rows = await data.toArray();
 
         if (typeof mongo !== 'object')
