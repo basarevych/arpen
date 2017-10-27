@@ -1,12 +1,19 @@
 /**
- * User session service
+ * User session service. Requires 'jsonwebtoken' module for token methods
  * @module arpen/services/session
  */
+let jwt;
+try {
+    jwt = require('jsonwebtoken');
+} catch (error) {
+    // do nothing
+}
 const moment = require('moment-timezone');
-const jwt = require('jsonwebtoken');
 
 /**
  * User sessions registry service
+ * <br><br>
+ * jsonwebtoken module is required for token methods
  */
 class Session {
     /**
@@ -294,6 +301,9 @@ class Session {
      * @return {Promise}                        Resolves to JWT string
      */
     async encodeJwt(name, session, payload) {
+        if (jwt)
+            throw new Error('jsonwebtoken module is required for .encodeJwt() method');
+
         let bridge = this.bridges.get(name);
         if (!bridge || !bridge.instance.secret)
             throw new Error(`Invalid bridge: ${name}`);
@@ -313,6 +323,9 @@ class Session {
      * @return {Promise}                        Resolves to { session, payload }
      */
     async decodeJwt(name, token, info) {
+        if (jwt)
+            throw new Error('jsonwebtoken module is required for .decodeJwt() method');
+
         let bridge = this.bridges.get(name);
         if (!bridge || !bridge.instance.secret)
             throw new Error(`Invalid bridge: ${name}`);
