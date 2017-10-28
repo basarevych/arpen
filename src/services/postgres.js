@@ -11,6 +11,7 @@ try {
 
 const debug = require('debug')('arpen:postgres');
 const moment = require('moment-timezone');
+const os = require('os');
 const NError = require('nerror');
 
 /**
@@ -281,11 +282,13 @@ class Postgres {
      * Create the service
      * @param {object} config       Config service
      * @param {Logger} logger       Logger service
+     * @param {Runner} runner       Runner service
      * @param {Util} util           Util service
      */
-    constructor(config, logger, util) {
+    constructor(config, logger, runner, util) {
         this._config = config;
         this._logger = logger;
+        this._runner = runner;
         this._util = util;
 
         this._pool = new Map();
@@ -307,7 +310,7 @@ class Postgres {
      * @type {string[]}
      */
     static get requires() {
-        return [ 'config', 'logger', 'util' ];
+        return [ 'config', 'logger', 'runner', 'util' ];
     }
 
     /**
@@ -358,6 +361,55 @@ class Postgres {
                 resolve(new PostgresClient(this, client, done));
             });
         });
+    }
+
+    /**
+     * Execute SQL file
+     * @param {string} filename
+     * @param {string|object} instance
+     * @return {Promise}
+     */
+    async exec(filename, instance = 'main') {
+        if (typeof instance === 'string')
+            instance = this._config.get(`postgres.${instance}`);
+
+        if (!instance)
+            throw new Error('Instance of Postgres is not specified');
+
+        let expect;
+        let params = [];
+        if (instance.host)
+            params.push('-h', instance.host);
+        if (instance.port)
+            params.push('-p', instance.port);
+        if (instance.user)
+            params.push('-U', instance.user);
+        if (instance.password) {
+            params.push('-W');
+            expect = new Map();
+            expect.set(/assword.*:/, instance.password);
+        }
+        if (instance.database)
+            params.push('-d', instance.database);
+        params.push('-f', filename);
+
+        let proc = this._runner.spawn(
+            'psql',
+            params,
+            {
+                env: {
+                    'LANGUAGE': os.platform() === 'freebsd' ? 'en_US.UTF-8' : 'C.UTF-8',
+                    'LANG': os.platform() === 'freebsd' ? 'en_US.UTF-8' : 'C.UTF-8',
+                    'LC_ALL': os.platform() === 'freebsd' ? 'en_US.UTF-8' : 'C.UTF-8',
+                    'PATH': '/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin',
+                },
+            },
+            expect
+        );
+        proc.cmd.on('data', data => {
+            process.stdout.write(data);
+        });
+        return proc.promise;
     }
 }
 

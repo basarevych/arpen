@@ -429,7 +429,11 @@ class App {
         }
 
         debug('Saving class map');
-        return filer.lockWrite(path.join('/var/tmp', mapFile), JSON.stringify(map, undefined, 4) + '\n');
+        try {
+            await filer.lockWrite(path.join('/var/tmp', mapFile), JSON.stringify(map, undefined, 4) + '\n');
+        } catch (error) {
+            debug(error.messages || error.message);
+        }
     }
 
     /**

@@ -338,6 +338,7 @@ class Redis {
                 options
             );
             let onError = error => {
+                client.quit();
                 reject(new NError(error, `Redis: Error connecting to ${name}`));
             };
 

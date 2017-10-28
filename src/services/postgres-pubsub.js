@@ -99,12 +99,8 @@ class PostgresPubSub extends Pubsub.client {
 
             handlers.add(handler);
 
-            if (!needSubscribe)
-                return;
-
-            let sub = await this._getSub();
-            if (sub)
-                await sub.query(`LISTEN "${channel}"`);
+            if (needSubscribe)
+                await this._getSub(channel);
         } catch (error) {
             throw new NError(error, `Subscribe attempt failed (${channel})`);
         }
@@ -182,11 +178,15 @@ class PostgresPubSub extends Pubsub.client {
 
     /**
      * Get SUB client
-     * @return {object}
+     * @param {string} [subsrcribe]                 Subscribe to this if sub is already created
+     * @return {Promise}
      */
-    async _getSub() {
-        if (this._started)
+    async _getSub(subscribe) {
+        if (this._started) {
+            if (subscribe)
+                await this._sub.query(`LISTEN "${subscribe}"`);
             return this._sub;
+        }
 
         this._stared = true;
         let connect = async () => {
