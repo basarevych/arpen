@@ -20,7 +20,7 @@ class PostgresRepository extends BaseRepository {
         super(app, util);
         this._postgres = postgres;
         this._cacher = cacher;
-        this._enableCache = true;
+        this._enableCache = false;
 
         this._loadMethods(path.join(__dirname, 'postgres'));
     }
