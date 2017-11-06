@@ -375,12 +375,12 @@ class App {
         debug('Loading application sources');
         let filer = new Filer();
         let config = this.get('config');
-        let mapFile = `${config.project}.${config.instance}.map.json`;
+        this._mapFile = `${config.project}.${config.instance}.map.json`;
 
         let cache = null;
         if (!process.env.DEBUG && this.options.cacheServices) {
             try {
-                let contents = await filer.lockRead(path.join('/var/tmp', mapFile));
+                let contents = await filer.lockRead(path.join('/var/tmp', this._mapFile));
                 cache = JSON.parse(contents.trim());
                 if (typeof cache !== 'object' || cache === null || cache.version !== config.version)
                     cache = null;
@@ -428,11 +428,13 @@ class App {
             });
         }
 
-        debug('Saving class map');
-        try {
-            await filer.lockWrite(path.join('/var/tmp', mapFile), JSON.stringify(map, undefined, 4) + '\n');
-        } catch (error) {
-            debug(error.messages || error.message);
+        if (!process.env.DEBUG && this.options.cacheServices) {
+            debug('Saving class map');
+            try {
+                await filer.lockWrite(path.join('/var/tmp', this._mapFile), JSON.stringify(map, undefined, 4) + '\n');
+            } catch (error) {
+                debug(error.messages || error.message);
+            }
         }
     }
 

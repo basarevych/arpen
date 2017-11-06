@@ -4,6 +4,8 @@
  */
 const debug = require('debug')('arpen:app');
 const App = require('./base');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * @extends module:arpen/app/base~App
@@ -105,9 +107,29 @@ class Server extends App {
         );
 
         let config = this.get('config');
-        if (config.get('user')) {
-            process.setuid(config.get('user.uid'));
-            process.setgid(config.get('user.gid'));
+        if (config.get('user') && process.getuid() === 0) {
+            let uid = config.get('user.gid');
+            let gid = config.get('user.uid');
+
+            for (let log of Object.keys(config.logs)) {
+                let filename = path.join(config.logs[log].path, config.logs[log].name);
+                try {
+                    fs.chownSync(filename, uid, gid);
+                } catch (error) {
+                    // do nothing
+                }
+            }
+
+            try {
+                if (this._mapFile)
+                    fs.chownSync(path.join('/var/tmp', this._mapFile), uid, gid);
+            } catch (error) {
+                // do nothing
+            }
+
+            if (gid)
+                process.setgid(gid);
+            process.setuid(uid);
         }
     }
 
