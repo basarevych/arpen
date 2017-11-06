@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const App = require('arpen').App;
+const Daemon = require('arpen').Daemon;
+
+let args = process.argv.slice(2);
+let pidFile = args.shift();
+if (!pidFile || !args.length) {
+    console.error('Usage:\tdaemon <pidfile> <server-name> [... <server-name>]');
+    process.exit(1);
+}
+
+let daemon = new Daemon(path.join(__dirname, '..'), pidFile);
+
+require('daemon')({
+    env: {
+        'LANGUAGE': 'C.UTF-8',
+        'LANG': 'C.UTF-8',
+        'LC_ALL': 'C.UTF-8',
+        'PATH': '/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin',
+    },
+    cwd: path.join(__dirname, '..'),
+});
+
+daemon
+    .run(args)
+    .catch(error => {
+        console.error(error.stack || error.message || error);
+        process.exit(App.fatalExitCode);
+    });

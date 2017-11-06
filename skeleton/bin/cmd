@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const Console = require('arpen').Console;
+
+const console = new Console(path.join(__dirname, '..'), process.argv.slice(2));
+console
+    .run()
+    .catch(error => {
+        process.stderr.write((error.fullStack || error.stack || error.message || error) + '\n');
+        process.exit(Console.fatalExitCode);
+    });

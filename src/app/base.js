@@ -356,9 +356,9 @@ class App {
         config.modules = modules;
 
         let filer = new Filer();
-        let packageInfo = await filer.lockRead(path.join(config.base_path, 'package.json'));
         let json;
         try {
+            let packageInfo = await filer.lockRead(path.join(config.base_path, 'package.json'));
             json = JSON.parse(packageInfo);
         } catch (error) {
             json = {};

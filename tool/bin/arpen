@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const Console = require('../../index').Console;
+
+const console = new Console(path.join(__dirname, '..'), process.argv.slice(2));
+console
+    .run({ cacheServices: false })
+    .catch(error => {
+        process.stderr.write((error.fullStack || error.stack || error.message || error) + '\n');
+        process.exit(Console.fatalExitCode);
+    });

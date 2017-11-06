@@ -1,0 +1,73 @@
+/**
+ * INFO
+ */
+const path = require('path');
+
+module.exports = {
+    // Server instance name (alphanumeric)
+    instance: 'server1',
+
+    // Environment
+    env: process.env.NODE_ENV || (!!process.env.DEBUG ? 'development' : 'production'),
+
+    // Loaded modules
+    modules: [
+        'udp',
+    ],
+
+    // Servers
+    servers: {
+        udp: {
+            class: 'servers.udp',
+            host: "0.0.0.0",
+            port: 3000,
+        },
+    },
+
+    // SMTP servers
+    smtp: {
+        main: {
+            host: 'localhost',
+            port: 25,
+            ssl: false,
+            //user: 'username',
+            //password: 'password',
+        },
+    },
+
+    // Email configuration
+    email: {
+        from: 'root@localhost',
+        log: {
+            enable: false,                  // email logger messages or not
+            level: 'error',
+            to: 'debug@example.com',
+        },
+        crash: {
+            enable: false,                  // email program crash or not
+            to: 'debug@example.com',
+        },
+    },
+
+    // Log files configuration
+    logs: {
+        main: {
+            level: 'info',
+            default: true,
+            name: 'error.log',
+            path: path.join(__dirname, '..', 'logs'),
+            interval: '1d',
+            mode: 0o640,
+            max_files: 3,
+            history: path.join(__dirname, '..', 'logs', 'error.log.history'),
+        },
+    },
+
+/*
+    // Drop privileges, otherwise comment out this section
+    user: {
+        uid: 80,
+        gid: 80,
+    },
+*/
+};

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+basepath=`dirname "$0"`
+basepath=`cd "$basepath" && cd .. && pwd`
+if [ ! -d "$basepath" ]; then
+    echo "Could not get base path"
+    exit 1
+fi
+
+if [ ! -x "$basepath/node_modules/.bin/eslint" ]; then
+    echo "eslint is not installed"
+    exit 1
+fi
+
+find "$basepath" \
+    \( -name "node_modules" -o -name "spec" -o -name "docs" -o -name "config" -o -name "public" -o -path "*/.*" \) -prune \
+    -o \( -name "*.js" -a -not -name "*.config.js" \) -print | \
+    xargs "$basepath/node_modules/.bin/eslint"
