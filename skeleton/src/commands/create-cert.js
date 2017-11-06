@@ -69,7 +69,7 @@ class CreateCert extends Base {
             sslConfig += `\n[SAN]\nsubjectAltName=${type}:${hostname}\n`;
             fs.writeFileSync('/tmp/arpen.openssl.cnf', sslConfig, {mode: 0o644});
 
-            await this._filer.createDirectory(path.join(__dirname, '..', 'certs'));
+            await this._filer.createDirectory(path.join(__dirname, '..', '..', 'certs'));
 
             await this._app.debug('Creating self-signed certificate');
             let result = await this._runner.exec(
@@ -85,8 +85,8 @@ class CreateCert extends Base {
                     '-reqexts', 'SAN',
                     '-extensions', 'SAN',
                     '-config', '/tmp/arpen.openssl.cnf',
-                    '-keyout', path.join(__dirname, '..', 'certs', hostname + '.key'),
-                    '-out', path.join(__dirname, '..', 'certs', hostname + '.cert')
+                    '-keyout', path.join(__dirname, '..', '..', 'certs', hostname + '.key'),
+                    '-out', path.join(__dirname, '..', '..', 'certs', hostname + '.cert')
                 ]
             );
 
