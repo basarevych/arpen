@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "argv": "~0.0.2",
-    "arpen": "~0.2.32",
+    "arpen": "~0.9.2",
     "daemon": "~1.1.0",
     "emailjs": "~1.0.12",
     "fs-ext": "~1.0.0",
