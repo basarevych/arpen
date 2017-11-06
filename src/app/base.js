@@ -175,11 +175,11 @@ class App {
      * @return {Promise}
      */
     async run(options, ...args) {
-        let {
-            cacheServices = false,
-            interceptConsole = true,
-        } = options || {};
-        this.options = { cacheServices, interceptConsole };
+        this.options = options || {};
+        if (typeof this.options.cacheServices === 'undefined')
+            this.options.cacheServices = false;
+        if (typeof this.options.interceptConsole === 'undefined')
+            this.options.interceptConsole = true;
 
         try {
             await this.init(...args);

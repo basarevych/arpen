@@ -40,7 +40,11 @@ class Console extends App {
             return this.exit(this.constructor.fatalExitCode, 'Command name required');
 
         let util = this.get('util');
-        let name = `commands.${util.dashedToCamel(this.argv[0])}`;
+        let name;
+        if (this.argv[0])
+            name = `commands.${util.dashedToCamel(this.argv[0])}`;
+        if (!this.has(name))
+            name = `commands.help`;
         if (!this.has(name))
             return this.exit(this.constructor.fatalExitCode, 'Unknown command');
 
