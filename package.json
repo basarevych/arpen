@@ -1,6 +1,6 @@
 {
   "name": "arpen",
-  "version": "0.9.3",
+  "version": "1.0.0",
   "license": "MIT",
   "author": "Ross Basarevych <basarevych@gmail.com>",
   "description": "ARPEN micro-framework",
@@ -8,6 +8,12 @@
     "type": "git",
     "url": "git+https://github.com/basarevych/arpen.git"
   },
+  "keywords": [
+    "node.js",
+    "framework",
+    "di",
+    "dependency injection"
+  ],
   "dependencies": {
     "argv": "~0.0.2",
     "debug": "~3.1.0",
