@@ -165,10 +165,10 @@ $ sudo npm install arpen -g --unsafe-perm
 $ arpen new my-project
 $ cd my-project
 $ npm install
-$ ./bin/run utp
+$ ./bin/run udp
 ```
 
-This how to create and run a skeleton project. It includes one simple server
+This is how to create and run a skeleton project. It includes one simple server
 Udp which listens for UDP commands. Test it:
 
 ```
@@ -213,7 +213,7 @@ skeleton project **local.js** config you will find the following section:
 
 This is how you define your servers, each entry should have at least *class*
 key, which is the service name of the server. The rest of keys are all up to
-you: they depend on what is your server expects.
+you: they depend on what your server expects.
 
 You can retrieve this configuration by adding dependency on 'config' service:
 
