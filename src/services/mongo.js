@@ -79,13 +79,13 @@ class MongoClient {
  * <pre>
  * // MongoDB servers
  * mongo: {
- * main: {
- *   host: 'localhost',
- *   port: 27017,
- *   user: 'username',
- *   password: 'password',
- *   database: 'dbname',
- *   pool_size: 100,
+ *   main: {
+ *     host: 'localhost',
+ *     port: 27017,
+ *     user: 'username',
+ *     password: 'password',
+ *     database: 'dbname',
+ *     pool_size: 100,
  *   },
  * },
  * </pre>
