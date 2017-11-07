@@ -28,6 +28,19 @@ const NError = require('nerror');
  *     //password: 'password',
  *   },
  * },
+ *
+ * email: {
+ *   from: 'root@localhost',
+ *   log: {
+ *     enable: false,                  // email logger messages or not
+ *     level: 'error',
+ *     to: 'debug@example.com',
+ *   },
+ *   crash: {
+ *     enable: false,                  // email program crash when using ./bin/daemon
+ *     to: 'debug@example.com',
+ *   },
+ * }
  * </pre>
  */
 class Emailer {
