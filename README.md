@@ -1,5 +1,3 @@
-# work in progress
-
 # Arpen
 
 Arpen is a Node.js micro-framework with class autoloading and dependency
