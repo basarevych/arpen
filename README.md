@@ -221,3 +221,19 @@ You can retrieve this configuration by adding dependency on 'config' service:
 let name = 'udp';
 let port = config.get(`servers.${name}.port`);
 ```
+
+## Commands
+
+Another feature of Arpen is console commands. The skeleton project includes
+a couple of them, you can find them in **src/commands** directory.
+
+Try running:
+
+```
+$ ./bin/cmd help create-cert
+$ ./bin/cmd create-cert 192.168.0.1
+``` 
+
+## Bundled services
+
+See jsDoc: https://basarevych.github.io/arpen

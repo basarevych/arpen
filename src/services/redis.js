@@ -277,6 +277,19 @@ class RedisClient {
  * Redis service
  * <br><br>
  * redis module is required
+ * <br><br>
+ * Add to your config:
+ * <pre>
+ * // Redis servers
+ * redis: {
+ *   main: {
+ *     host: 'localhost',
+ *     port: 6379,
+ *     database: 0,
+ *     //password: 'password',
+ *   },
+ * },
+ * </pre>
  */
 class Redis {
     /**

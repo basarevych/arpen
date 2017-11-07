@@ -11,6 +11,28 @@ const NError = require('nerror');
  * Will temporarily cache object in Redis if cache is enabled or instantly return undefined if it isn't
  * <br><br>
  * redis module is required
+ * <br><br>
+ * Add to your config:
+ * <pre>
+ * // Redis servers
+ * redis: {
+ *   cache: {
+ *     host: 'localhost',
+ *     port: 6379,
+ *     database: 0,
+ *     //password: 'password',
+ *   },
+ * },
+ * cache: {
+ *   enable: true,
+ *     subscribe: [
+ *       { postgres: 'main' },           // Invalidate cache pubsub provider
+ *     ],
+ *   redis: 'cache',                     // Name of Redis configuration to use
+ *   expire_min: 3 * 60,                 // seconds, minimum time to cache values for (random)
+ *   expire_max: 5 * 60,                 // seconds, maximum time to cache values for (random)
+ * },
+ * </pre>
  */
 class Cacher {
     /**

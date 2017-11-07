@@ -276,6 +276,22 @@ class PostgresClient {
  * Postgres service
  * <br><br>
  * pg module is required
+ * <br><br>
+ * Add to your config
+ * <pre>
+ * // PostgreSQL servers
+ * postgres: {
+ *   main: {
+ *     host: 'localhost',
+ *     port: 5432,
+ *     user: 'username',
+ *     password: 'password',
+ *     database: 'dbname',
+ *     min: 10,
+ *     max: 100,
+ *   },
+ * },
+ * </pre>
  */
 class Postgres {
     /**

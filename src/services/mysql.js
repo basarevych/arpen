@@ -276,6 +276,21 @@ class MySQLClient {
  * Mysql service
  * <br><br>
  * mysql module is required
+ * <br><br>
+ * Add to your config:
+ * <pre>
+ * // MySQL servers
+ * mysql: {
+ *   main: {
+ *     host: 'localhost',
+ *     port: 3306,
+ *     user: 'username',
+ *     password: 'password',
+ *     database: 'dbname',
+ *     connection_limit: 100,
+ *   },
+ * },
+ * </pre>
  */
 class MySQL {
     /**

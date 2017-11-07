@@ -74,6 +74,21 @@ class MongoClient {
  * Mongo service
  * <br><br>
  * mongodb module is required
+ * <br><br>
+ * Add to your config:
+ * <pre>
+ * // MongoDB servers
+ * mongo: {
+ * main: {
+ *   host: 'localhost',
+ *   port: 27017,
+ *   user: 'username',
+ *   password: 'password',
+ *   database: 'dbname',
+ *   pool_size: 100,
+ *   },
+ * },
+ * </pre>
  */
 class Mongo {
     /**

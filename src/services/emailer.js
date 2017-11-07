@@ -15,6 +15,20 @@ const NError = require('nerror');
  * Emailer
  * <br><br>
  * emailjs module is required
+ * <br><br>
+ * Add to your config:
+ * <pre>
+ * // SMTP servers
+ * smtp: {
+ *   main: {
+ *     host: 'localhost',
+ *     port: 25,
+ *     ssl: false,
+ *     //user: 'username',
+ *     //password: 'password',
+ *   },
+ * },
+ * </pre>
  */
 class Emailer {
     /**
