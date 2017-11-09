@@ -353,7 +353,8 @@ class Logger {
             log.open = false;
             if (!log.failed) {
                 log.failed = true;
-                process.stderr.write(this.constructor.formatString(`Log error (${log.name}): ${error.message}\n`));
+                if (process.env.DEBUG)
+                    process.stderr.write(this.constructor.formatString(`Log error (${log.name}): ${error.message}\n`));
             }
         });
         log.stream.on('open', () => {
