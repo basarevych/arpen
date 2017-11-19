@@ -1,7 +1,7 @@
 # Arpen
 
 Arpen is a Node.js micro-framework with class autoloading and dependency
-injection. It is purpose is to aid in creation of non-Express.js
+injection. Its purpose is to aid in creation of non-Express.js
 applications.
 
 ## Dependency injection
