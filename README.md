@@ -52,7 +52,7 @@ instantiated. So D is instantiated only once *per request* of instantiating
 A.
 
 But if you run **app.get('A')** another time it will be new *request*
-and B and C of A will receive different instance of D when instantiating
+and B and C of A will receive a different instance of D when instantiating
 new A (but, again, both B and C will receive the same D just like in
 previous **app.get('A')**).
 
@@ -80,8 +80,8 @@ via **app.get()** cannot have additional parameters (they will be
 
 ### Manual registration and instantiation
 
-Usually you let Arpen find, load and register your services. But you
-can also do this by hand. Add a dependency on 'app' service which is
+Usually, you let Arpen find, load and register your services. But you
+can also do this by hand. Add a dependency on 'app' service which is the
 instance of the application. Now your service can call **app.get()** to
 instantiate a known service or **app.registerClass(classFunc)**
 and **app.registerInstance(obj, name)** to register services.
@@ -104,7 +104,7 @@ let map = app.get('myMapService');
 console.log(map.get('key'));
 ```
 
-Basically instance services behave just like singleton classes.
+Basically, instance services behave just like singleton classes.
 
 ## Class autoloading
 
@@ -119,7 +119,7 @@ repo so passwords can be stored in it.
 
 One possible configuration is to put 'autoload' parameter to global file.
 This is an array of paths relative to project root that will be searched
-for services. If path starts with '~' symbol then it is loaded from
+for services. If the path starts with '~' symbol then it is loaded from
 'node_modules' directory and not from the project root. Paths starting
 with '!' symbol define what will be excluded when autoloading.
 
@@ -136,11 +136,11 @@ into local configuration file, for example). This is a list of modules of
 your application.
 
 Modules defined in your configuration are searched for in 'modules'
-subdirectory relative to project root. Each module is a directory with
+subdirectory relative to the project root. Each module is a directory with
 the same 'config' subdirectory just like the main project. It should
 contain at least 'global.js' with 'autoload' parameter.
 
-Usually you put project-wide files in 'src' directory of project root
+Usually, you put project-wide files in 'src' directory of project root
 and module-specific code in 'src' relative to a module directory (don't
 forget to autoload it!)
 
